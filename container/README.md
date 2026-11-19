@@ -6,6 +6,10 @@ with 3tched's existing provisioning (`deploy/provisioning/` and the sealed
 grants and the 3tchedFS mount are pre-existing work and are disclosed in
 [`../PREEXISTING.md`](../PREEXISTING.md).
 
+The container contract (network isolation, FUSE-only backend channel,
+hardening) lives in 3tched, not here:
+[odbus-verified `.kiro/specs/subsidiary-container/`](https://github.com/repr0bated/odbus-verified/tree/dev/.kiro/specs/subsidiary-container).
+
 Status: **not provisioned yet.** It will be created after the current golden
 build on antix1 finishes. When it is, this file will record:
 
