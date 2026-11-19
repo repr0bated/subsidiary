@@ -9,15 +9,19 @@ Hobson ([@repr0bated](https://github.com/repr0bated)).
 Subsidiary is a standalone identity container that runs as its own Web3
 instance: a child of my 3tched platform, but independent. It has its own
 identity, it acts only through methods sealed into the platform's catalog,
-and every action leaves a receipt that anyone can verify on-chain without
-trusting me.
+and every action is recorded in 3tched's private hashchain. The head of that
+hashchain is committed periodically on a public chain — hashes only — so the
+local history can be compared against what was publicly committed, and a
+receipt handed to an authorized party can be checked against that public
+commitment. A mismatch is tamper evidence. The chain contents stay private.
 
 The core loop:
 
 1. **Spawn** a subsidiary (a child identity container).
 2. **Issue** a grant (an exact sealed capability).
 3. **Run** an action through a sealed method.
-4. **Verify** the receipt on-chain (catalog hash + schema hash anchored).
+4. **Verify**: the receipt holder checks the receipt against the public
+   anchor of the hashchain head (head commitment + catalog hash + schema hash).
 
 The admission rule, which nothing in this repo is allowed to weaken:
 
@@ -36,7 +40,7 @@ methods as call files, a Svelte + json-render UI, and an on-chain anchor.
 | Piece | Spec | Code home |
 |---|---|---|
 | Sealed-surface GUI — renders only what the identity's grants permit; the chatbot is a display-only renderer; every action dispatches through a sealed method and shows its receipt | [`.kiro/specs/sealed-surface-gui/`](.kiro/specs/sealed-surface-gui/) | [`ui/`](ui/) |
-| Receipt anchoring (Web3) — catalog hash + schema hash of each receipt anchored on a local Ganache chain, then Base Sepolia, with an independent verifier | [`.kiro/specs/receipt-anchoring/`](.kiro/specs/receipt-anchoring/) | [`web3/`](web3/) |
+| Receipt anchoring (Web3) — EtchedAnchor (Foundry) periodically commits the head of 3tched's existing private hashchain, with the catalog hash and schema hash, on local Anvil then Base Sepolia; receipt holders verify against it and the operator compares the local head to the anchors. Hashes only on-chain | [`.kiro/specs/receipt-anchoring/`](.kiro/specs/receipt-anchoring/) | [`web3/`](web3/) |
 
 Both are built spec-first in Kiro: Kiro drafts the spec, I review and correct
 it, Kiro implements against it. The spec is the contract — the same principle
@@ -46,8 +50,8 @@ Subsidiary runs on, where the sealed schema is the law.
 
 Subsidiary runs on top of my existing 3tched platform. The container base,
 provisioning, bridge, 3tchedFS, D-Bus control plane, grants and capabilities,
-catalog routing and the earlier anchor proof all predate the submission
-period and are **not** claimed as hackathon work. Subsidiary reads the
+catalog routing, and 3tched's hashchain (event chain) with its vectorization
+are pre-existing dependencies and are **not** claimed as hackathon work. EtchedAnchor is new hackathon work to be built with Kiro. Subsidiary reads the
 platform's **live** sealed schema at runtime; it does not copy or fork it.
 Full list with commit references: [`PREEXISTING.md`](PREEXISTING.md).
 
@@ -80,14 +84,18 @@ Requirements:
   and capabilities — it brings no security model of its own.
 - A freshly provisioned LXD container on that host (see
   [`container/README.md`](container/README.md)).
-- Node 22+ / Bun for `ui/`; a local Ganache (chain id 1337) for `web3/`,
-  then Base Sepolia (chain id 84532).
+- Node 22+ / Bun for `ui/`; Foundry for `web3/`: `forge` for build/tests
+  (including fuzz), `anvil` for the local chain (31337), `cast` for
+  verification and `forge script` for deployment. Local Anvil first, then
+  Base Sepolia (84532).
 
 Planned commands (wired up by the Kiro tasks):
 
 ```sh
 cp .env.example .env          # local chain settings only, no secrets
-cd web3 && <install> && <deploy to Ganache>
+cd web3 && forge build && forge test  # includes fuzz tests when implemented
+anvil                              # local chain, in a separate terminal
+# Deployment will use forge script; verification will use cast.
 cd ui   && <install> && <dev server against the container's 3tchedFS mount>
 ```
 

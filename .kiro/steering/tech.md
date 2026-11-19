@@ -23,8 +23,13 @@ Match the 3tched platform (repr0bated/odbus-verified) so code merges back.
 - UI: Svelte 5, SvelteKit, Vite, `@json-render/core` + `@json-render/svelte`
   0.20. Every visible element is declared in the catalog sealed in the
   `json_render` blob; generated specs are validated against it before render.
-- Web3: Solidity contract + TypeScript (or Rust) anchorer/verifier. Ganache
-  (chain id 1337) first, Base Sepolia (84532) second. Index entries use the
+- Web3: new Solidity contract `EtchedAnchor`, built with Kiro; periodically
+  records a commitment to the head of the existing private hashchain
+  (`op-state-store` event chain) plus the catalog hash and schema hash.
+  Hashes only on-chain. Foundry toolchain: `forge build`,
+  `forge test` (including fuzz), `anvil` local chain, `cast` for independent
+  verification, `forge script` for deployment. Anvil (chain id 31337) first,
+  Base Sepolia (84532) second. Index entries use the
   platform's live `etched.index-entry/1` format.
 - Tests: unit tests next to code; integration tests run against a live
   backend only when explicitly enabled.

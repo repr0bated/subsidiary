@@ -2,71 +2,99 @@
 
 ## Overview
 
-Three parts in `web3/`: an anchor contract, an anchorer service, and a
-verifier CLI. Inputs come from the running 3tched backend (receipts, the live
-sealed catalog, per-method sealed schemas). Nothing is copied into this repo.
-(Req 1, 2)
+EtchedAnchor (new, Foundry) publishes periodic **commitments** to the head
+of 3tched's existing private hashchain. The chain is the timestamp, not the
+trust; the private chain stays private; receipts are what authorized parties
+verify. (Req 1–5)
+
+Pre-existing inputs (see PREEXISTING.md), consumed live from the backend:
+
+- The hashchain: `ChainEvent` records in `crates/op-state-store/src/event_chain.rs`
+  — `event_hash = H(prev_hash || canonical_payload)`, Merkle batching,
+  committed by the `MutationEngine` (`crates/op-grpc-bridge/src/mutation_engine.rs`,
+  which exposes the chain head).
+- Its vectorization (`chain_vector_projector.rs`, `op-cognitive`
+  `chain_vectors.rs`) is unaffected and never published.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  BR[3tched bridge] -->|receipt| Q[anchorer queue]
-  M[live sealed catalog + method schema\nvia 3tchedFS / backend] -->|hash at call time| Q
-  Q -->|anchor tx| K[Anchor contract\nGanache 1337 / Base Sepolia 84532]
-  K -->|confirmed| I[append-only index\netched.index-entry/1]
-  V[verifier CLI] -->|receipt + RPC| K
-  UI[sealed-surface GUI] -->|status| Q
+  subgraph private[Private: 3tched host]
+    ME[MutationEngine] --> HC[(hashchain\nChainEvent prev_hash → event_hash)]
+    HC --> AN[anchorer]
+    HC --> CMP[head comparison]
+    AN --> RI[anchored receipt\nevent hash + proof + anchor ref]
+  end
+  AN -->|head commitment, seq, catalog hash, schema hash| EA[EtchedAnchor\nAnvil 31337 → Base Sepolia 84532]
+  RI -->|given to authorized party| V[receipt verifier]
+  V -->|cast call| EA
+  CMP -->|cast call| EA
 ```
 
 ## Components and Interfaces
 
-- `web3/contracts/` — anchor contract. Records
-  `(receiptHash, catalogHash, schemaHash)` once per `receiptHash`; emits an
-  event; rejects duplicates. (Req 2.3, 6.2) Relationship to the earlier
-  EtchedAnchor proof: this is new code written in Kiro; the earlier contract
-  is disclosed in PREEXISTING.md. Assumption: compatibility with the earlier
-  event shape is desirable but not required.
-- `web3/anchorer/` — subscribes to receipts from the backend, captures the
-  catalog and schema hashes at call time, submits transactions, tracks status
-  `queued | submitted | confirmed | failed`, writes index entries. (Req 1, 2.4, 3, 6)
-- `web3/verify/` — CLI: given a receipt and RPC URL, recomputes the receipt
-  hash and checks the on-chain record and timestamp. (Req 4)
-- Config: `ANCHOR_RPC_URL`, `ANCHOR_CHAIN_ID` (env); signing key from
-  `/etc/op-dbus/secrets` on antix1. (Req 5)
+- `web3/src/EtchedAnchor.sol` — stores, per sequence number:
+  `(headCommitment, catalogHash, schemaHash, timestamp)`; `anchor(seq,
+  head, catalog, schema)` restricted to the anchoring key, `seq` strictly
+  increasing; emits `Anchored`. `bytes32` fields only. (Req 1.3, 1.5, 2.1)
+- `web3/script/Deploy.s.sol` — `forge script` deployment to Anvil, then
+  Base Sepolia. (Req 6)
+- `web3/test/` — `forge test` unit + fuzz tests. (Req 6.4)
+- `web3/anchorer/` — reads the current head from the backend on a timer,
+  skips if unchanged, submits, tracks `pending | anchored | failed`, and for
+  each covered event builds the inclusion proof (hash path through the
+  chain/Merkle batch to the anchored head) and issues the anchored receipt to
+  authorized parties via the existing backend grants. (Req 1, 3, 7)
+- `web3/verify/` — receipt verifier: recomputes the head from the receipt's
+  event hash and proof, reads the anchor with `cast call`, compares head,
+  catalog hash and schema hash. Needs only the receipt and an RPC URL. (Req 4)
+- `web3/compare/` — operator-side: recomputes the local head at each anchored
+  seq and compares to EtchedAnchor; reports the first mismatch. Runs on the
+  host; publishes nothing. (Req 5)
 
 ## Data Models
 
-- Receipts, catalog and schemas: the backend's live formats.
-- Index entries: the platform's live `etched.index-entry/1` format, read from
-  the backend at runtime; `artifact.chain_id` set to 1337 or 84532,
-  `artifact.ref` the transaction hash.
-- Hashing: sha256 over canonical JSON (assumption, matches the index
-  format's `prev_hash` rule; to confirm against the live backend in task 1).
+- Head commitment: the hashchain head hash at sequence N, as `bytes32`.
+  **Assumed**: the head hash is already high-entropy, so committing it
+  directly leaks nothing; if the backend's head is not 32 bytes, commit
+  `sha256(domain || head)` (Open Question 2).
+- Anchored receipt (off-chain, private to its holder): event hash, catalog
+  hash, schema hash, inclusion proof (list of sibling/prev hashes), anchored
+  seq, chain id, contract address, tx hash. Receipt fields otherwise follow
+  the backend's live receipt format.
 
 ## Error Handling
 
-- Unmatched receipt → dropped with a logged reason, never anchored. (Req 1.2)
-- Tx failure → stays queued with reason; retry checks the contract first. (Req 6)
-- Unknown chain id → refuse to start. (Req 5.3)
+- Tx failure → `failed` with reason; retried next interval; the contract's
+  strictly increasing `seq` makes duplicates impossible. (Req 7)
+- Unknown chain id → refuse to start. (Req 6.3)
+- Proof does not reach an anchored head → verifier reports tamper evidence
+  naming the field. (Req 4.3)
 
 ## Security
 
-No new authority. The anchorer only observes backend receipts; the signing
-key is never logged or committed. The chain records hashes only — no
-arguments, results or personal data.
+- No new authority: the anchorer only reads committed heads; receipt delivery
+  uses the existing grants.
+- On-chain data is hashes and sequence numbers only (Req 2). The private
+  chain, its events and vectors are never published.
+- Signing key from `/etc/op-dbus/secrets`, never logged or committed.
 
 ## Testing Strategy
 
-- Contract tests on a local chain: single record per receipt, event fields.
-- Anchorer unit tests: refusal/unknown-outcome not anchored, call-time hash
-  capture, idempotent retry, index hash chain.
-- Verifier tests: match, and mismatch per field.
-- Opt-in end-to-end on Ganache against the live backend.
+- `forge test`: only the anchoring key may anchor; `seq` strictly
+  increasing; fields stored and event emitted; fuzz over arbitrary hashes and
+  sequence orderings.
+- Anchorer: skip-when-unchanged, no anchored receipt for refusals/unknown
+  outcomes, idempotent retry.
+- Verifier: valid receipt verifies; tampered event hash, proof, catalog hash
+  or schema hash each yield tamper evidence naming the field.
+- Comparison: rewritten or truncated local chain detected at the right seq.
+- Opt-in end-to-end on local Anvil against the live backend.
 
 ## Open Questions
 
-- Location of the earlier EtchedAnchor source (not in public repos).
-- How the anchorer subscribes to receipts on the live backend (bridge feed vs
-  reading the mount's results).
-- Canonical JSON rule used by the backend.
+- How the anchorer reads the current head from the live backend (a sealed
+  method, or the bridge's chain feed).
+- The exact head hash width and canonical-JSON rule used by `event_chain.rs`.
+- Anchoring interval for the demo.

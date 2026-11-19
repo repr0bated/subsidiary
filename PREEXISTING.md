@@ -18,13 +18,14 @@ Reference repository: [repr0bated/odbus-verified](https://github.com/repr0bated/
 | Grants and capabilities | Identity grants as exact sealed capability strings; admission model | `crates/op-identity/`, bridge, `etched-in-schema/catalog-routing/src/model.rs` |
 | catalog-routing | Pure decision engine: allow / refuse (naming missing capability) / needs-approval (two-person root) | `etched-in-schema/catalog-routing/` (`7475dd0`) |
 | Approvals | Two-human root approval crate | `etched-in-schema/approvals/` |
+| Hashchain (event chain) | 3tched's private, tamper-evident audit chain: hash-linked `ChainEvent`s (`event_hash = H(prev_hash ‖ canonical_payload)`), Merkle batching, committed by the MutationEngine, which exposes the chain head. Anchoring commits its head; the chain itself stays private | `crates/op-state-store/src/event_chain.rs` (added `8d01947`, 2026-09-14), `crates/op-grpc-bridge/src/mutation_engine.rs` |
+| Hashchain vectorization | Vectorize-on-mutation: each committed chain event projected to a vector, filtered by the sealed schema that created it | `crates/op-grpc-bridge/src/chain_vector_projector.rs` (added `b8fdbe4`, 2026-09-19), `crates/op-cognitive/src/chain_vectors.rs` (added `7766577`, 2026-10-18) |
 | Etched index entry format | `etched.index-entry/1` append-only index linking Web3 artifacts to 3tched receipts | `etched-in-schema/schema/index-entry.schema.json` |
 | json-render UI references | Design-free element map / menu and json-render 0.20 docs | `etched-in-schema/ui/` |
 | Container provisioning | Identity container provisioning (`new`, `complete`), identity sled, SID1, `/dev/fuse` | `deploy/provisioning/` (`a347e41`), `deploy/scripts/provision-container.sh`, `.kiro/specs/provisioning-system-subsidiary/` |
 | Container contract spec | How the Subsidiary container is provisioned and confined: OVN edge port with its own egress, no network path to the backend, FUSE call files as the only backend channel, unprivileged + limits + read-only base/overlay + snapshot + runit logs | [`.kiro/specs/subsidiary-container/`](https://github.com/repr0bated/odbus-verified/tree/dev/.kiro/specs/subsidiary-container) (`ed17f15`), building on `.kiro/specs/provisioning-system-subsidiary/` |
 | LXD/Incus plugins | Sealed `lxd` and `incus` plugins used to create the base container | `crates/op-plugins/src/state_plugins/lxd.rs` |
 | Earlier Etched in Schema project | Prior hackathon work by me (also public: [repr0bated/etched-in-schema](https://github.com/repr0bated/etched-in-schema), `4f82d39`) | — |
-| EtchedAnchor proof | A Solidity anchor contract proven end-to-end on local Ganache (catalog hash + schema hash in the receipt block). **Its source is not in either public repo above**; it is disclosed here as prior work and will be referenced by commit once located. | TBD |
 
 ## Live dependency, not a copy
 
@@ -39,7 +40,13 @@ the **live** sealed schema from the running 3tched backend at runtime:
 If the backend's formats change, Subsidiary follows them; nothing here
 redefines them.
 
+## New hackathon work
+
+EtchedAnchor is new hackathon work, built with Kiro and Foundry. It
+periodically commits the head of the pre-existing hashchain above, with the
+catalog hash and schema hash, to local Anvil and then Base Sepolia. Only
+hashes go on-chain; the hashchain stays private.
+
 ## Third-party
 
-Svelte, SvelteKit, Vite, `@json-render/core`, `@json-render/svelte`, Ganache
-and any Solidity toolchain are used under their own licenses.
+Svelte, SvelteKit, Vite, `@json-render/core`, `@json-render/svelte` and Foundry (Forge, Anvil, Cast) are used under their own licenses.

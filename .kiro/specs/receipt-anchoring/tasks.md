@@ -1,24 +1,24 @@
 # Implementation Plan
 
-- [ ] 1. Scaffold `web3/` (contract toolchain + TypeScript workspace) and a canonical-JSON + sha256 helper with tests
-  - _Requirements: 2.1, 2.2_
-- [ ] 2. Anchor contract
-  - [ ] 2.1 Record `(receiptHash, catalogHash, schemaHash)` once per receipt and emit an event
-  - [ ] 2.2 Contract tests: duplicate rejected, fields recorded, event emitted
-  - _Requirements: 2.3, 6.2_
-- [ ] 3. Network config: accept chain id 1337 or 84532 only; signing key from the secrets path; never logged
+- [ ] 1. Scaffold `web3/` with Foundry (`foundry.toml`, `src/`, `test/`, `script/`) and the anchorer workspace
+  - _Requirements: 6.4_
+- [ ] 2. EtchedAnchor contract (`web3/src/EtchedAnchor.sol`)
+  - [ ] 2.1 Store `(headCommitment, catalogHash, schemaHash, timestamp)` per strictly increasing `seq`, anchoring key only, emit `Anchored`
+  - [ ] 2.2 `forge test` unit and fuzz tests for access control, ordering, stored fields and events
+  - _Requirements: 1.3, 1.5, 2.1, 6.4, 7.2_
+- [ ] 3. Deployment with `forge script` to Anvil (31337) and Base Sepolia (84532); refuse other chain ids; key from the secrets path, never logged
+  - _Requirements: 2.4, 6.1, 6.2, 6.3_
+- [ ] 4. Periodic anchorer
+  - [ ] 4.1 Read the committed head from the backend on an interval; skip when unchanged; submit; track `pending | anchored | failed`
+  - [ ] 4.2 Tests: no recompute/backfill, skip-when-unchanged, idempotent retry, hashes-only payload
+  - _Requirements: 1.1, 1.2, 1.4, 2.1, 2.2, 7.1, 7.2_
+- [ ] 5. Anchored receipts with inclusion proofs; issue only for committed events and only to parties authorized by existing grants; tests
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+- [ ] 6. Receipt verifier using only the receipt and `cast`; verified vs tamper evidence per field; tests
+  - _Requirements: 4.1, 4.2, 4.3, 4.4_
+- [ ] 7. Operator-side head comparison against EtchedAnchor; first differing seq and truncation detection; tests
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
-- [ ] 4. Anchorer queue
-  - [ ] 4.1 Ingest backend receipts; drop unmatched, refused and unknown-outcome receipts
-  - [ ] 4.2 Capture catalog and schema hashes from the live backend at call time
-  - [ ] 4.3 Submit, track `queued | submitted | confirmed | failed`, idempotent retry
-  - [ ] 4.4 Unit tests for each rule
-  - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.4, 6.1, 6.2, 6.3_
-- [ ] 5. Append-only index in the live `etched.index-entry/1` format with hash links; refuse rewrites; tests
-  - _Requirements: 3.1, 3.2, 3.3_
-- [ ] 6. Verifier CLI: match and per-field mismatch reporting using only receipt, RPC and contract address; tests
-  - _Requirements: 4.1, 4.2, 4.3_
-- [ ] 7. Status endpoint consumed by the GUI's `AnchorStatus`
-  - _Requirements: 6.3_
-- [ ] 8. Opt-in end-to-end test on Ganache against the live backend
-  - _Requirements: 1.1, 2.3, 4.1, 5.1_
+- [ ] 8. Status endpoint for the GUI's `AnchorStatus`
+  - _Requirements: 7.3_
+- [ ] 9. Opt-in end-to-end test on local Anvil against the live backend
+  - _Requirements: 1.1, 4.1, 5.1, 6.1_
