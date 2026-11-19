@@ -1,0 +1,13 @@
+# Never ignore .kiro/ — Kiroween rules require it at the repo root.
+node_modules/
+.svelte-kit/
+build/
+dist/
+target/
+.env
+.env.*
+!.env.example
+web3/cache/
+web3/out/
+web3/broadcast/
+*.log

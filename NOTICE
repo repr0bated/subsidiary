@@ -1,0 +1,10 @@
+3tched Subsidiary
+Copyright 2026 Jeremy Hobson
+
+Licensed under the Apache License, Version 2.0 (see LICENSE), matching the
+license declared by the 3tched workspace (repr0bated/odbus-verified,
+Cargo.toml [workspace.package] license = "Apache-2.0") so that code here can
+be merged back into 3tched without relicensing.
+
+This project builds on pre-existing work by the same author; see
+PREEXISTING.md.

@@ -1,0 +1,24 @@
+# Implementation Plan
+
+- [ ] 1. Scaffold `web3/` (contract toolchain + TypeScript workspace) and a canonical-JSON + sha256 helper with tests
+  - _Requirements: 2.1, 2.2_
+- [ ] 2. Anchor contract
+  - [ ] 2.1 Record `(receiptHash, catalogHash, schemaHash)` once per receipt and emit an event
+  - [ ] 2.2 Contract tests: duplicate rejected, fields recorded, event emitted
+  - _Requirements: 2.3, 6.2_
+- [ ] 3. Network config: accept chain id 1337 or 84532 only; signing key from the secrets path; never logged
+  - _Requirements: 5.1, 5.2, 5.3, 5.4_
+- [ ] 4. Anchorer queue
+  - [ ] 4.1 Ingest backend receipts; drop unmatched, refused and unknown-outcome receipts
+  - [ ] 4.2 Capture catalog and schema hashes from the live backend at call time
+  - [ ] 4.3 Submit, track `queued | submitted | confirmed | failed`, idempotent retry
+  - [ ] 4.4 Unit tests for each rule
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.4, 6.1, 6.2, 6.3_
+- [ ] 5. Append-only index in the live `etched.index-entry/1` format with hash links; refuse rewrites; tests
+  - _Requirements: 3.1, 3.2, 3.3_
+- [ ] 6. Verifier CLI: match and per-field mismatch reporting using only receipt, RPC and contract address; tests
+  - _Requirements: 4.1, 4.2, 4.3_
+- [ ] 7. Status endpoint consumed by the GUI's `AnchorStatus`
+  - _Requirements: 6.3_
+- [ ] 8. Opt-in end-to-end test on Ganache against the live backend
+  - _Requirements: 1.1, 2.3, 4.1, 5.1_

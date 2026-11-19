@@ -1,0 +1,27 @@
+# Implementation Plan
+
+- [ ] 1. Scaffold the SvelteKit app in `ui/` (Svelte 5, Vite, json-render 0.20) with a configurable backend mount path and door URL
+  - _Requirements: 1.1_
+- [ ] 2. Backend adapter: read the live catalog and per-method `metadata.json` / schemas
+  - [ ] 2.1 Implement catalog listing and per-method reads from the mount, with an unavailable state on failure
+  - [ ] 2.2 Unit tests with temp-dir fixtures generated at test time (no committed schema copies)
+  - _Requirements: 1.1, 1.3, 1.4_
+- [ ] 3. Grants filter
+  - [ ] 3.1 Read the identity's grants and filter methods by exact required-capability match on the server
+  - [ ] 3.2 Ensure ungranted methods' schemas are never requested; unit tests for exact-match and no-leak
+  - _Requirements: 2.1, 2.2, 2.4_
+- [ ] 4. Schema-driven form and dispatch
+  - [ ] 4.1 Render forms from live `input.schema.json`; validate before submit
+  - [ ] 4.2 Dispatch via the call file (identity path) and via the door (human path); no other endpoints
+  - [ ] 4.3 Tests for invalid-args-no-dispatch and transport selection
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+- [ ] 5. Governance components: `Receipt`, `Refusal`, `OutcomeUnknown`, `RejectedSpec`, `AnchorStatus`, with component tests
+  - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.2_
+- [ ] 6. Chatbot renderer: validate generated specs against the live `json_render` catalog; route actions through task 4 only on explicit submit
+  - _Requirements: 5.1, 5.2, 5.3, 5.4_
+- [ ] 7. Core loop route `ui/src/routes/loop/`: spawn, grant, action, verify steps with locked states naming missing capabilities
+  - _Requirements: 6.1, 6.2, 6.3, 6.4_
+- [ ] 8. Periodic catalog and grants refresh; tests that new methods and changed grants appear without code changes
+  - _Requirements: 1.2, 2.3_
+- [ ] 9. Opt-in integration test against the live backend (skipped unless enabled by env)
+  - _Requirements: 1.1, 3.2, 4.1_
