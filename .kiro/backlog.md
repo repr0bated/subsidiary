@@ -15,7 +15,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 - Salesman persona: text drafted in docs/persona-salesman.md. It needs a backend home (ctl_plane_chatbot config or persona plugin) and the container responder to insert it as a system message. Owner/backend change (2026-11-25)
 - chat-canvas-ui 11.2 and persona agents: `snowball.search_own_events` and `cognitive.agent_*` return `outcome_unknown` (operations 5e9fceac-… and eb9c4771-…); both need a model path, missing from the seed's networking. Owner investigating (2026-11-25)
 - chat-canvas-ui 7.2 (backend-calling actions): the sealed json_render catalog declares only setState, pushState, removeState and validateForm. A rendered view can call a granted method only once the backend seals an action for it (for example one that takes plugin, method and arguments and is admitted by Runtime::call). Owner/backend change and reseal (2026-11-25)
-- chat-canvas-ui 2.4: browser identity source (SID1 or OIA1 from the decoy issuer). Needs the owner's identity bootstrap; the UI mints nothing (2026-11-25)
+- chat-canvas-ui 2.4: no browser identity exists (the container is the identity, owner 2026-11-25). Needs odbus-verified: the container's own bridge attributes calls from its UI on its door to the container identity, instead of requiring OIA1 or SID1 from the browser. Then the UI drops `IdentitySource` (2026-11-25)
 - service-contract 8: decided (host method submits for the identity; see requirements open question 1). Waits for 3tched to add the sealed submit and address-read methods (2026-11-25)
 <!-- - <item or spec/task id>: <reason>, what is needed to unblock (<date>) -->
 - chat-canvas-ui 3.1: needs `fuse.get_catalog`, which is not yet in the sealed catalog. Needs the rebuilt golden build live (2026-11-24)
@@ -23,7 +23,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 - chat-canvas-ui 8, 9: need the live golden build. 9 (deploy to CHAT_UI_DIR) was approved by the owner on 2026-11-25 but still waits for the build (2026-11-25)
 - tenant-storage 2 to 5: need a live tenant container, Cozo tenant data and a FUSE view (2026-11-25). Task 1: LXD disk device through the sealed `lxd` plugin (see design.md); adding it is an lxd mutation, so it needs the owner
 - chat-canvas-ui 10.6: `json_render.save_candidate` is a zcall mutation (`--yes`) and needs the owner's approval. Unblock: owner approves registering Burst, SpeechBalloon and ReceiptCard (2026-11-24)
-- demo-hire-and-receipt-check 3: needs the live door, identity bootstrap and the persona backend home (see the salesman persona and chat-canvas-ui 2.4 entries) (2026-11-24)
+- demo-hire-and-receipt-check 3: needs the live door, the container bridge acting as its own identity for UI calls (chat-canvas-ui 2.4) and the persona backend home (2026-11-24)
 - demo-hire-and-receipt-check 4: needs the seed networking fix so persona agents reach a model (2026-11-24)
 - demo-hire-and-receipt-check 6: same as chat-canvas-ui 11.2, `search_own_events` returns `outcome_unknown` (2026-11-24)
 - demo-hire-and-receipt-check 7: recording the video needs a tagged known-good version and the live tasks 3, 4 and 6 first (2026-11-24)

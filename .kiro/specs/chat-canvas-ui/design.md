@@ -29,7 +29,7 @@ The UI never decides any of these. It renders what arrives and sends actions as 
 ### 1. Static build and serving
 - `ui/` is a SvelteKit app built with `adapter-static` to `index.html` plus `assets/`, which is exactly what `container_ui.rs` serves from `CHAT_UI_DIR` (`/`, `/chat`, `/assets`). Serving only starts after the bridge verifies the container's mount.
 - Built on the host with Node 22 (installed through fnm). Placing the build where `CHAT_UI_DIR` points, and setting it, is a deployment step on the backend side and needs owner approval.
-- No credentials in the UI. The door handles the human's identity (SID1); the UI forwards what the session already carries and mints nothing (Requirement 10.2).
+- No credentials in the UI. The container is the identity, and the UI is that container's chatbot: there is no separate browser, human or session identity. The UI carries, forwards and mints no identity; the container's own bridge acts as the container for every call its UI makes (Requirement 10.2). Owner, 2026-11-25.
 
 ### 2. Door client (`ui/src/lib/door/`)
 - One gRPC-Web client for the door's `PluginService.CallMethod` and `StateSync.Subscribe`.

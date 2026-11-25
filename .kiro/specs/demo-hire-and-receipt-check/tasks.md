@@ -5,7 +5,7 @@
 - [x] 2a. Receipt to anchored head on the command line: `script/verify-receipt.sh` (2026-11-25)
 - [x] 2. Hire and verify on the command line: `script/DemoHire.s.sol` and `script/verify-hire.sh` (genuine terms pass, a one-word change fails)
   - _Requirements: 3.1, 5.1, 6.3_
-- [ ] 3. Pitch and hire in the chat canvas (needs the live door, identity bootstrap and the persona)
+- [ ] 3. Pitch and hire in the chat canvas (needs the live door, the container bridge acting as its own identity for UI calls, and the persona)
   - _Requirements: 2, 3_
 - [ ] 4. Agent work with receipts (needs the seed networking fix so persona agents reach a model)
   - _Requirements: 4_
