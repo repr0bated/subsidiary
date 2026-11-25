@@ -5,3 +5,13 @@ export type ChatMode = (typeof ALL_MODES)[number];
 export function modesFor(subsidiary: boolean): ChatMode[] {
   return ALL_MODES.filter((m) => !(subsidiary && m === 'personal'));
 }
+
+const LABELS: Record<ChatMode, string> = {
+  personal: 'Personal',
+  project: 'Project',
+  control_plane: 'Control plane',
+  accountability: 'Accountability',
+  notebook_lm: 'Notebook',
+  ui_render: 'Render a view'
+};
+export const modeLabel = (m: ChatMode) => LABELS[m];

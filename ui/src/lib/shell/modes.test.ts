@@ -15,3 +15,10 @@ describe('shell layout', () => {
     expect(gridColumns({ chat: true, picker: true, nav: true })).toBe('14rem 1fr 26rem');
   });
 });
+
+import { modeLabel } from './modes';
+describe('mode labels', () => {
+  it('are human readable', () => {
+    expect(modeLabel('control_plane')).toBe('Control plane');
+  });
+});
