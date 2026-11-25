@@ -8,6 +8,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 ## Open
 
 ## Blocked
+- chat-canvas-ui 7.2 (backend-calling actions): the sealed json_render catalog declares only setState, pushState, removeState and validateForm. A rendered view can call a granted method only once the backend seals an action for it (for example one that takes plugin, method and arguments and is admitted by Runtime::call). Owner/backend change and reseal (2026-11-25)
 - chat-canvas-ui 2.4: browser identity source (SID1 or OIA1 from the decoy issuer). Needs the owner's identity bootstrap; the UI mints nothing (2026-11-25)
 - service-contract 7a, 8: recomputing the work head needs a sealed method to read own execution records and a collision-resistant chain hash (MD5 today); 8 needs the identity-to-address decision (2026-11-25)
 <!-- - <item or spec/task id>: <reason>, what is needed to unblock (<date>) -->

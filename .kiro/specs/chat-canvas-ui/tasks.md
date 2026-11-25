@@ -35,9 +35,9 @@ Revised 2026-11-24 for the backend path (door, `fuse.get_catalog`, StateSync). T
   - [x]* 6.4 Unit tests: no Personal for a subsidiary; collapse gives space to the canvas
   - _Requirements: 3.1 to 3.6, 4.1 to 4.4_
 - [ ] 7. Canvas
-  - [ ] 7.1 `Renderer`, `JsonUIProvider`, `defineRegistry` against the `json_render` catalog; `buildSpecFromParts` from `Chat.messages`
-  - [ ] 7.2 One action handler per runnable catalog action (not-runnable actions render without a handler); `mutates_state` through propose and approve
-  - [ ] 7.3 Show receipts (without capability fields), refusals (without naming a capability), and `outcome_unknown` as not retried
+  - [x] 7.1 `Renderer`, `JsonUIProvider`, `defineRegistry` against the `json_render` catalog; `buildSpecFromParts` from `Chat.messages`
+  - [ ] 7.2 One action handler per runnable catalog action (not-runnable actions render without a handler); done for the four sealed state actions (`canvas/actions.ts`, never writing into /plugins). Backend-calling actions are blocked: the sealed json_render catalog declares none yet; `mutates_state` through propose and approve
+  - [x] 7.3 Show receipts (without capability fields), refusals (without naming a capability), and `outcome_unknown` as not retried
   - [ ]* 7.4 Unit tests for 7.2 and 7.3
   - _Requirements: 5.4, 5.5, 6.1 to 6.6, 6a.1 to 6a.4_
 - [ ] 8. Integration check against the live door (after the golden build is live)
