@@ -62,6 +62,20 @@ web3/script/verify-hire.sh --rpc http://127.0.0.1:8545 --hire $HIRE_ADDRESS --id
 
 It checks that your terms document hashes to the hire's `termsHash` (canonical form: `jq -S -c .`, keccak256), that the hire is completed, and that its work head is anchored, and it reads only public chain data. Change one word in the terms and the check fails.
 
+## Anchor a real 3tched record and check a receipt against it
+
+With a 3tched host and `zcall` (reads go through the identity's own mount and are themselves receipted):
+
+```sh
+web3/script/demo-setup.sh                       # deploy; addresses saved to .kiro/state/demo.env
+set -a; . .kiro/state/demo.env; set +a
+web3/script/anchor-head.sh                      # backend verifies the chain, prints the head
+ANCHOR_KEY=... web3/script/anchor-head.sh --send   # anchor it (key from the environment only)
+web3/script/verify-receipt.sh --event-id N --event-hash HASH --anchor $ANCHOR_ADDRESS
+```
+
+`verify-receipt.sh` checks that your receipt's event exists with your hash, that every later event links to it by `prev_hash` up to an anchored head, that the backend's `verify_chain` agrees over that range, and that the head is on the public record. A wrong hash fails.
+
 ## UI
 
 ```sh
