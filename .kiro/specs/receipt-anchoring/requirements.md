@@ -34,6 +34,6 @@ The local `.kiro/hashchain.log` written by `.kiro/scripts/receipt.sh` is a recor
 3. WHEN `anchorOf(bytes32 head)` is called, THE contract SHALL return the first anchoring's timestamp and sender, or zero values if the head was never anchored.
 4. WHEN `isAnchored(bytes32 head)` is called for a head that was never anchored, THE contract SHALL return false.
 ## Open questions
-1. Which sealed method returns the chain head (open item in docs/PLAN.md), its hash function and width, and its canonical form.
+1. Which sealed method returns the chain head. Hash function, found 2026-11-25: live receipts use MD5 (128-bit, 32 hex) from `op-state-store/src/event_chain.rs`; it fits `bytes32` but is not collision-resistant. The anchor is only meaningful once the chain uses blake3 or SHA-256 (owner decision). Canonical form: keys sorted recursively, whole-number floats as integers, compact JSON (`canonicalize_json`), then hashed.
 2. Anchoring frequency: per hire, per session end, or on demand.
 3. The receipt and chain-path format the verifier reads.

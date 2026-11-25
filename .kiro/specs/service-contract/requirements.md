@@ -88,6 +88,6 @@ Contracts are Foundry only (`forge`, `anvil` on 31337, `cast`, `forge script`).
 ## Open questions
 1. How an identity gets its address and who signs its transactions: an identity key from the `keypair` plugin, a host-held key per identity, or a host plugin method that submits on the identity's behalf. Keys never in the container image or repo.
 2. Hash alignment: 3tched's chain head width and function versus the `bytes32` stored here; whether the head is stored as-is or re-hashed with `keccak256`.
-3. Canonical JSON rules for the terms document, so client, provider and holder compute the same terms hash.
+3. Canonical JSON for the terms document (decided 2026-11-25, reversible): `jq -S -c .` (keys sorted at every depth, compact, UTF-8, no trailing newline), hashed with keccak256; the document carries a random `salt` of at least 32 characters and no personal data. Example: `web3/examples/terms.example.json`.
 4. Whether an SOP (`threetched` `sop.*`) is the terms document, with `sop.approve` as acceptance.
 5. Which sealed method returns the work head after the provider's work.

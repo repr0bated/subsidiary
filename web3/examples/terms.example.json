@@ -1,0 +1,10 @@
+{
+  "version": "subsidiary.terms/1",
+  "task": "Review the business CMS schema against its OSCAL controls and report findings.",
+  "provider_method_subid": "obs.service.cognitive.agent.oscal-auditor.review@v1",
+  "schema_hash": "<sealed schema_hash of the provider plugin, from fuse.get_catalog>",
+  "catalog_hash": "<catalog_hash the work runs under>",
+  "inputs_hash": "<hash of the inputs; never the inputs themselves>",
+  "warranty_seconds": 604800,
+  "salt": "<32 random bytes as hex; kept by both parties, never published>"
+}

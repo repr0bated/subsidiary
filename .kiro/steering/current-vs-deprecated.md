@@ -40,6 +40,7 @@ Deprecated means revised and reworked. Remnants of the old versions are still in
 - Ganache, Hardhat.
 
 ## Unsure: confirm before relying on it
+- Receipt chain hash: live receipts use MD5 (`event_chain.rs`), while the bridge core journal uses blake3. Do not claim receipts are tamper-proof until the persisted chain uses blake3 or SHA-256.
 - External MCP: `op-mcp-door` (spec `mcp-door-adapter`, updated 2026-11-22) is the MCP endpoint for external clients (IDEs, agents) to reach the cognitive tools. MCP Streamable HTTP over TLS, default `127.0.0.1:8091`, endpoints `/mcp/full` and `/mcp/loader`; every tool call becomes one 3tchedFS call file and one receipt. Not installed as a runit service on this host as of 2026-11-23. The `cognitive` plugin alone has 669 methods, too many to list as tools in one client, so clients such as Kiro should use `/mcp/loader` (five meta-tools to search, describe, load and call) rather than `/mcp/full`.
 - The 3tched.com model and mode pickers (`ModelPicker.svelte`, `ModeStrip.svelte`, `model-catalog.ts`) predate the separation of threetched and use old capability names. Reference only.
 - Agents (ours): sealed in the `cognitive` plugin as `agent_<name>_<operation>` methods: 111 agents, 644 methods (2026-11-23). Advisor operations are `advise`, `analyze`, `consult`, `explain`, `help`, `recommend`, `review`; orchestrators have `list_steps`, `run_workflow`, `validate`. Each agent has its own capability (for example `cognitive.agent.oscal_auditor`). Also `cognitive.specialist`, a persona assembled per call (`cognitive.read`).

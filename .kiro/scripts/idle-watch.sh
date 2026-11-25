@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Cron entry point (every 10 minutes). Starts a crew run when the server has been idle
-# on two consecutive checks AND the workspace changed since the last run.
+# Cron entry point (every 5 minutes).
+# 1. Idle for 15 min (idle-check.sh) and open work in .kiro/backlog.md or spec tasks: run the worker (work-run.sh).
+# 2. Then a crew run when idle on two consecutive checks AND the workspace changed since the last run.
 # Only one run at a time (flock).
 set -u
 root="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -13,6 +14,7 @@ if ! bash "$root/.kiro/scripts/idle-check.sh" >/dev/null 2>&1; then
   rm -f "$state/idle-seen"
   exit 0
 fi
+bash "$root/.kiro/scripts/work-run.sh" || exit 0   # rc 2: development resumed
 if [ ! -e "$state/idle-seen" ]; then      # first idle observation: wait for the next tick
   touch "$state/idle-seen"
   exit 0

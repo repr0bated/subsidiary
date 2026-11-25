@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "name": "Backlog on stop",
+  "description": "Keep .kiro/backlog.md current: add unfinished or deferred work when the agent stops",
+  "version": "1",
+  "when": { "type": "agentStop" },
+  "then": {
+    "type": "askAgent",
+    "prompt": "If this turn left work unfinished, deferred or blocked that is not already an unchecked task in .kiro/specs/*/tasks.md or an item in .kiro/backlog.md, add one line per item to the Open (or Blocked, with the reason) section of .kiro/backlog.md in its stated format. If nothing is left over, do nothing and say nothing."
+  }
+}

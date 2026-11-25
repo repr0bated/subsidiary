@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Work now",
+  "description": "On demand: start the worker on open work without waiting for idle",
+  "version": "1",
+  "when": { "type": "userTriggered" },
+  "then": { "type": "runCommand", "command": "WORK_FORCE=1 WORK_MAX_ITEMS=1 bash .kiro/scripts/work-run.sh" }
+}
