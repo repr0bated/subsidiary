@@ -29,7 +29,7 @@ The UI never decides any of these. It renders what arrives and sends actions as 
 ### 1. Static build and serving
 - `ui/` is a SvelteKit app built with `adapter-static` to `index.html` plus `assets/`, which is exactly what `container_ui.rs` serves from `CHAT_UI_DIR` (`/`, `/chat`, `/assets`). Serving only starts after the bridge verifies the container's mount.
 - Built on the host with Node 22 (installed through fnm). Placing the build where `CHAT_UI_DIR` points, and setting it, is a deployment step on the backend side and needs owner approval.
-- No credentials in the UI. The container is the identity, and the UI is that container's chatbot: there is no separate browser, human or session identity. The UI carries, forwards and mints no identity; the container's own bridge acts as the container for every call its UI makes (Requirement 10.2). Owner, 2026-11-25.
+- The container is the identity, and the UI is that container's chatbot: there is no separate browser, human or session identity. The container that serves the page injects its own SID1 as `window.__3TCHED_CONFIG__.identity` (owner, 2026-11-25; the same mechanism as 3tched.com `door-config.ts` `injectedIdentity`). The UI reads it (`door/identity.ts`), keeps it in memory, sends it as `x-opdbus-sealed-id-bin` on each call, and never mints, stores, fetches or renders it. It accepts SID1 only. The injection itself is backend work: docs/handoff/container-identity-injection/.
 
 ### 2. Door client (`ui/src/lib/door/`)
 - One gRPC-Web client for the door's `PluginService.CallMethod` and `StateSync.Subscribe`.

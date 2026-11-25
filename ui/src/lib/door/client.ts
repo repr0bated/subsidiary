@@ -8,15 +8,15 @@ import type { CatalogOutput, Door, Receipt } from './types';
 
 /**
  * The browser's only path to the backend: the door's gRPC-Web services (design §2).
- * Every action is one PluginService.CallMethod as the human; state comes from StateSync.Subscribe.
- * Identity is the session's own (SID1 or OIA1) and is never minted here.
+ * Every action is one PluginService.CallMethod as the container identity; state comes from StateSync.Subscribe.
+ * Identity is the container's own SID1, injected into the page by the container (door/identity.ts); never minted here.
  */
 
 export const PLUGIN_OBJECT_ROOT = '/org/opdbus/v1/plugins';
 export const PLUGIN_INTERFACE = 'org.opdbus.v1.PluginV1';
 const CAPABILITY_HEADER = 'x-opdbus-capability';
 
-/** Where the session's identity metadata comes from (decoy issuer, configured SID1). Not minted here. */
+/** Where the identity metadata comes from: the container's injected SID1 (door/identity.ts). Not minted here. */
 export interface IdentitySource {
   metadata(): Promise<Record<string, string>>;
 }

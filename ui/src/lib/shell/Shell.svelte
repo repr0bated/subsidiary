@@ -49,7 +49,7 @@
       {#if session && conversationId}
         <ChatPanel {session} {conversationId} {incoming} onview={(s) => (spec = s)} />
       {:else}
-        <p class="placeholder">Not connected yet: the door needs this browser's identity (owner setup).</p>
+        <p class="placeholder">Not connected yet: this page carries no container identity.</p>
       {/if}
     {/if}
   </section>
