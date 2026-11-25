@@ -8,6 +8,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 ## Open
 
 ## Blocked
+- Salesman persona: text drafted in docs/persona-salesman.md. It needs a backend home (ctl_plane_chatbot config or persona plugin) and the container responder to insert it as a system message. Owner/backend change (2026-11-25)
 - chat-canvas-ui 11.2 and persona agents: `snowball.search_own_events` and `cognitive.agent_*` return `outcome_unknown` (operations 5e9fceac-… and eb9c4771-…); both need a model path, missing from the seed's networking. Owner investigating (2026-11-25)
 - chat-canvas-ui 7.2 (backend-calling actions): the sealed json_render catalog declares only setState, pushState, removeState and validateForm. A rendered view can call a granted method only once the backend seals an action for it (for example one that takes plugin, method and arguments and is admitted by Runtime::call). Owner/backend change and reseal (2026-11-25)
 - chat-canvas-ui 2.4: browser identity source (SID1 or OIA1 from the decoy issuer). Needs the owner's identity bootstrap; the UI mints nothing (2026-11-25)
