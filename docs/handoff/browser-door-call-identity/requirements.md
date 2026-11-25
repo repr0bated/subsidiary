@@ -1,6 +1,6 @@
 # Requirements Document — `browser-door-call-identity`: browser calls admitted as the container
 
-Status: PROPOSED, not implemented. Written 2026-11-25 against odbus-verified `bf3c4a8` (branch `dev`). For the backend; nothing here is built in the Subsidiary repo.
+Status: IMPLEMENTED on odbus-verified `dev` in `89d8950` (`container_ui_door.rs`), owner decisions recorded in `74091c7`. Compiles; tests written, not run; not deployed, and the door is off until `OP_UI_LISTEN` is set in a container. Written 2026-11-25 against `bf3c4a8`. For the backend; nothing here is built in the Subsidiary repo.
 
 ## Introduction
 
@@ -21,14 +21,12 @@ Out of scope: any change to the browser or UI code; new credentials or login flo
 - **Container mount**: the container's own 3tchedFS view at `/run/mounts/3tchedFS`, opened as `MountedNamespace::open_for_identity_mode(.., IdentityMode::GuestKernel, None)` (already done in `container_ui.rs::mount`).
 - **Browser call**: a `CallMethod` or `Subscribe` that arrives on the UI listener.
 
-## Decisions for the owner
+## Decisions (owner, 2026-11-25)
 
-- **D1: which connections run as the container.** "No credential means the container" must not hold on a listener that other callers can reach.
-  - **A (recommended):** a separate UI listener that `op-tunnel-door` alone splices to. Every call on it is a browser call. The identity door on `8090` keeps today's credential check unchanged.
-  - **B:** the same listener, where the bridge tells browser connections apart by their source (the `op-tunnel-door` splice). This is more fragile and mixes two admission rules on one port.
-- **D2: who may open the page.** With no browser credential, anyone who reaches the container's browser port acts as the container under its grants. What limits reaching the port: the host browser door's exposure (WARP/privacy transport), an allowlist, or something else? This decides whether the feature is safe to enable. It is not answered in source.
-- **D3: the `container_ui.rs` rule.** Its header says "No host HTTP listener, desktop, identity endpoint, credential injection or RPC proxy", and "The existing generic door still validates every human credential". This feature changes that: browser calls are no longer human-credentialed, they are the container's. The owner confirms the change, or rejects the feature.
-- **Existing alternative, not proposed:** the OIA1 browser binding (`oracle_assertion.rs::with_browser_binding`, `bound_state_subscription.rs`) admits a browser that presents a bound oracle assertion. That is a browser-carried credential, which the owner rule forbids.
+- **D1: a separate UI listener (option A).** Only `op-tunnel-door` splices to it. The identity door on `8090` keeps its credential check.
+- **D2: closed, not a question.** The container is the identity and is already authenticated. The browser is never authenticated again. Do not raise browser-port reachability as an open decision.
+- **D3: accepted.** Browser calls run as the container through its mount. The `container_ui.rs` rule about validating human credentials no longer applies on the UI listener.
+- **Not used:** the OIA1 browser binding (`oracle_assertion.rs::with_browser_binding`), because it is a browser-carried credential.
 
 ## Requirements
 

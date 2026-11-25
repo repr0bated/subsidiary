@@ -1,6 +1,6 @@
 # Design — `browser-door-call-identity`
 
-Written 2026-11-25 against odbus-verified `bf3c4a8`. Assumes D1 option A. D2 and D3 are open (see requirements).
+Written 2026-11-25 against odbus-verified `bf3c4a8`. D1 is option A; D2 is closed and D3 accepted (see requirements). Implemented in `89d8950`; state wakeups use the container's own `subscribe_commits()` and re-read `value.json`.
 
 ## Today
 
@@ -44,11 +44,10 @@ The bridge could read `/agent/user/sealed_id` and attach it to browser calls as 
 
 ## Open items
 
-1. **D2, reachability.** The design is only as safe as access to the host browser port. It must be decided before the listener is enabled in any container that holds mutating grants.
-2. **Subscribe without polling.** `MountedNamespace` exposes `state()` reads, but I did not find a change notification on the guest mount. Options:
+1. **Subscribe without polling (resolved in `89d8950`).** `MountedNamespace` exposes `state()` reads, but I did not find a change notification on the guest mount. Options:
    - the bridge's existing `production_subscribe` (`service.rs:389`), restricted to the mount's disclosed paths and run as the mount identity;
    - an inotify or FUSE notify stream on `plugins/<id>/value.json`, if 3tchedFS emits one.
 
    The owner or backend chooses. A timer loop is not acceptable.
-3. **`fuse.get_catalog`.** It is not in the sealed catalog as of golden 335. `ListPlugins` from `catalog_view` serves the UI in the meantime. When `get_catalog` is sealed, it is just one more call through `CallMethod`.
-4. **kiroween image.** It is built from `75dd98b`, before Keccak. It needs a rebuild from `bf3c4a8` or later for receipts to verify.
+2. **`fuse.get_catalog`.** It is not in the sealed catalog as of golden 335. `ListPlugins` from `catalog_view` serves the UI in the meantime. When `get_catalog` is sealed, it is just one more call through `CallMethod`.
+3. **kiroween image.** It is built from `75dd98b`, before Keccak. It needs a rebuild from `bf3c4a8` or later for receipts to verify.
