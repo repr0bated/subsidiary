@@ -6,3 +6,4 @@
 - Startup check: each configured tenant path exists and is writable, else abort.
 - Schema: read-only FUSE file generated from the live Cozo relations on each read.
 - `.kiroignore` keeps tenant data out of the agent's context.
+- Container runtime (owner, 2026-11-25): Incus, which runs the current containers. The mount deliverable is an Incus profile under `container/incus/` that bind-mounts the host path above. LXD is being prepared and is out of scope here.

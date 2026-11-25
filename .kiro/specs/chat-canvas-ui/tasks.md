@@ -20,17 +20,17 @@ Revised 2026-11-24 for the backend path (door, `fuse.get_catalog`, StateSync). T
   - _Requirements: 2.1 to 2.6, 3a.1_
 - [ ] 4. State feed
   - [x] 4.1 Reducer: one feed per plugin; newest generation per path; tombstones; withheld absent; read-only under `/plugins/<id>`
-  - [ ] 4.2 Subscription wrapper: subscribe first with initial state and schema; on `data_loss`, disconnect or new `catalog_hash`, hydrate again; stop on identity change, revocation, denial or malformed frame; no timers
+  - [x] 4.2 Subscription wrapper (`app/session.ts`; tested with a fake door, live check waits for StateSync): subscribe first with initial state and schema; on `data_loss`, disconnect or new `catalog_hash`, hydrate again; stop on identity change, revocation, denial or malformed frame; no timers
   - [x]* 4.3 Property tests 2, 3, 4 and 6
   - _Requirements: 1.4, 6b.1 to 6b.7_
 - [ ] 5. Chat transport
   - [x] 5.1 `ChatTransport`: `submit_turn`, read back with `get_turn_response`, emit text and `flat` `data-spec` parts
-  - [ ] 5.2 Approve and deny for mutating tool proposals through `approve_pending_tool`
+  - [x] 5.2 Approve and deny for mutating tool proposals through `approve_pending_tool` with the backend's exact turn_id, tool_call_id and digest (`chat/approval.ts`, `ApprovalCard.svelte`)
   - [x]* 5.3 Unit test: committed canvas becomes a `flat` `data-spec` part
   - _Requirements: 5.1 to 5.3, 6.5_
 - [ ] 6. Shell
   - [x] 6.1 `Shell.svelte`: collapsible chat, picker and menu; canvas takes freed space; sealed default layout, in memory only for now
-  - [ ] 6.2 Model and mode picker: `chat_router.ListProviders`, `ListModels`, `SetSelection`; `project.get_context`, `select_context`; no Personal for a subsidiary
+  - [x] 6.2 Model and mode picker: `chat_router.ListProviders`, `ListModels`, `SetSelection`; `project.get_context`, `select_context`; no Personal for a subsidiary
   - [x] 6.3 Navigation menu placeholder
   - [x]* 6.4 Unit tests: no Personal for a subsidiary; collapse gives space to the canvas
   - _Requirements: 3.1 to 3.6, 4.1 to 4.4_

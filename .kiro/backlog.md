@@ -8,15 +8,17 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 ## Open
 
 ## Blocked
+- chat-canvas-ui 2.4: browser identity source (SID1 or OIA1 from the decoy issuer). Needs the owner's identity bootstrap; the UI mints nothing (2026-11-25)
+- service-contract 7a, 8: recomputing the work head needs a sealed method to read own execution records and a collision-resistant chain hash (MD5 today); 8 needs the identity-to-address decision (2026-11-25)
 <!-- - <item or spec/task id>: <reason>, what is needed to unblock (<date>) -->
-- chat-canvas-ui 2.1: the pinned `odbus-verified` commit is not given anywhere, and no codegen configuration exists. Needs the owner to name the commit and config location (2026-11-24)
 - chat-canvas-ui 3.1: needs `fuse.get_catalog`, which is not yet in the sealed catalog. Needs the rebuilt golden build live (2026-11-24)
-- chat-canvas-ui 4.2: needs live StateSync and the generated door types from 2.1 (2026-11-24)
-- chat-canvas-ui 8, 9: need the live golden build, and 9 needs owner approval (2026-11-24)
+- chat-canvas-ui 4.2 live check: needs live StateSync; the wrapper itself is done and tested (2026-11-25)
+- chat-canvas-ui 8, 9: need the live golden build. 9 (deploy to CHAT_UI_DIR) was approved by the owner on 2026-11-25 but still waits for the build (2026-11-25)
 - receipt-anchoring 4, 5: method and receipt format not identified (already noted in tasks.md). Needs the 3tched method and format (2026-11-24)
-- sealed-surface-gui 1 to 5: spec is blocked on the container, FUSE mount and an open design decision, and task 1 duplicates chat-canvas-ui task 1. Needs the owner to confirm the spec is superseded or settle the design (2026-11-24)
-- service-contract 7, 8: need canonical JSON rules, the receipt format and a decision on identity-to-address mapping (open question 1). Needs the owner's decisions (2026-11-24)
-- tenant-storage 1 to 5: the deliverable for the container mount is not specified (Incus versus LXD is unconfirmed), and tasks 2 to 5 need a live container, Cozo tenant data and a FUSE view. Needs the owner to confirm the container runtime and the target file (2026-11-24)
+- tenant-storage 2 to 5: need a live tenant container, Cozo tenant data and a FUSE view (2026-11-25). Task 1 is unblocked: Incus profile under container/incus/ (see design.md)
 
 ## Done
 <!-- - <item or spec/task id>: <one line on what changed> (<date>) -->
+- chat-canvas-ui 2.1: door types generated from operation.proto at the commit in ui/door-proto.ref by ui/scripts/gen-door.sh (2026-11-25)
+- service-contract 7: holder verifier web3/script/verify-hire.sh; canonical terms JSON decided (jq -S -c, keccak256, salt) (2026-11-25)
+- sealed-surface-gui: superseded by chat-canvas-ui; its tasks are closed (2026-11-25)
