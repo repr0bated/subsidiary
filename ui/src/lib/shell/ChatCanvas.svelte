@@ -1,6 +1,7 @@
 <script lang="ts">
   // The simplest shell: the canvas fills the browser window (polka dots mark its extent) and the
-  // chatbot floats over it in a collapsible panel. Nothing else is loaded yet.
+  // chatbot is a drawer along the bottom. Pull its handle up to open it, drag to size it, click to
+  // open or close. The conversation is held to a readable line length.
   import Canvas from '../canvas/Canvas.svelte';
   import ChatPanel from '../app/ChatPanel.svelte';
   import type { Session } from '../app/session';
@@ -8,8 +9,51 @@
 
   let { session = null, conversationId = '' }: { session?: Session | null; conversationId?: string } = $props();
   let spec = $state<Spec | null>(null);
-  let open = $state(true);
+  let open = $state(false);
+  /** Drawer height as a fraction of the window while open. */
+  let height = $state(0.4);
+  const MIN = 0.15;
+  const MAX = 0.85;
   const bodyId = $props.id();
+
+  const clamp = (h: number) => Math.min(MAX, Math.max(MIN, h));
+
+  let drag: { startY: number; moved: boolean } | null = null;
+
+  function onpointerdown(e: PointerEvent) {
+    drag = { startY: e.clientY, moved: false };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  function onpointermove(e: PointerEvent) {
+    if (!drag) return;
+    if (!drag.moved && Math.abs(e.clientY - drag.startY) < 6) return;
+    drag.moved = true;
+    const h = (window.innerHeight - e.clientY) / window.innerHeight;
+    if (h < MIN / 2) {
+      open = false;
+    } else {
+      open = true;
+      height = clamp(h);
+    }
+  }
+  function onpointerup() {
+    if (drag && !drag.moved) open = !open;
+    drag = null;
+  }
+  function onkeydown(e: KeyboardEvent) {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!open) open = true;
+      else height = clamp(height + 0.1);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (height - 0.1 < MIN) open = false;
+      else height = clamp(height - 0.1);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      open = !open;
+    }
+  }
 </script>
 
 <div class="window">
@@ -17,16 +61,30 @@
     <Canvas {spec} components={session?.components ?? []} />
   </main>
 
-  <section class="chatbot" class:collapsed={!open} aria-label="Chatbot">
-    <button type="button" class="toggle display" aria-expanded={open} aria-controls={bodyId} onclick={() => (open = !open)}>
-      {open ? 'Collapse chat' : 'Chat'}
+  <section class="drawer" class:open style:height={open ? `${height * 100}vh` : null} aria-label="Chatbot">
+    <button
+      type="button"
+      class="handle display"
+      aria-expanded={open}
+      aria-controls={bodyId}
+      title="Drag to resize, click to open or close, arrow keys to resize"
+      {onpointerdown}
+      {onpointermove}
+      {onpointerup}
+      onpointercancel={() => (drag = null)}
+      {onkeydown}
+    >
+      <span class="grip" aria-hidden="true"></span>
+      <span>{open ? 'Chat' : 'Pull up to chat'}</span>
     </button>
     <div id={bodyId} class="body" hidden={!open}>
-      {#if session && conversationId}
-        <ChatPanel {session} {conversationId} onview={(s) => (spec = s)} />
-      {:else}
-        <p class="placeholder">Not connected yet.</p>
-      {/if}
+      <div class="measure">
+        {#if session && conversationId}
+          <ChatPanel {session} {conversationId} onview={(s) => (spec = s)} />
+        {:else}
+          <p class="placeholder">Not connected yet.</p>
+        {/if}
+      </div>
     </div>
   </section>
 </div>
@@ -45,44 +103,59 @@
     background-image: radial-gradient(var(--pop-blue) 22%, transparent 24%);
     background-size: 32px 32px;
   }
-  .chatbot {
+  .drawer {
     position: absolute;
-    left: 1rem;
-    top: 1rem;
-    width: min(26rem, calc(100vw - 2rem));
-    max-height: calc(100vh - 2rem);
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    border: var(--outline);
+    border-top: var(--outline);
     background: var(--paper);
-    box-shadow: 6px 6px 0 var(--ink);
+    box-shadow: 0 -6px 0 var(--ink);
   }
-  .chatbot.collapsed {
-    width: auto;
-  }
-  .toggle {
-    align-self: stretch;
+  .handle {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    width: 100%;
     border: 0;
-    border-bottom: var(--outline);
     background: var(--pop-yellow);
-    padding: 0.4rem 0.8rem;
+    padding: 0.35rem 0.8rem 0.45rem;
     font-size: 1.1rem;
-    cursor: pointer;
+    cursor: ns-resize;
+    touch-action: none;
+    user-select: none;
   }
-  .chatbot.collapsed .toggle {
-    border-bottom: 0;
+  .drawer.open .handle {
+    border-bottom: var(--outline);
   }
-  .toggle:focus-visible {
+  .handle:focus-visible {
     outline: 3px solid var(--pop-red);
-    outline-offset: 2px;
+    outline-offset: -5px;
+  }
+  .grip {
+    width: 3.5rem;
+    height: 0.35rem;
+    border-radius: 1rem;
+    background: var(--ink);
   }
   .body {
+    flex: 1;
     overflow: auto;
-    min-height: 12rem;
+  }
+  /* A readable line length, however wide the window. */
+  .measure {
+    max-width: 68ch;
+    margin: 0 auto;
+    padding: 0 1rem;
+    overflow-wrap: anywhere;
   }
   .placeholder {
-    margin: 1rem;
+    margin: 1rem 0;
     font-weight: 700;
   }
 </style>
