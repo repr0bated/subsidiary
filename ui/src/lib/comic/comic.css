@@ -40,6 +40,8 @@ body {
   background: var(--paper);
   font-family: var(--font-body);
 }
+/* Keyboard focus stays visible on every control, in the same ink as the outlines. */
+:focus-visible { outline: 3px dashed var(--pop-blue); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }

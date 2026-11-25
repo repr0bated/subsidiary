@@ -40,7 +40,7 @@
 </script>
 
 <div class="chat">
-  <ol class="msgs">
+  <ol class="msgs" role="log" aria-live="polite" aria-label="Conversation">
     {#each chat.messages as m (m.id)}
       <li class={m.role}>
         {#if m.role === 'assistant'}
@@ -51,8 +51,8 @@
       </li>
     {/each}
   </ol>
-  {#if chat.status === 'submitted' || chat.status === 'streaming'}<p class="display busy">On it!</p>{/if}
-  {#if chat.error}<p class="err">That didn't go through. Nothing was retried.</p>{/if}
+  {#if chat.status === 'submitted' || chat.status === 'streaming'}<p class="display busy" role="status">On it!</p>{/if}
+  {#if chat.error}<p class="err" role="alert">That didn't go through. Nothing was retried.</p>{/if}
   <form onsubmit={(e) => { e.preventDefault(); send(); }}>
     <textarea bind:value={text} rows="2" aria-label="Message"></textarea>
     <button type="submit" class="display">Send</button>
