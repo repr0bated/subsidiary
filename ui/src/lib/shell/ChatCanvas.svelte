@@ -47,8 +47,8 @@
   }
   .chatbot {
     position: absolute;
-    right: 1rem;
-    bottom: 1rem;
+    left: 1rem;
+    top: 1rem;
     width: min(26rem, calc(100vw - 2rem));
     max-height: calc(100vh - 2rem);
     display: flex;
