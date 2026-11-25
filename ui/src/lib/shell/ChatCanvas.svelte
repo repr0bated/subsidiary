@@ -16,7 +16,7 @@
     <Canvas {spec} components={session?.components ?? []} />
   </main>
   <EdgeDrawer edge="top" label="Model and mode" closedLabel="Pull down for model and mode" height={0.3}>
-    <ModelModePicker />
+    <ModelModePicker {session} />
   </EdgeDrawer>
   <EdgeDrawer edge="bottom" label="Chat" closedLabel="Pull up to chat">
     {#if session && conversationId}
