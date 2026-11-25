@@ -7,6 +7,7 @@ set -u
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root" || exit 1
 export PATH="$HOME/.foundry/bin:$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+. "$root/.kiro/scripts/toolchain.sh"
 export SUBSIDIARY_CREW=1
 export ETH_RPC_URL="http://127.0.0.1:8545"   # anvil only
 timeout_s="${CREW_AGENT_TIMEOUT:-1800}"
