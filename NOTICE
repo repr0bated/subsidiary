@@ -1,0 +1,11 @@
+Subsidiary
+Copyright 2026 Jeremy Hobson
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party components:
+- forge-std (web3/lib/forge-std, git submodule): MIT or Apache-2.0, see its license files.
+- Bangers and Comic Neue fonts (ui/static/fonts): SIL Open Font License 1.1, see ui/static/fonts/OFL-*.txt.
+- npm dependencies of ui/ (Svelte, SvelteKit, Vercel AI SDK, json-render, zod, protobuf-ts and others): their own licenses, as listed in ui/package-lock.json.
+
+Pre-existing work this project builds on is listed in PREEXISTING.md.
