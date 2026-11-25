@@ -7,5 +7,5 @@
 - [x] 5. Foundry tests with fuzzed properties (31 passing, 2026-11-25)
 - [x] 6. Deploy and demo-hire scripts for anvil, run end to end
 - [x] 7. Holder verifier `web3/script/verify-hire.sh` (cast and jq only): terms hash, completion, work-head anchoring, optional recomputed head. Genuine terms pass; a one-word change fails (2026-11-25)
-- [ ] 7a. Recompute the work head from a receipt and its chain path (blocked: no sealed method to read own execution records; chain hash is MD5 today, see PLAN risk)
+- [x] 7a. A receipt's path to the anchored work head is checked by `web3/script/verify-receipt.sh` (links, backend verify_chain, anchor). Full payload recompute is receipt-anchoring task 6
 - [ ] 8. Identity to address mapping and signing (open question 1)
