@@ -1,0 +1,42 @@
+# Implementation Plan — `browser-door-dispatch`
+
+For odbus-verified. Tasks 1 to 5 need no decision. Task 6 waits for D1. Task 8 needs the owner's go-ahead because it changes deploy files. Use the golden chroot Cargo shim, and run one Cargo build at a time.
+
+- [ ] 1. Generic accept queue in `crates/op-tunnel-mux/src/lib.rs`
+  - [ ] 1.1 Make `AcceptQueue` generic over its key. Rename today's `deliver` to `deliver_sole`, with its behavior unchanged, and keep the control-plane `Mux` on `u32`
+  - [ ] 1.2 Add `deliver_to(&K, stream)`: drop closed waiters of that key, run each waiter's revalidate check, never touch other keys, and return `Err` when none is ready
+  - [ ] 1.3 Unit tests: two keys waiting, delivery goes to the selected key; the selected key is empty while another key waits, so the connection is refused; dead and failed-revalidation waiters are skipped within one key
+  - _Requirements: 1.1–1.4, 3.1_
+- [ ] 2. Waiter identity hook
+  - [ ] 2.1 `WaiterIdentity<K>` trait and `WaiterProof<K>` in `op-tunnel-mux`
+  - [ ] 2.2 A browser socket accept loop that identifies each `UnixStream` before tonic sees it and carries the proof in connect info. Refuse the connection if identification fails
+  - [ ] 2.3 `Tunnel::accept` on the browser mux keys the waiter by the proof. Request content is never used for the key
+  - [ ] 2.4 Tests with a fake `WaiterIdentity`: an Accept with no proof is refused; a waiter is registered under its proof key
+  - _Requirements: 2.1–2.4, 1.5_
+- [ ] 3. Lungs-backed identity in `op-grpc-bridge`
+  - [ ] 3.1 Factor the binding lookup out of `LungsIdentity::bind_current_container` (host, forkproxy and namespace checks, then `find_container_binding`) without publishing a D-Bus binding, and keep one implementation for both callers
+  - [ ] 3.2 Implement `WaiterIdentity<String>` with it, using the key `ContainerBinding.session_id` and the revalidate check `PeerLifetime::revalidate`
+  - [ ] 3.3 Tests: a host peer, a forkproxy peer and a peer with no identity container are each refused
+  - _Requirements: 2.1, 2.2, 2.4_
+- [ ] 4. Second mux owner
+  - [ ] 4.1 `BROWSER_OWNER` in `runtime_tunnel.rs`, built only when `OP_BROWSER_DOOR` is set. The socket goes in its own directory (`OP_BROWSER_SOCKET`, default `/run/opdbus/tunnel-browser/browser.sock`)
+  - [ ] 4.2 `op_tunnel_mux::serve_browser` with a `Selector<K>` trait. A `None` result closes the stream, and refusals are logged without identity values
+  - [ ] 4.3 Tests: a browser waiter never gets a control-plane connection and the control-plane waiter never gets a browser connection; a closed browser door refuses and drops its splices
+  - _Requirements: 3.1–3.3, 1.2_
+- [ ] 5. Tunnel plugin state and methods
+  - [ ] 5.1 Add `browser_door`, `browser_open`, `browser_waiting` and `browser_active` to `TunnelState`, each with an `x-oscal-subid`. No identity values
+  - [ ] 5.2 Give `set_open` and `close_connections` an optional `door` argument (`control` by default)
+  - [ ] 5.3 Regenerate the sealed schema and the `oscal_subid_registry` entries from the plugin
+  - _Requirements: 5.1–5.4_
+- [ ] 6. Selector (waits for D1)
+  - [ ] 6.A Option A: one listener per committed identity container with an assigned port; port → `session_id` from committed identity records; tests for an unknown port and a container that is removed
+  - [ ] 6.B Option B: a `peek`-based ClientHello `server_name` reader (16 KiB cap, deadline, ECH and malformed input refused), name → `session_id`, and a fuzz target for the parser
+  - _Requirements: 6_
+- [ ] 7. Regression: all existing `op-tunnel-mux` tests pass unchanged, including `accept_splices_a_door_connection_into_the_container`, `a_closed_door_refuses_and_drops_active_splices` and `a_door_connection_without_a_waiting_container_is_refused`
+  - _Requirements: 3.1, 7.1_
+- [ ] 8. Deploy (owner go-ahead)
+  - [ ] 8.1 Seed `deploy/provisioning/runit/op-tunnel-door/run`: keep the control-plane branch, add a browser branch with `OP_UI_LISTEN`, and idle when neither socket exists
+  - [ ] 8.2 Provisioning: bind `/run/opdbus/tunnel-browser/` into user identity containers only, and write `OP_UI_LISTEN`
+  - [ ] 8.3 `deploy/runit/op-grpc-bridge/run`: set `OP_BROWSER_DOOR`. Leave `OP_TUNNEL_DOOR` and the warp-vip `8090` route as they are
+  - _Requirements: 4.1–4.4_
+- [ ] 9. Live check after deploy: two user containers each get only their own browser connections; the control-plane MCP route on `100.96.0.5:8090` still reaches the chatbot; `zcall tunnel status` shows counts with no identity values
