@@ -86,8 +86,8 @@ Contracts are Foundry only (`forge`, `anvil` on 31337, `cast`, `forge script`).
 3. A `forge script` SHALL deploy to anvil and run one full hire end to end.
 
 ## Open questions
-1. How an identity gets its address and who signs its transactions: an identity key from the `keypair` plugin, a host-held key per identity, or a host plugin method that submits on the identity's behalf. Keys never in the container image or repo.
-2. Hash alignment: 3tched's chain head width and function versus the `bytes32` stored here; whether the head is stored as-is or re-hashed with `keccak256`.
+1. How an identity gets its address and who signs its transactions: an identity key from the `keypair` plugin, a host-held key per identity, or a host plugin method that submits on the identity's behalf. Keys never in the container image or repo. Decided 2026-11-25 (owner delegated): a host plugin method submits on the identity's behalf. The host holds the key per identity and signs; the identity's address is the address of that host-held key, read through a sealed read method. The container never holds a key, which keeps authority on the host. Neither method exists in the sealed catalog yet (`keypair` has only `list_keypairs`), so task 8 waits for that backend work.
+2. Hash alignment (decided 2026-11-25, owner): 3tched chain hashing is Keccak-256 system-wide since odbus-verified `bf3c4a8` (64 hex, the same Keccak-256 Ethereum uses). The head is stored as-is in `bytes32`, with no re-hash. Legacy MD5 records (32 hex) still verify in 3tched but are never anchored.
 3. Canonical JSON for the terms document (decided 2026-11-25, reversible): `jq -S -c .` (keys sorted at every depth, compact, UTF-8, no trailing newline), hashed with keccak256; the document carries a random `salt` of at least 32 characters and no personal data. Example: `web3/examples/terms.example.json`.
 4. Whether an SOP (`threetched` `sop.*`) is the terms document, with `sop.approve` as acceptance.
 5. Which sealed method returns the work head after the provider's work.
