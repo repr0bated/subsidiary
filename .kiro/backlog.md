@@ -8,6 +8,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 ## Open
 
 ## Blocked
+- UI build (`npm --prefix ui run build`): Node 22 is broken on the host. `/usr/local/bin/node` points to `/usr/local/lib/node-v22.23.5-linux-x64/bin/node`, whose `bin/` was removed, so `/usr/bin/node` v20.19.2 runs and SvelteKit prerender fails (`Promise.withResolvers is not a function`). `check` and `test` still pass. Needs root to reinstall Node 22 (2026-11-25)
 - Owner item: kiroween container TLS UI listener (`OP_UI_LISTEN`) and provisioned browser port, then the live two-container check from docs/handoff/browser-door-dispatch/tasks.md task 9. Blocked: container provisioning and a live two-container check are owner actions outside the worker's scope. Unblock: owner configures the listener and port, then the check can run (2026-11-25)
 - Owner item: kiroween image is from odbus-verified `75dd98b`, before the Keccak change, so its in-container `zcall` likely rejects every receipt. Blocked: needs an image rebuild from `bf3c4a8` or later (golden 335), an owner action when kiroween is next reprovisioned (2026-11-25)
 - Control-plane MCP TLS check: the chatbot guest's bridge has a compiled versus sealed identity_sled schema mismatch (predates golden 335). Backend fix in odbus-verified (2026-11-25)
