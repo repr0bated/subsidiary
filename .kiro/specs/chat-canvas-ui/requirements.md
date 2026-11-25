@@ -86,7 +86,7 @@ Working plugin state is required before the UI can be built or demonstrated: wit
 4. THE UI SHALL keep `JsonUIProvider` state as local view state only and SHALL NOT treat it as committed state.
 
 ### Requirement 6b: One feed per plugin
-1. THE UI SHALL keep one feed per plugin, built from `StateSync.Subscribe` (subscribe first, then hydration and live frames), and SHALL take schema from `fuse.get_catalog`.
+1. THE UI SHALL keep one feed per plugin, built from `StateSync.Subscribe` (subscribe first, then hydration and live frames), and SHALL take schema from its schema frames.
 2. THE UI SHALL take each plugin's schema from its schema frame and SHALL NOT keep another copy.
 3. THE UI SHALL apply state frames by object path, keep only the newest `state_generation` per path, honour tombstones, and ignore older frames.
 4. THE UI SHALL expose feed data read-only under `/plugins/<plugin_id>` in the json-render state, so views bound to it update when the feed changes.
@@ -120,7 +120,7 @@ Working plugin state is required before the UI can be built or demonstrated: wit
 ### Requirement 9: Stack and portability
 1. THE UI SHALL use Svelte 5 only, with `@ai-sdk/svelte`, `ai`, `@json-render/svelte` and, where useful, `chat`. It SHALL NOT use React, Vue, Angular or any other UI framework.
 1a. THE UI SHALL pin `@ai-sdk/svelte` ^5, `ai` ^7, `@json-render/core` and `@json-render/svelte` at the host blob's `core_version` (0.20.x today), `zod` ^4, and Svelte 5.31 or newer, and SHALL build with Node 22 or newer. It SHALL NOT configure `@ai-sdk/gateway` or any provider package; inference runs on the host.
-2. THE UI SHALL be a static build served by the bridge's `container_ui.rs` on the TLS door. THE browser SHALL reach the backend only through the door: `fuse.get_catalog` for schema, `StateSync.Subscribe` for state, and `CallMethod` for actions. THE UI SHALL add no server or adapter of its own.
+2. THE UI SHALL be a static build served by the bridge's `container_ui.rs` on the TLS door. THE browser SHALL reach the backend only through the door: `StateSync.Subscribe` for schema and state, and `CallMethod` for actions (including `fuse.get_catalog` once it is sealed). THE UI SHALL add no server or adapter of its own.
 3. THE UI SHALL NOT hard-code paths or names of this repository, so it can move to its own repository.
 4. THE UI SHALL use only current backend pieces as listed in `.kiro/steering/current-vs-deprecated.md`.
 

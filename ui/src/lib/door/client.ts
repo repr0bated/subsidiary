@@ -4,18 +4,17 @@ import { Value } from './gen/google/protobuf/struct';
 import { ChangeType, StateFrameKind, type StateChange } from './gen/operation';
 import { PluginServiceClient, StateSyncClient } from './gen/operation.client';
 import type { Frame } from '../state/reducer';
-import type { CatalogOutput, Door, Receipt } from './types';
+import type { Door, Receipt } from './types';
 
 /**
  * The browser's only path to the backend: the door's gRPC-Web services (design §2).
  * Every action is one PluginService.CallMethod as the container identity; state comes from StateSync.Subscribe.
- * The UI carries no identity: the host handles identity and delivers only the schema this container may see.
+ * The UI carries no identity and names no capability: the door admits each call against the
+ * method's sealed `required_capability` itself.
  */
 
 export const PLUGIN_OBJECT_ROOT = '/org/opdbus/v1/plugins';
 export const PLUGIN_INTERFACE = 'org.opdbus.v1.PluginV1';
-const CAPABILITY_HEADER = 'x-opdbus-capability';
-
 
 /** D-Bus object path for a sealed plugin id (op_plugins::canonical::plugin_path). */
 export function pluginObjectPath(pluginId: string): string {
@@ -25,24 +24,8 @@ export function pluginObjectPath(pluginId: string): string {
   return `${PLUGIN_OBJECT_ROOT}/${seg}`;
 }
 
-/**
- * The capability a call declares, read from the sealed schema in the catalog. Used only to make
- * the call; the chatbot never renders it.
- */
-export function capabilityFor(catalog: CatalogOutput | undefined, plugin: string, method: string): string {
-  for (const view of catalog?.views ?? []) {
-    const p = view.plugins.find((x) => x.plugin_id === plugin);
-    const methods = (p?.schema as { methods?: Record<string, { required_capability?: string }> } | undefined)?.methods;
-    const cap = methods?.[method]?.required_capability;
-    if (cap) return cap;
-  }
-  return '';
-}
-
 export interface DoorOptions {
   baseUrl: string;
-  /** The current catalog, for each call's declared capability. */
-  catalog: () => CatalogOutput | undefined;
   timeoutMs?: number;
 }
 
@@ -53,8 +36,6 @@ export function createDoor(opts: DoorOptions) {
 
   const door: Door = {
     async callMethod(plugin, method, args) {
-      const capability = method === 'get_catalog' && plugin === 'fuse' ? 'cap.storage.fuse.contract.read@v1' : capabilityFor(opts.catalog(), plugin, method);
-      const meta: Record<string, string> = capability ? { [CAPABILITY_HEADER]: capability } : {};
       const { response } = await plugins.callMethod(
         {
           pluginId: plugin,
@@ -63,9 +44,9 @@ export function createDoor(opts: DoorOptions) {
           methodName: method,
           arguments: [Value.fromJson((args ?? {}) as JsonValue)],
           actorId: '',
-          capabilityId: capability
+          capabilityId: ''
         },
-        { meta, timeout: opts.timeoutMs ?? 60_000 }
+        { timeout: opts.timeoutMs ?? 60_000 }
       );
       const receipt: Receipt = {
         success: response.success,

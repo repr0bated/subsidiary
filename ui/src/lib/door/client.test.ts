@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { capabilityFor, pluginObjectPath, toFrame } from './client';
+import { pluginObjectPath, toFrame } from './client';
 import { ChangeType, StateFrameKind, type StateChange } from './gen/operation';
 import { Value } from './gen/google/protobuf/struct';
 
@@ -14,14 +14,6 @@ describe('door client mapping', () => {
     expect(pluginObjectPath('My-Plugin')).toBe('/org/opdbus/v1/plugins/my_plugin');
     expect(pluginObjectPath('3d')).toBe('/org/opdbus/v1/plugins/plugin_3d');
     expect(() => pluginObjectPath('../etc')).toThrow();
-  });
-
-  it('reads the declared capability from the sealed schema in the catalog', () => {
-    const catalog = { views: [{ view_id: 'v', source_catalog_hash: 'h', source_catalog_generation: 1, plugins: [
-      { plugin_id: 'chat_router', schema_hash: 's', operations: [], schema: { methods: { SetSelection: { required_capability: 'cap.x' } } } }
-    ] }] };
-    expect(capabilityFor(catalog, 'chat_router', 'SetSelection')).toBe('cap.x');
-    expect(capabilityFor(catalog, 'chat_router', 'Nope')).toBe('');
   });
 
   it('maps StateChange frames for the reducer', () => {

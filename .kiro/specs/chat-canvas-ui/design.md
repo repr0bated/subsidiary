@@ -37,7 +37,8 @@ The UI never decides any of these. It renders what arrives and sends actions as 
 - `call(plugin, method, args)` sends one `CallMethod` and returns the receipt unchanged, including `outcome_unknown` and refusals. It never retries.
 
 ### 3. Catalog (`ui/src/lib/catalog/`)
-- On start, and again when a frame reports a new `catalog_hash`, the UI calls `fuse.get_catalog`. It returns both views (3tchedFS and threetchedFS), every plugin's sealed schema and `schema_hash`, and each operation with `call_path`, `metadata_path` and `currently_granted`. The bridge has already checked it against the sealed catalog.
+- The session does not wait for `fuse.get_catalog` (2026-11-25): it is not in the sealed catalog as of release 337, and the container door admits each call against the sealed `required_capability` itself, so the UI names no capability. Schema arrives in the Subscribe schema frames; the catalog hash is taken from the feed's first frame, and a new `catalog_hash` reloads the sealed components and hydrates again.
+- When `fuse.get_catalog` is sealed it is one more `CallMethod`: it returns both views (3tchedFS and threetchedFS), every plugin's sealed schema and `schema_hash`, and each operation with `call_path`, `metadata_path` and `currently_granted`, already checked by the bridge against the sealed catalog. It is the chatbot's material for rendering operations.
 - The catalog carries no state (`state: "not_requested"`).
 - The catalog is the chatbot's material; nothing in it reaches the human until the chatbot renders it. When the chatbot renders an operation that is not `currently_granted`, it shows it as present but not runnable (owner decision, 2026-11-24). The chatbot never renders capabilities.
 - Surfaces (Requirement 3a) come from `chat_router.ListUiSurfaces`; the json-render catalog from the `json_render` plugin's schema.
@@ -93,7 +94,7 @@ No persistent data in the UI. Client state is only:
 ## Testing
 - `vitest --run` with `fast-check` for properties 1 to 6 (100 or more cases each), and unit tests for the picker (no Personal for a subsidiary), panel collapse, `mutates_state` routing, and `flat` `data-spec` parts.
 - `npm --prefix ui run check` (svelte-check).
-- One integration check against the live door once `fuse.get_catalog` is sealed: load the catalog, subscribe, and make one read call, asserting the receipt has `operation_id`, `outcome` and `event_id`.
+- One integration check against the live door: subscribe, and make one read call, asserting the receipt has `operation_id`, `outcome` and `event_id`.
 - No test presents data as accurate before the state fix (Prerequisite).
 
 ## Decisions and open items
@@ -102,5 +103,5 @@ No persistent data in the UI. Client state is only:
 3. Which granted method stores the user's layout (Requirement 3.6).
 4. What the navigation menu lists.
 5. How in-progress turns are pushed, for `patch` streaming.
-6. `fuse.get_catalog` and the renderer principal become live with the current golden build; until then only the static shell can be built and tested.
+6. The renderer principal becomes live with the current golden build; `fuse.get_catalog` is not sealed as of release 337 and the session no longer waits for it.
 7. FUSEFS.md §12.4 mentions MQTT wake doorbells as a channel with its own checks. EMQX is retired; the UI does not use any MQTT path.

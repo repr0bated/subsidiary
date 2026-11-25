@@ -1,11 +1,11 @@
 import { FeedReducer, type FeedState, type Frame } from '../state/reducer';
 import type { SealedComponent } from '../catalog/sealed-catalog';
-import type { CatalogOutput, Door, Receipt } from '../door/types';
+import type { Door, Receipt } from '../door/types';
 
 /**
  * One browser session against the door (design §3, §4, §5). No polling, no timers:
- * - catalog from `fuse.get_catalog`, reloaded when a frame reports a new catalog_hash;
- * - sealed components from `json_render.list_components`;
+ * - sealed components from `json_render.list_components`, reloaded when a frame reports a new
+ *   catalog_hash; schema arrives in the Subscribe stream, so nothing waits for `fuse.get_catalog`;
  * - state from the Subscribe stream into one reducer; data_loss, disconnect or a catalog
  *   change resets it and hydrates again;
  * - a chat turn's commit is awaited by re-reading the turn only when a chat_response frame arrives.
@@ -27,7 +27,8 @@ export function isRetryable(error: unknown): boolean {
 }
 
 export class Session {
-  catalog: CatalogOutput | undefined;
+  /** The catalog hash the current feed was hydrated from, taken from its first frame. */
+  catalogHash = '';
   components: SealedComponent[] = [];
   status: SessionStatus = 'disconnected';
   private reducer = new FeedReducer();
@@ -52,8 +53,7 @@ export class Session {
     return this.door.callMethod(plugin, method, args);
   }
 
-  async loadCatalog(): Promise<void> {
-    this.catalog = inner(await this.call('fuse', 'get_catalog', { plugin: null })) as unknown as CatalogOutput;
+  async loadComponents(): Promise<void> {
     const listed = inner(await this.call('json_render', 'list_components', {}));
     this.components = Array.isArray(listed.components) ? (listed.components as SealedComponent[]) : [];
   }
@@ -66,16 +66,16 @@ export class Session {
       this.reducer.reset();
       let again = false;
       try {
-        await this.loadCatalog();
-        let seenCatalog = this.catalog?.views?.[0]?.source_catalog_hash ?? '';
+        await this.loadComponents();
+        this.catalogHash = '';
         for await (const f of this.subscribeFeed([], signal)) {
           if (signal?.aborted) break;
           this.status = 'live';
           const s = this.reducer.apply(f);
           if (f.plugin_id === 'chat_response' && f.kind !== 'heartbeat') for (const w of [...this.chatWaiters]) w();
           for (const l of this.listeners) l(s);
-          if (f.catalog_hash && seenCatalog && f.catalog_hash !== seenCatalog) {
-            seenCatalog = f.catalog_hash;
+          if (f.catalog_hash && !this.catalogHash) this.catalogHash = f.catalog_hash;
+          else if (f.catalog_hash && f.catalog_hash !== this.catalogHash) {
             again = true; // catalog changed: reload and hydrate again
             break;
           }

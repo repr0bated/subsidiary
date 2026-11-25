@@ -9,7 +9,6 @@ function fakeDoor(turnCommittedAfter: number) {
   const door: Door = {
     async callMethod(plugin, method): Promise<Receipt> {
       calls.push(`${plugin}.${method}`);
-      if (method === 'get_catalog') return { result: { views: [{ view_id: 'v', source_catalog_hash: 'c1', source_catalog_generation: 1, plugins: [] }] } };
       if (method === 'list_components') return { result: { components: [{ name: 'Text', props_schema: {} }] } };
       if (method === 'get_turn_response') return { result: { turn: ++reads > turnCommittedAfter ? { content: { kind: 'user_response', message: 'ok' } } : null } };
       return { outcome: 'completed' };
@@ -23,8 +22,8 @@ const frame = (plugin: string, gen: bigint, catalog = 'c1'): Frame => ({
 });
 
 describe('session', () => {
-  it('loads the catalog and sealed components, then applies the feed', async () => {
-    const { door } = fakeDoor(0);
+  it('loads sealed components without fuse.get_catalog, then applies the feed', async () => {
+    const { door, calls } = fakeDoor(0);
     const s = new Session(door, async function* () {
       yield frame('incus', 1n);
       yield frame('incus', 2n);
@@ -34,9 +33,24 @@ describe('session', () => {
     await new Promise((r) => setTimeout(r, 10));
     ac.abort();
     await done;
-    expect(s.catalog?.views[0].source_catalog_hash).toBe('c1');
+    expect(calls).not.toContain('fuse.get_catalog');
+    expect(s.catalogHash).toBe('c1');
     expect(s.components.map((c) => c.name)).toEqual(['Text']);
     expect(s.feeds.plugins.get('incus')?.paths.get('/p/incus')?.generation).toBe(2n);
+  });
+
+  it('reloads components and hydrates again when a frame reports a new catalog hash', async () => {
+    const { door, calls } = fakeDoor(0);
+    let runs = 0;
+    const s = new Session(door, async function* () {
+      if (++runs > 1) return; // second hydration: the server ends the stream cleanly
+      yield frame('incus', 1n, 'c1');
+      yield frame('incus', 2n, 'c2');
+    });
+    await s.run();
+    expect(runs).toBe(2);
+    expect(calls.filter((c) => c === 'json_render.list_components').length).toBe(2);
+    expect(s.status).toBe('stopped');
   });
 
   it('waits for a commit only on chat_response frames, with no timer', async () => {

@@ -8,9 +8,10 @@
   let session = $state<Session | null>(null);
   onMount(() => {
     const abort = new AbortController();
-    const { door, subscribe } = createDoor({ baseUrl: window.location.origin, catalog: () => s.catalog });
-    const s: Session = new Session(door, subscribe);
-    void s.loadCatalog().then(
+    const { door, subscribe } = createDoor({ baseUrl: window.location.origin });
+    const s = new Session(door, subscribe);
+    // Components are read before the canvas mounts; schema and state arrive in the feed.
+    void s.loadComponents().then(
       () => {
         session = s;
         void s.run(abort.signal);
