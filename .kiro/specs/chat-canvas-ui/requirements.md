@@ -37,7 +37,7 @@ Working plugin state is required before the UI can be built or demonstrated: wit
 5. WHEN a user asks for something that is not in the catalog at all, THE chatbot SHALL reply that there is nothing like that available and SHALL NOT render a new view. No "not found", 404 or placeholder views.
 6. THE chatbot SHALL NOT make or change grants or capabilities.
 7. WHEN grants change, THE chatbot SHALL take the new runnable state from the next catalog load.
-8. THE chatbot SHALL compose views from the whole catalog, granted and ungranted alike. Ungranted schema can be needed to render the full picture even where the human may not run, or see, that part; the UI SHALL NOT filter the catalog down to granted operations, and SHALL NOT read only the granted mount view for this. (Owner, 2026-11-25.) This is why the UI depends on `fuse.get_catalog` (both views with `currently_granted`), as 3tched.com's `src/chat/mounted-catalog.ts` does.
+8. THE chatbot SHALL render whatever schema the host delivers. The host decides what this container may see; if a schema is present, it may be rendered, and the UI SHALL NOT filter it further. Parts that cannot be run still help make up the whole view and render as not runnable. (Owner, 2026-11-25.)
 
 ### Requirement 3: Shell
 **User story:** As a user, I want a chat and a model and mode picker that are always there but can get out of the way.

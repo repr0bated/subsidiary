@@ -9,17 +9,13 @@ import type { CatalogOutput, Door, Receipt } from './types';
 /**
  * The browser's only path to the backend: the door's gRPC-Web services (design §2).
  * Every action is one PluginService.CallMethod as the container identity; state comes from StateSync.Subscribe.
- * Identity is the container's own SID1, injected into the page by the container (door/identity.ts); never minted here.
+ * The UI carries no identity: the host handles identity and delivers only the schema this container may see.
  */
 
 export const PLUGIN_OBJECT_ROOT = '/org/opdbus/v1/plugins';
 export const PLUGIN_INTERFACE = 'org.opdbus.v1.PluginV1';
 const CAPABILITY_HEADER = 'x-opdbus-capability';
 
-/** Where the identity metadata comes from: the container's injected SID1 (door/identity.ts). Not minted here. */
-export interface IdentitySource {
-  metadata(): Promise<Record<string, string>>;
-}
 
 /** D-Bus object path for a sealed plugin id (op_plugins::canonical::plugin_path). */
 export function pluginObjectPath(pluginId: string): string {
@@ -45,7 +41,6 @@ export function capabilityFor(catalog: CatalogOutput | undefined, plugin: string
 
 export interface DoorOptions {
   baseUrl: string;
-  identity: IdentitySource;
   /** The current catalog, for each call's declared capability. */
   catalog: () => CatalogOutput | undefined;
   timeoutMs?: number;
@@ -59,7 +54,7 @@ export function createDoor(opts: DoorOptions) {
   const door: Door = {
     async callMethod(plugin, method, args) {
       const capability = method === 'get_catalog' && plugin === 'fuse' ? 'cap.storage.fuse.contract.read@v1' : capabilityFor(opts.catalog(), plugin, method);
-      const meta = { ...(await opts.identity.metadata()), ...(capability ? { [CAPABILITY_HEADER]: capability } : {}) };
+      const meta: Record<string, string> = capability ? { [CAPABILITY_HEADER]: capability } : {};
       const { response } = await plugins.callMethod(
         {
           pluginId: plugin,
@@ -84,10 +79,9 @@ export function createDoor(opts: DoorOptions) {
 
   /** Subscribe first, then hydration and live frames, mapped for the reducer. Never polls. */
   async function* subscribe(pluginIds: string[] = [], signal?: AbortSignal): AsyncGenerator<Frame> {
-    const meta = await opts.identity.metadata();
     const call = state.subscribe(
       { pluginIds, pathPatterns: [], tags: [], includeInitialState: true, includeSchema: true },
-      { meta, abort: signal }
+      { abort: signal }
     );
     for await (const c of call.responses) yield toFrame(c);
   }
