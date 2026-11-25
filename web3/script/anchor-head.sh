@@ -8,7 +8,7 @@
 #   snowball.verify_chain   the backend re-checks every event hash and link
 #   snowball.query_events   pages to the newest event; its event_hash is the head
 # The head is written as bytes32: the hash hex left-padded with zeros to 32 bytes, so a 32-byte
-# hash (blake3, SHA-256) maps to itself. Today 3tched uses MD5 (16 bytes): see docs/PLAN.md risk.
+# hash maps to itself. 3tched heads are Keccak-256 (32 bytes); older MD5 events are 16 bytes (docs/PLAN.md).
 set -euo pipefail
 export PATH="$HOME/.foundry/bin:$HOME/.local/bin:$PATH"
 send=0; rpc="${RPC_URL:-http://127.0.0.1:8545}"

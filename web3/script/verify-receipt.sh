@@ -9,8 +9,8 @@
 #   2. links     every later event's prev_hash equals the event_hash before it, up to a head
 #   3. backend   snowball.verify_chain re-checks every hash in that range
 #   4. anchor    the newest anchored hash on that path is in EtchedAnchor (time and anchorer shown)
-# Exit 0 only if all pass. Today 3tched hashes events with MD5 (docs/PLAN.md risk): the link and
-# anchor checks hold, but MD5 does not resist a host that crafts collisions.
+# Exit 0 only if all pass. 3tched hashes events with Keccak-256; events from before the switch keep
+# MD5 hashes (docs/PLAN.md), so a receipt that links through them does not resist crafted collisions.
 set -euo pipefail
 export PATH="$HOME/.foundry/bin:$HOME/.local/bin:$PATH"
 rpc="${RPC_URL:-http://127.0.0.1:8545}" id="" want="" anchor=""

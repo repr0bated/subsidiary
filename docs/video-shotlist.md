@@ -13,7 +13,7 @@ Draft 2026-11-25, built from what runs today. Record from a tagged known-good ve
 | 2:30 to 2:55 | How it was built | Quick cuts: `.kiro/specs` (EARS requirements), steering (current-vs-deprecated), hooks firing (hash-only guard, preflight), crew report in `docs/reports`, `forge test` 37 passing, fuzz runs | Works now |
 | 2:55 to 3:00 | Close | "Don't take my word for it. Check the receipt." | Graphic |
 
-Honest limits to say or caption: the receipt chain uses MD5 today; anvil is a local chain.
+Honest limits to say or caption: receipts older than the Keccak-256 switch still rest on MD5; anvil is a local chain.
 
 Commands, in order, for the recorded terminal segments:
 

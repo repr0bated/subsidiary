@@ -9,7 +9,7 @@ The whole backend and the container are pre-existing. Only the UI, the contracts
 - Per-tenant storage: Cozo with RocksDB on host ext4, one database per tenant
 - Container: provisioning, spec, mounts and runtime (LXD or Incus, runit services)
 - The 3tched architecture diagrams, "One system. Connected by design." and "An identity, embodied.", and their vocabulary (3tched.com kit assets)
-- Hashchain: `crates/op-state-store/src/event_chain.rs` (persisted receipts; MD5 today) and the bridge core journal `crates/op-grpc-bridge/src/core.rs` (blake3)
+- Hashchain: `crates/op-state-store/src/event_chain.rs` (persisted receipts; Keccak-256 since `bf3c4a8`, older records MD5) and the bridge core journal `crates/op-grpc-bridge/src/core.rs` (blake3)
 - Chain vectorization: `crates/op-grpc-bridge/src/chain_vector_projector.rs` and `crates/op-cognitive/src/chain_vectors.rs`
 
 ## New for the Kiroween hackathon

@@ -37,7 +37,7 @@ The end-to-end demo for the video and for judges: one business identity, one hir
 3. WHEN the visitor checks a receipt, THE system SHALL run the holder verifier (`web3/script/verify-hire.sh`) and show its result (BAM! on pass).
 
 ### Requirement 7: Honest limits
-1. THE demo SHALL NOT claim tamper-proof receipts while the receipt chain hashes with MD5.
+1. THE demo SHALL NOT claim tamper-proof receipts for events hashed with MD5 (recorded before the Keccak-256 switch); receipts shown in the demo SHALL come from Keccak-256 events.
 2. THE demo SHALL label any sample data as sample data.
 
 ## Open questions

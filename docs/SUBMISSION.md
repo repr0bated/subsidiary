@@ -88,7 +88,7 @@ Not used yet. 3tched exposes its 669 cognitive tools to external clients through
 See `docs/PLAN.md`, "Video: under 3:00". One business, one deal. Problem, then the salesman, the deal, on the record, on the stand, and how it was built.
 
 ## Known limits to state honestly
-- The persisted receipt chain in 3tched currently hashes events with MD5. Until it moves to blake3 or SHA-256, an anchored head is not a tamper-proof commitment against whoever runs the host.
+- The persisted receipt chain in 3tched hashes events with Keccak-256 (since 2026-11-25). Events recorded before the switch keep their MD5 hashes, so receipts for those older events are not collision-resistant against whoever runs the host.
 - The live UI needs the 3tched build that seals `fuse.get_catalog`, and the browser identity bootstrap.
 - Rendered views cannot call backend methods yet: the sealed catalog declares only local state actions.
 
