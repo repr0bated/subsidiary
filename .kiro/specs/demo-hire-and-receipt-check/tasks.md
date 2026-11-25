@@ -8,8 +8,8 @@
   - _Requirements: 2, 3_
 - [ ] 4. Agent work with receipts (needs the seed networking fix so persona agents reach a model)
   - _Requirements: 4_
-- [ ] 5. Read the real chain head and anchor it (needs the head method)
+- [x] 5. Read the real chain head and anchor it: `web3/script/anchor-head.sh --send` (2026-11-25)
   - _Requirements: 5_
-- [ ] 6. On the stand: accountability view with semantic search over the vectorized chain
+- [ ] 6. On the stand: accountability view with semantic search (`snowball.search_own_events`, found 2026-11-25)
   - _Requirements: 6.1, 6.2_
 - [ ] 7. Record the video from a tagged known-good version

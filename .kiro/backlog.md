@@ -15,7 +15,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 - chat-canvas-ui 3.1: needs `fuse.get_catalog`, which is not yet in the sealed catalog. Needs the rebuilt golden build live (2026-11-24)
 - chat-canvas-ui 4.2 live check: needs live StateSync; the wrapper itself is done and tested (2026-11-25)
 - chat-canvas-ui 8, 9: need the live golden build. 9 (deploy to CHAT_UI_DIR) was approved by the owner on 2026-11-25 but still waits for the build (2026-11-25)
-- receipt-anchoring 4, 5: method and receipt format not identified (already noted in tasks.md). Needs the 3tched method and format (2026-11-24)
+- receipt-anchoring 5: holder recompute of an event hash needs the full canonical payload, which `query_events` does not return (link checks via prev_hash are possible) (2026-11-25)
 - tenant-storage 2 to 5: need a live tenant container, Cozo tenant data and a FUSE view (2026-11-25). Task 1 is unblocked: Incus profile under container/incus/ (see design.md)
 
 ## Done
