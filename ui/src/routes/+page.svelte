@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Shell from '../lib/shell/Shell.svelte';
+  import ChatCanvas from '../lib/shell/ChatCanvas.svelte';
 </script>
 
-<Shell />
+<ChatCanvas />
