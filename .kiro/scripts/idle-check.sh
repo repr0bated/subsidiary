@@ -38,7 +38,7 @@ if [ "$newest" -gt 0 ]; then
 fi
 
 # 3. A running Cargo/rustc/Clippy or golden build means the machine is busy (single-Cargo rule).
-if pgrep -f 'cargo-chroot.sh|build-golden.sh|golden.sh build' >/dev/null 2>&1 \
+if pgrep -f 'cargo-chroot.sh|build-golden.sh|golden.sh build|golden-deploy-' >/dev/null 2>&1 \
    || pgrep -f '(^|/)(cargo|rustc|clippy-driver)( |$)' >/dev/null 2>&1; then
   busy "a Cargo or golden build is running"
 fi
