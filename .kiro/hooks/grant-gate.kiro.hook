@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "name": "Grant gate",
+  "description": "Check shell/write/MCP actions against grants. Enable once the door/FUSE path works.",
+  "version": "1",
+  "when": { "type": "preToolUse", "toolTypes": ["shell", "write", "@mcp"] },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Before this tool runs, check the action against the current grants (admit(a) iff identity(a) AND grants(a) AND sealed(a)). If it is not granted, refuse and say which grant is missing."
+  }
+}

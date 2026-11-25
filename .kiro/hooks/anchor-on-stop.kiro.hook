@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "name": "Anchor on stop",
+  "description": "Confirm, then anchor the latest hashchain head on the local chain",
+  "version": "1",
+  "when": { "type": "agentStop" },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Show the latest hashchain head and ask me to confirm. Only after I confirm, run the anchor forge script against anvil (chain 31337) and report the tx hash. Never anchor anything but the head hash."
+  }
+}

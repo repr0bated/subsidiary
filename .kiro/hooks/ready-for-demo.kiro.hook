@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Ready for demo",
+  "description": "On demand: check the whole demo flow and the write-up rules",
+  "version": "1",
+  "when": { "type": "userTriggered" },
+  "then": { "type": "askAgent", "prompt": "Run the demo readiness check. Confirm anvil answers on 8545 with chain 31337; forge fmt, build and test pass; the flow hire, render from schema, receipt, anchor, holder verification works against anvil; the negative cases fail as required; no secrets or schema copies are in the repo; the docs follow the write-up rules. Report pass or fail per item and fix nothing without asking." }
+}

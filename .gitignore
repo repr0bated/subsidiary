@@ -1,0 +1,20 @@
+# secrets and tenant data
+.env
+.env.*
+*.pem
+*.key
+
+# local state
+.kiro/hashchain.log
+.kiro/state/
+docs/reports/
+
+# foundry
+web3/out/
+web3/cache/
+web3/broadcast/
+
+# ui
+ui/node_modules/
+ui/.svelte-kit/
+ui/build/

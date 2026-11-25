@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "name": "Schema guard",
+  "description": "Validate schema files and regenerate the CMS preview",
+  "version": "1",
+  "when": { "type": "fileEdited", "patterns": ["**/*.schema.json"] },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A *.schema.json file changed. Validate it against the compliance rules in the steering files, report any violations, and regenerate the CMS preview from the schema. Do not copy the live schema elsewhere."
+  }
+}

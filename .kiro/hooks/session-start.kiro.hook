@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "name": "Session start",
+  "description": "Load grants and chain head into context. Enable once the door/FUSE path works.",
+  "version": "1",
+  "when": { "type": "promptSubmit" },
+  "then": {
+    "type": "askAgent",
+    "prompt": "If this is the first message of the session, load the current grants through the door and read the latest hashchain head (last line of .kiro/hashchain.log). Summarize both in two lines, then continue."
+  }
+}

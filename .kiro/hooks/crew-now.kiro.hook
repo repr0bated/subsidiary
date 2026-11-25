@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Crew now",
+  "description": "On demand: start the crew without waiting for idle",
+  "version": "1",
+  "when": { "type": "userTriggered" },
+  "then": { "type": "runCommand", "command": "CREW_FORCE=1 bash .kiro/scripts/crew-run.sh" }
+}

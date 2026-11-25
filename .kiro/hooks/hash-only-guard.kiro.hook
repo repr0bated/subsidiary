@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Hash-only guard",
+  "description": "Contracts store and emit only bytes32 hashes and minimal metadata",
+  "version": "1",
+  "when": { "type": "fileEdited", "patterns": ["web3/src/**/*.sol"] },
+  "then": { "type": "askAgent", "prompt": "A contract changed. Check that it stores and emits only bytes32 hashes and minimal metadata (addresses, timestamps, status). Flag any string, bytes or struct field that could hold a payload, tenant data or an identifier, and any anchor path that accepts a value other than a chain head hash. Report violations with file and line." }
+}

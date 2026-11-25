@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Spec for new contract",
+  "description": "New contract gets a test stub and a requirements entry",
+  "version": "1",
+  "when": { "type": "fileCreated", "patterns": ["web3/src/**/*.sol"] },
+  "then": { "type": "askAgent", "prompt": "A new contract file was created. Create a Foundry test stub in web3/test/<Name>.t.sol (expectRevert and a fuzz case for free-form inputs) and add or extend the matching requirements.md under .kiro/specs/ using the EARS WHEN/THE SYSTEM SHALL format. Do not change existing requirements." }
+}

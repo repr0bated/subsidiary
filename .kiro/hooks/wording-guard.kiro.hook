@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Wording guard",
+  "description": "Keep docs inside the write-up rules",
+  "version": "1",
+  "when": { "type": "fileEdited", "patterns": ["docs/**/*.md", "README*", "PREEXISTING.md"] },
+  "then": { "type": "askAgent", "prompt": "A doc changed. Check it against the write-up rules: say Foundry, never Ganache or Hardhat; receipt verification is done by the receipt holder, not by the project; no company, startup or YC language; businesses are fictional example tenants; only hashes go on-chain. Report each violation with the line and a replacement." }
+}

@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "name": "Spec sync",
+  "description": "Keep design.md and tasks.md consistent with requirements.md",
+  "version": "1",
+  "when": { "type": "fileEdited", "patterns": [".kiro/specs/**/requirements.md"] },
+  "then": {
+    "type": "askAgent",
+    "prompt": "requirements.md in this spec changed. Update the sibling design.md and tasks.md so they match the new requirements. Keep completed task checkboxes unless the requirement they cover was removed."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Svelte check",
+  "description": "Keep the GUI type-clean",
+  "version": "1",
+  "when": { "type": "fileEdited", "patterns": ["ui/**/*.svelte"] },
+  "then": { "type": "runCommand", "command": "npm --prefix ui run check" }
+}

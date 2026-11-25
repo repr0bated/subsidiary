@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Solidity save",
+  "description": "Format and build contracts on save",
+  "version": "1",
+  "when": { "type": "fileEdited", "patterns": ["web3/**/*.sol"] },
+  "then": { "type": "runCommand", "command": "cd web3 && forge fmt && forge build" }
+}

@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Explain this contract",
+  "description": "On demand: plain-language summary for the write-up and video",
+  "version": "1",
+  "when": { "type": "userTriggered" },
+  "then": { "type": "askAgent", "prompt": "Summarize each contract in web3/src in plain language for the write-up and demo video: what it stores (hashes only), who can call what, events emitted, and the failure cases. Keep it under 150 words per contract and follow the write-up rules." }
+}

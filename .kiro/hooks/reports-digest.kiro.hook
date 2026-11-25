@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Reports digest",
+  "description": "Summarize the crew's newest reports at session start",
+  "version": "1",
+  "when": { "type": "promptSubmit" },
+  "then": { "type": "askAgent", "prompt": "If this is the first message of the session, read the newest files in docs/reports/ and summarize the crew's findings and fixes in three lines or fewer, naming anything left unfixed. If there are no reports, say nothing. Then continue." }
+}

@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Contract tests",
+  "description": "Tasks are not done with red tests",
+  "version": "1",
+  "when": { "type": "postTaskExecution" },
+  "then": { "type": "runCommand", "command": "cd web3 && forge test -vv" }
+}

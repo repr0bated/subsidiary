@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "name": "Preflight",
+  "description": "Fail fast: anvil on 8545 and live schema readable via FUSE",
+  "version": "1",
+  "when": { "type": "preTaskExecution" },
+  "then": { "type": "runCommand", "command": "bash .kiro/scripts/preflight.sh" }
+}
