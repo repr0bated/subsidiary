@@ -46,6 +46,9 @@ Revised 2026-11-24 for the backend path (door, `fuse.get_catalog`, StateSync). T
 - [ ] 9. Deploy the build to `CHAT_UI_DIR` — **requires owner approval**
   - _Requirements: 9.2_
 
+- [ ] 11. Accountability view (Requirement 6c)
+  - [x] 11.1 Search by meaning with `snowball.search_own_events`, results without capabilities, question built so the chatbot answers only from its receipts (`accountability/`, tested)
+  - [ ] 11.2 Live check: `search_own_events` returns `outcome_unknown` today (operation 5e9fceac-…), likely the same model-path gap as the persona agents (seed networking)
 - [ ] 10. Look and feel (Requirement 8), started 2026-11-25
   - [x] 10.1 Catalog built at runtime from the sealed `json_render.list_components` (`catalogFromSealed`, `z.fromJSONSchema`); no copy of the catalog
   - [x] 10.2 Lichtenstein implementations of 12 of the 36 sealed components (Card, Stack, Grid, Heading, Text, Badge, Alert, Button, Separator, Table, Progress, Spinner); rendered through the real json-render `Renderer` on `/preview` (sample data, labelled)
