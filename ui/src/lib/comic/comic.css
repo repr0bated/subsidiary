@@ -1,3 +1,7 @@
+/* Bundled under the SIL Open Font License 1.1 (static/fonts/OFL-*.txt). No runtime font requests. */
+@font-face { font-family: 'Bangers'; src: url('/fonts/Bangers-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Comic Neue'; src: url('/fonts/ComicNeue-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Comic Neue'; src: url('/fonts/ComicNeue-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 /* Lichtenstein-style pop art, drawn for this project: Ben-Day dots, thick black outlines,
    flat red, yellow and blue on white. No copied artworks, characters, logos or lettering. */
 :root {

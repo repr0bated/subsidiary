@@ -15,6 +15,7 @@
     animation: pop 220ms ease-out; }
   [data-long='true'] { width: 14rem; font-size: 1.55rem; }
   .word { padding: 0 2.2rem; -webkit-text-stroke: 1px var(--ink); text-shadow: 2px 2px 0 var(--ink); }
+  .burst:not([data-color='red']):not([data-color='blue']) .word { -webkit-text-stroke: 0; text-shadow: 2px 2px 0 var(--paper); }
   [data-color='red'] { background: var(--pop-red); color: var(--paper); }
   [data-color='blue'] { background: var(--pop-blue); color: var(--paper); }
   @keyframes pop { from { transform: scale(0.4) rotate(-12deg); } to { transform: scale(1) rotate(-4deg); } }
