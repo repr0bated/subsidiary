@@ -22,6 +22,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 
 ## Done
 <!-- - <item or spec/task id>: <one line on what changed> (<date>) -->
+- tenant-storage, business-container-provisioning: parked (pre-existing backend; out of the hackathon showcase) (2026-11-25)
 - chat-canvas-ui 2.1: door types generated from operation.proto at the commit in ui/door-proto.ref by ui/scripts/gen-door.sh (2026-11-25)
 - service-contract 7: holder verifier web3/script/verify-hire.sh; canonical terms JSON decided (jq -S -c, keccak256, salt) (2026-11-25)
 - sealed-surface-gui: superseded by chat-canvas-ui; its tasks are closed (2026-11-25)

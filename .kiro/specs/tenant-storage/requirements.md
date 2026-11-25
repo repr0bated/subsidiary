@@ -1,3 +1,5 @@
+> Parked 2026-11-25: per-tenant Cozo storage, its mounts and the live schema through FUSE are pre-existing 3tched backend work (PREEXISTING.md), not built here. Kept for reference; do not implement.
+
 # Requirements: Tenant Storage
 
 ## Introduction

@@ -1,3 +1,5 @@
+> Parked 2026-11-25: the showcase moved to the contracts and the identity (docs/PLAN.md, "What the submission presents"). Provisioning stays in the background in 3tched. Kept for reference; do not implement for the hackathon.
+
 # Requirements: Business Container Provisioning
 
 ## Introduction
