@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run the worker agent one item at a time while the machine stays idle.
 # Stops when development resumes, when a run changes nothing (everything left is blocked),
-# or after WORK_MAX_ITEMS runs. WORK_FORCE=1 skips the idle check.
+# or after WORK_MAX_ITEMS runs. The worker commits after each item and never pushes. WORK_FORCE=1 skips the idle check.
 set -u
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root" || exit 1
@@ -20,7 +20,7 @@ open_count() {
   { sed -n '/^## Open/,/^## /p' .kiro/backlog.md 2>/dev/null; cat .kiro/specs/*/tasks.md 2>/dev/null; } \
     | grep -c '^[[:space:]]*- \[ \]'
 }
-snapshot() { { git status --porcelain; git diff; cat .kiro/backlog.md; } 2>/dev/null | sha256sum; }
+snapshot() { { git rev-parse HEAD; git status --porcelain; git diff; cat .kiro/backlog.md; } 2>/dev/null | sha256sum; }   # HEAD: the worker commits
 
 for i in $(seq 1 "$max"); do
   [ "$(open_count)" -gt 0 ] || { echo "$(date -u +%FT%TZ) no open work" >>"$log"; exit 0; }
