@@ -1,0 +1,41 @@
+/* Lichtenstein-style pop art, drawn for this project: Ben-Day dots, thick black outlines,
+   flat red, yellow and blue on white. No copied artworks, characters, logos or lettering. */
+:root {
+  --ink: #111;
+  --paper: #fffdf6;
+  --pop-red: #e3242b;
+  --pop-yellow: #ffd60a;
+  --pop-blue: #1f5fd6;
+  --outline: 4px solid var(--ink);
+  --dot-size: 7px;
+  --font-display: 'Bangers', 'Impact', 'Arial Black', system-ui, sans-serif;
+  --font-body: 'Comic Neue', 'Trebuchet MS', system-ui, sans-serif;
+}
+.ben-day {
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--dot-color, var(--pop-red)) 28%, transparent 30%);
+  background-size: var(--dot-size) var(--dot-size);
+}
+.ben-day.blue { --dot-color: var(--pop-blue); }
+.ben-day.yellow { --dot-color: var(--pop-yellow); }
+.panel {
+  box-sizing: border-box;
+  border: var(--outline);
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 1rem;
+}
+.display {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-body);
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
