@@ -6,6 +6,9 @@ set -u
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root" || exit 1
 export PATH="$HOME/.foundry/bin:$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+# Node from nvm at the version pinned in ui/.nvmrc (cron does not read ~/.bashrc).
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use --silent "$(cat "$root/ui/.nvmrc")" >/dev/null
 . "$root/.kiro/scripts/toolchain.sh"
 export SUBSIDIARY_CREW=1
 export ETH_RPC_URL="http://127.0.0.1:8545"   # anvil only
