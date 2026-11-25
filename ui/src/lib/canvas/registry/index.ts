@@ -1,17 +1,40 @@
+import Accordion from './Accordion.svelte';
+import Alert from './Alert.svelte';
+import Avatar from './Avatar.svelte';
+import Badge from './Badge.svelte';
+import ButtonGroup from './ButtonGroup.svelte';
+import Button from './Button.svelte';
 import Card from './Card.svelte';
-import Stack from './Stack.svelte';
+import Carousel from './Carousel.svelte';
+import Checkbox from './Checkbox.svelte';
+import Collapsible from './Collapsible.svelte';
+import Dialog from './Dialog.svelte';
+import Drawer from './Drawer.svelte';
+import DropdownMenu from './DropdownMenu.svelte';
 import Grid from './Grid.svelte';
 import Heading from './Heading.svelte';
-import Text from './Text.svelte';
-import Badge from './Badge.svelte';
-import Alert from './Alert.svelte';
-import Button from './Button.svelte';
-import Separator from './Separator.svelte';
-import Table from './Table.svelte';
+import Image from './Image.svelte';
+import Input from './Input.svelte';
+import Link from './Link.svelte';
+import Pagination from './Pagination.svelte';
+import Popover from './Popover.svelte';
 import Progress from './Progress.svelte';
+import Radio from './Radio.svelte';
+import Select from './Select.svelte';
+import Separator from './Separator.svelte';
+import Skeleton from './Skeleton.svelte';
+import Slider from './Slider.svelte';
 import Spinner from './Spinner.svelte';
+import Stack from './Stack.svelte';
+import Switch from './Switch.svelte';
+import Table from './Table.svelte';
+import Tabs from './Tabs.svelte';
+import Textarea from './Textarea.svelte';
+import Text from './Text.svelte';
+import ToggleGroup from './ToggleGroup.svelte';
+import Toggle from './Toggle.svelte';
+import Tooltip from './Tooltip.svelte';
 
-/** Lichtenstein-styled implementations of sealed catalog components, by sealed name.
- * A sealed component with no implementation here is not drawn; the remaining 24 are next. */
-export const comicComponents = { Card, Stack, Grid, Heading, Text, Badge, Alert, Button, Separator, Table, Progress, Spinner };
+/** Lichtenstein-styled implementations of every sealed json_render catalog component, by sealed name. */
+export const comicComponents = { Accordion, Alert, Avatar, Badge, ButtonGroup, Button, Card, Carousel, Checkbox, Collapsible, Dialog, Drawer, DropdownMenu, Grid, Heading, Image, Input, Link, Pagination, Popover, Progress, Radio, Select, Separator, Skeleton, Slider, Spinner, Stack, Switch, Table, Tabs, Textarea, Text, ToggleGroup, Toggle, Tooltip };
 export type ImplementedComponent = keyof typeof comicComponents;

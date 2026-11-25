@@ -49,8 +49,8 @@ Revised 2026-11-24 for the backend path (door, `fuse.get_catalog`, StateSync). T
   - [x] 10.1 Catalog built at runtime from the sealed `json_render.list_components` (`catalogFromSealed`, `z.fromJSONSchema`); no copy of the catalog
   - [x] 10.2 Lichtenstein implementations of 12 of the 36 sealed components (Card, Stack, Grid, Heading, Text, Badge, Alert, Button, Separator, Table, Progress, Spinner); rendered through the real json-render `Renderer` on `/preview` (sample data, labelled)
   - [x] 10.3 Candidate components ready to register with `json_render.save_candidate`: Burst (seven events, text equivalents), SpeechBalloon, ReceiptCard (capabilities stripped)
-  - [ ] 10.4 The other 24 sealed components
-  - [ ] 10.5 Bundle an OFL display font (no third-party font request at runtime)
+  - [x] 10.4 The other 24 sealed components (all 36 implemented; inputs bind to local view state only and never write into /plugins)
+  - [x] 10.5 Bangers and Comic Neue bundled under the SIL OFL (no runtime font requests)
   - [ ] 10.6 Register the candidates (needs `json_render.gallery`; owner)
 
 Deferred until state works: Requirement 6c (accountability view data) and 7 (candidate flow at runtime).
