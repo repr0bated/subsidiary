@@ -20,10 +20,10 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 <!-- - <item or spec/task id>: <reason>, what is needed to unblock (<date>) -->
 - chat-canvas-ui 3.1: needs `fuse.get_catalog`, which is not yet in the sealed catalog. Needs the rebuilt golden build live (2026-11-24)
 - chat-canvas-ui 4.2 live check: needs live StateSync; the wrapper itself is done and tested (2026-11-25)
-- chat-canvas-ui 8, 9: need the live golden build. 9 (deploy to CHAT_UI_DIR) was approved by the owner on 2026-11-25 but still waits for the build (2026-11-25)
+- chat-canvas-ui 8, 9: golden 335 is live; now need the container's injected SID1 (2.5) and, for kiroween, its TLS UI listener. 9 (deploy to CHAT_UI_DIR) is owner-approved (2026-11-25)
 - tenant-storage 2 to 5: need a live tenant container, Cozo tenant data and a FUSE view (2026-11-25). Task 1: LXD disk device through the sealed `lxd` plugin (see design.md); adding it is an lxd mutation, so it needs the owner
 - chat-canvas-ui 10.6: `json_render.save_candidate` is a zcall mutation (`--yes`) and needs the owner's approval. Unblock: owner approves registering Burst, SpeechBalloon and ReceiptCard (2026-11-24)
-- demo-hire-and-receipt-check 3: needs the live door, the container bridge acting as its own identity for UI calls (chat-canvas-ui 2.4) and the persona backend home (2026-11-24)
+- demo-hire-and-receipt-check 3: needs the live door, the container's injected SID1 (chat-canvas-ui 2.5) and the persona backend home (2026-11-24)
 - demo-hire-and-receipt-check 4: needs the seed networking fix so persona agents reach a model (2026-11-24)
 - demo-hire-and-receipt-check 6: same as chat-canvas-ui 11.2, `search_own_events` returns `outcome_unknown` (2026-11-24)
 - demo-hire-and-receipt-check 7: recording the video needs a tagged known-good version and the live tasks 3, 4 and 6 first (2026-11-24)
