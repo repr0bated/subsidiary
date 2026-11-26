@@ -8,7 +8,6 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and the chain) first, then **Structure**, then **Cleanup and tests**. When everything here is blocked, the crew still runs the checks (tests, Rust lint) as fallback work, at least every three hours.
 
 ## Open
-- [ ] Foundation: gas snapshot for both contracts (`forge snapshot` into `web3/.gas-snapshot`, committed) and a `forge coverage --report summary` table appended to `web3/README.md` under a "Test evidence" heading with the date. Done when both run clean. (added 2026-11-26, Kiro)
 
 ## Blocked
 - Owner item: kiroween container TLS UI listener (`OP_UI_LISTEN`) and provisioned browser port, then the live two-container check from docs/handoff/browser-door-dispatch/tasks.md task 9. Blocked: container provisioning and a live two-container check are owner actions outside the worker's scope. Unblock: owner configures the listener and port, then the check can run (2026-11-25)
@@ -31,6 +30,7 @@ Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and
 - demo-hire-and-receipt-check 7: recording the video needs a tagged known-good version and the live tasks 3, 4 and 6 first (2026-11-24)
 
 ## Done
+- Foundation: gas snapshot in web3/.gas-snapshot and coverage table under "Test evidence" in web3/README.md (39 tests pass; contracts 100% lines) (2026-11-26)
 - Foundation: `HireContract` invariant tests in web3/test/HireContract.invariant.t.sol (6 invariants, handler with 4 actors and ghost state; fmt, build, test pass) (2026-11-26)
 - Foundation: `EtchedAnchor` invariant tests in web3/test/EtchedAnchor.invariant.t.sol (3 invariants, handler with ghost set; fmt, build, test pass) (2026-11-26)
 - UI build: Node 22.23.5 through nvm (v0.41.0, cloned from github.com/nvm-sh/nvm into ~/.nvm), pinned in ui/.nvmrc and used by the crew and worker scripts; build writes build/index.html with the config script (2026-11-25)
