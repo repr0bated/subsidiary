@@ -144,6 +144,10 @@ export class Session {
     this.conversationId.catch(() => (this.conversationId = null));
     return this.conversationId;
   }
+  /** The sealed ui_surfaces; the Shell entry's purpose is the page skeleton. */
+  async listUiSurfaces(): Promise<unknown> {
+    return inner(await this.call('chat_router', 'ListUiSurfaces', {})).ui_surfaces;
+  }
   // ---- model and mode (requirement 4) ----
   listProviders() {
     return this.call('chat_router', 'ListProviders', {});

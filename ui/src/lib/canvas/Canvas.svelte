@@ -10,8 +10,10 @@
     spec = null,
     components = [],
     actions = [],
-    feeds = {}
-  }: { spec?: Spec | null; components?: SealedComponent[]; actions?: SealedAction[]; feeds?: Record<string, unknown> } = $props();
+    feeds = {},
+    label = 'Canvas',
+    compact = false
+  }: { spec?: Spec | null; components?: SealedComponent[]; actions?: SealedAction[]; feeds?: Record<string, unknown>; label?: string; compact?: boolean } = $props();
 
   const sealedNames = $derived(new Set(components.map((c) => c.name)));
   const implemented = $derived(Object.fromEntries(Object.entries(comicComponents).filter(([n]) => sealedNames.has(n))));
@@ -20,7 +22,7 @@
   );
 </script>
 
-<div class="canvas-area" role="region" aria-live="polite" aria-label="Canvas">
+<div class="canvas-area" class:compact role="region" aria-live="polite" aria-label={label}>
   {#if spec && registry}
     <JsonUIProvider initialState={{ plugins: feeds }}>
       <Renderer {spec} {registry} />
@@ -30,4 +32,5 @@
 
 <style>
   .canvas-area { min-height: 60vh; padding: 1rem; }
+  .compact { min-height: 0; padding: 0; }
 </style>

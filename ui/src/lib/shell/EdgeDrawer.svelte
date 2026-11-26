@@ -8,6 +8,7 @@
     closedLabel,
     open = $bindable(false),
     height = $bindable(0.4),
+    offset = '0px',
     children
   }: {
     edge: 'top' | 'bottom';
@@ -15,6 +16,8 @@
     closedLabel: string;
     open?: boolean;
     height?: number;
+    /** CSS length between the drawer and its edge, e.g. a row below the chat. */
+    offset?: string;
     children: Snippet;
   } = $props();
   const MIN = 0.15;
@@ -79,7 +82,7 @@
     <span>{open ? label : closedLabel}</span>
   </button>
 {/snippet}
-<section class="drawer {edge}" class:open style:height={open ? `${height * 100}vh` : null} aria-label={label}>
+<section class="drawer {edge}" class:open style:--offset={offset} style:height={open ? `${height * 100}vh` : null} aria-label={label}>
   {#if edge === 'bottom'}{@render handle()}{/if}
   <div id={bodyId} class="body" hidden={!open}>
     <div class="measure">{@render children()}</div>
@@ -87,59 +90,94 @@
   {#if edge === 'top'}{@render handle()}{/if}
 </section>
 <style>
+  /* Pop-art drawer: the body is an outlined panel, the handle a pull tab hanging off it.
+     Closed, only the tab shows, so the canvas behind stays usable. */
   .drawer {
     position: absolute;
     left: 0;
     right: 0;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    background: var(--paper);
+    pointer-events: none;
+  }
+  .drawer > * {
+    pointer-events: auto;
   }
   .bottom {
-    bottom: 0;
-    border-top: var(--outline);
-    box-shadow: 0 -6px 0 var(--ink);
+    bottom: var(--offset);
   }
   .top {
-    top: 0;
-    border-bottom: var(--outline);
-    box-shadow: 0 6px 0 var(--ink);
-  }
-  .handle {
-    flex: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    width: 100%;
-    border: 0;
-    background: var(--pop-yellow);
-    padding: 0.35rem 0.8rem 0.45rem;
-    font-size: 1.1rem;
-    cursor: ns-resize;
-    touch-action: none;
-    user-select: none;
-  }
-  .bottom.open .handle {
-    border-bottom: var(--outline);
-  }
-  .top.open .handle {
-    border-top: var(--outline);
-  }
-  .handle:focus-visible {
-    outline: 3px solid var(--pop-red);
-    outline-offset: -5px;
-  }
-  .grip {
-    width: 3.5rem;
-    height: 0.35rem;
-    border-radius: 1rem;
-    background: var(--ink);
+    top: var(--offset);
   }
   .body {
     flex: 1;
     overflow: auto;
+    background: var(--paper);
+  }
+  .bottom .body {
+    border-top: var(--outline);
+    box-shadow: 0 -7px 0 var(--ink);
+    background-image: radial-gradient(color-mix(in srgb, var(--pop-red) 22%, transparent) 1.75px, transparent 1.75px);
+    background-size: 12px 12px;
+  }
+  .top .body {
+    border-bottom: var(--outline);
+    box-shadow: 0 7px 0 var(--ink);
+    background-color: var(--pop-yellow);
+    background-image: radial-gradient(color-mix(in srgb, var(--pop-red) 35%, transparent) 2px, transparent 2px);
+    background-size: 10px 10px;
+  }
+  .handle {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    align-self: center;
+    border: 3px solid var(--ink);
+    background: var(--pop-yellow);
+    color: var(--ink);
+    padding: 0.3rem 1.1rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    box-shadow: 3px 3px 0 var(--ink);
+    cursor: ns-resize;
+    touch-action: none;
+    user-select: none;
+    transition: transform 0.12s ease;
+  }
+  .handle:hover {
+    transform: translateY(var(--nudge));
+  }
+  /* The chat tab sits at the right, like a speech balloon's tail; the picker tab hangs centered. */
+  .bottom .handle {
+    --nudge: -2px;
+    align-self: flex-end;
+    margin-right: 1rem;
+    border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 4px 0 0 var(--ink);
+  }
+  .bottom.open .handle {
+    background: var(--pop-red);
+    color: var(--paper);
+    text-shadow: 2px 2px 0 var(--ink);
+  }
+  .top .handle {
+    --nudge: 2px;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+  }
+  .handle:focus-visible {
+    outline: 3px dashed var(--pop-red);
+    outline-offset: 3px;
+  }
+  .grip {
+    width: 1.6rem;
+    height: 0.3rem;
+    border-radius: 1rem;
+    background: currentColor;
   }
   /* A readable line length, however wide the window. */
   .measure {

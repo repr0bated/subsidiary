@@ -62,9 +62,11 @@
 <style>
   .chat { display: grid; grid-template-rows: 1fr auto auto auto; height: 100%; gap: 0.5rem; padding: 0.5rem; }
   .msgs { list-style: none; margin: 0; padding: 0; overflow: auto; }
-  .you { text-align: right; font-weight: 700; }
+  .msgs li.user { display: flex; justify-content: flex-end; margin: 0.6rem 0; }
+  .you { margin: 0; max-width: 85%; padding: 0.6rem 0.75rem; background: var(--pop-yellow); border: 3px solid var(--ink); border-radius: 14px 14px 2px 14px; box-shadow: -3px 3px 0 var(--ink); font-weight: 700; }
   form { display: flex; gap: 0.4rem; }
   textarea { flex: 1; border: var(--outline); font: inherit; padding: 0.4rem; }
-  button { border: var(--outline); background: var(--pop-red); color: var(--paper); padding: 0 1rem; }
+  button { border: var(--outline); background: var(--pop-red); color: var(--paper); padding: 0 1rem; font-size: 1.1rem; letter-spacing: 0.06em; box-shadow: 4px 4px 0 var(--ink); cursor: pointer; }
+  button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
   .err { color: var(--pop-red); font-weight: 700; }
 </style>
