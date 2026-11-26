@@ -3,11 +3,11 @@
   "description": "Runs the contract and UI checks (Foundry tests with fuzzing, UI property tests, svelte-check, build). Fixes lint, format, type and test errors and logs each fix.",
   "prompt": "You are the tester for the Subsidiary project. Run, one command per call, in this order: `forge fmt --check` and `forge build` and `forge test -vv` with the working directory web3/; then `npm --prefix ui test`, `npm --prefix ui run check` and `npm --prefix ui run build`. The PATH already has Foundry and Node 22. Use anvil only; never use a real key, Base Sepolia, .env, tenant Cozo data, /etc/op-dbus/secrets or ~/.bash_secrets. You MAY fix lint, format, type-check and test errors directly in web3/ and ui/, keeping each fix minimal and re-running the check after it. You MUST NOT change what a requirement says, edit .kiro/specs, .kiro/steering, .kiro/hooks or .kiro/agents, weaken or delete a test or a fuzz property to make it pass, edit generated files under ui/src/lib/door/gen, run git commit or git push, or change contract behaviour to satisfy a test unless the test is plainly wrong. If a failure needs a behaviour change, leave it and report it. Write docs/reports/<UTC timestamp>-tester.md with results per command, every file you changed and why, and anything left unfixed. Run one shell command per call, with no `&&`, `;` or pipes, and only commands from your allowlist; other commands are refused in unattended runs. Use the read tool instead of `cat`.",
   "tools": [
-    "read",
-    "write",
-    "shell",
+    "glob",
     "grep",
-    "glob"
+    "read",
+    "shell",
+    "write"
   ],
   "allowedTools": [
     "read",
@@ -55,5 +55,80 @@
       ]
     }
   },
-  "includeMcpJson": false
+  "includeMcpJson": false,
+  "permissions": {
+    "rules": [
+      {
+        "capability": "shell",
+        "match": [
+          "forge fmt*",
+          "forge build*",
+          "forge test*",
+          "npm --prefix ui test*",
+          "npm --prefix ui run check*",
+          "npm --prefix ui run build*",
+          "git status*",
+          "git diff*",
+          "ls*",
+          "date*",
+          "zcall list*",
+          "zcall methods *",
+          "zcall help *",
+          "zcall paths *",
+          "zcall expand *"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "shell",
+        "match": [
+          "rm -rf*",
+          "git push*",
+          "git commit*",
+          "git reset*",
+          "curl*",
+          "wget*",
+          "zcall * --yes*"
+        ],
+        "effect": "deny"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "web3/src/**",
+          "web3/test/**",
+          "web3/script/**",
+          "ui/**",
+          "docs/reports/**"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "ui/src/lib/door/gen/**",
+          "**/.env*",
+          ".kiro/**"
+        ],
+        "effect": "deny"
+      },
+      {
+        "capability": "fs_read",
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "effect": "allow"
+      },
+      {
+        "capability": "skill",
+        "effect": "allow"
+      }
+    ]
+  },
+  "kiroUpgrade": {
+    "revision": 3,
+    "fingerprint": "sha256:be71125549312912b6dbee717fe4eefe64bb6cc751273fec404c23ebeaa60021",
+    "source": "sha256:35643d80f4a47a1f22e9435b5246fd7b3b0c107a137dba0d6a4fdd5b1d576a5c"
+  }
 }

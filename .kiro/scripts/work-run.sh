@@ -23,10 +23,23 @@ open_count() {
   { sed -n '/^## Open/,/^## /p' .kiro/backlog.md 2>/dev/null; cat .kiro/specs/*/tasks.md 2>/dev/null; } \
     | grep -c '^[[:space:]]*- \[ \]'
 }
-snapshot() { { git rev-parse HEAD; git status --porcelain; git diff; cat .kiro/backlog.md; } 2>/dev/null | sha256sum; }   # HEAD: the worker commits
+snapshot() { { git rev-parse HEAD; git status --porcelain; git diff; cat .kiro/backlog.md; cat .kiro/specs/*/tasks.md; } 2>/dev/null | sha256sum; }   # HEAD: the worker commits
+# The live golden release ("<id> <commit>"); a change can unblock items that waited for it.
+live_release() { jq -r '"\(.live.id) \(.live.commit[0:7])"' /mnt/@upper/golden-state.json 2>/dev/null; }
+seen="$root/.kiro/state/seen-release"
+stuck="$root/.kiro/state/no-progress"     # snapshot after a run that changed nothing
 
 for i in $(seq 1 "$max"); do
   [ "$(open_count)" -gt 0 ] || { echo "$(date -u +%FT%TZ) no open work" >>"$log"; exit 0; }
+  release=$(live_release)
+  message="Complete the next open item now, following your instructions."
+  if [ -n "$release" ] && [ "$release" != "$(cat "$seen" 2>/dev/null)" ]; then
+    message="The live release changed to $release. Re-check the Blocked items first, as your instructions say, then complete the next open item."
+  elif [ "$(snapshot)" = "$(cat "$stuck" 2>/dev/null)" ]; then
+    # Everything left was blocked last time and nothing changed since: do not spend another run.
+    echo "$(date -u +%FT%TZ) skip: nothing changed since the last run without progress" >>"$log"
+    exit 0
+  fi
   if [ "${WORK_FORCE:-0}" != 1 ] && ! bash "$root/.kiro/scripts/idle-check.sh" 2>>"$log" >/dev/null; then
     echo "$(date -u +%FT%TZ) stop before item $i: development resumed" >>"$log"
     exit 2
@@ -35,7 +48,12 @@ for i in $(seq 1 "$max"); do
   echo "$(date -u +%FT%TZ) start worker item $i" >>"$log"
   timeout "$timeout_s" kiro-cli chat --agent worker --no-interactive \
     --trust-tools=read,grep,glob,write,shell \
-    "Complete the next open item now, following your instructions." >>"$log" 2>&1
+    "$message" >>"$log" 2>&1
   echo "$(date -u +%FT%TZ) end worker item $i rc=$?" >>"$log"
-  [ "$(snapshot)" = "$before" ] && { echo "$(date -u +%FT%TZ) no progress; stopping" >>"$log"; exit 0; }
+  [ -n "$release" ] && printf '%s\n' "$release" >"$seen"
+  if [ "$(snapshot)" = "$before" ]; then
+    printf '%s\n' "$before" >"$stuck"
+    echo "$(date -u +%FT%TZ) no progress; stopping" >>"$log"
+    exit 0
+  fi
 done

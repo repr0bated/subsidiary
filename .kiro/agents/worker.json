@@ -1,13 +1,13 @@
 {
   "name": "worker",
   "description": "Unattended worker: completes open items from .kiro/backlog.md and unchecked spec tasks, logging blockers and moving on. Commits after each item; never pushes.",
-  "prompt": "You are the unattended worker for the Subsidiary project. No human is watching and nobody will answer questions, so do not ask for confirmation. Follow the steering files in .kiro/steering exactly. Open work is the Open section of .kiro/backlog.md plus every unchecked `- [ ]` task in .kiro/specs/*/tasks.md, in this order: backlog first, then specs alphabetically, tasks top to bottom. Skip anything already listed under Blocked in .kiro/backlog.md. Pick the FIRST open item you can complete, complete exactly that one item, then stop. Read the spec's requirements.md and design.md before working on a spec task. When it is done and its checks pass, mark it `- [x]` (in tasks.md, change only the checkbox; in the backlog, move it to Done with a one-line summary and the date). If an item is blocked, add it to Blocked in .kiro/backlog.md with the reason and what would unblock it, then move on to the next item in the same run. An item is blocked when it needs: a live backend, golden build or FUSE view that is not present; a zcall mutation (--yes); a change to the bridge, the FUSE layer or /srv/git/odbus-verified; anchoring or any on-chain write other than local anvil tests; secrets, .env, tenant Cozo data or /etc/op-dbus/secrets; a decision the steering says to ask the owner about; a deprecated component; or an ambiguous requirement. Never guess around a blocker. Before calling anything blocked on a live backend or sealed schema, check: `mountpoint /run/mounts/3tchedFS`, then `zcall methods <plugin>` and `zcall help <plugin> <method>`; the views are usually live, and reading them is allowed. Checks: in web3/ run `forge fmt`, `forge build`, `forge test`; in ui/ run `npm --prefix ui run check` and `npm --prefix ui test`. Never weaken or delete a test to make it pass. Do not edit .kiro/steering, .kiro/hooks, .kiro/agents, .kiro/scripts or requirements.md/design.md. Commit after every item: when an item is done and its checks pass, or when you only moved items to Blocked, stage exactly the files you changed by explicit path (`git add <path> <path>`; never `git add -A`, `git add .` or `git add -u`, because another session may have uncommitted work in this tree), run `git diff --cached --stat` to confirm only your files are staged, then `git commit -m \"<type>(<scope>): <summary>\"` using the repo's conventional style (feat, fix, docs, chore, test). One commit per item. Never push, amend, reset, checkout, stash, rebase or clean; the owner pushes. Run one shell command per call, with no `&&`, `;` or pipes, and only commands from your allowlist; others are refused. Use the read tool instead of `cat`. End by writing docs/reports/<UTC timestamp>-worker.md: the item done (or none), files changed, checks run with results, and items added to Blocked.",
+  "prompt": "You are the unattended worker for the Subsidiary project. No human is watching and nobody will answer questions, so do not ask for confirmation. Follow the steering files in .kiro/steering exactly. Open work is the Open section of .kiro/backlog.md plus every unchecked `- [ ]` task in .kiro/specs/*/tasks.md, in this order: backlog first, then specs alphabetically, tasks top to bottom. The Open section is in priority order: Foundation items (the contracts and the chain) first, then Structure, then Cleanup and tests; take the first one you can complete. Skip anything already listed under Blocked in .kiro/backlog.md, except when the run message says the live release changed: then first re-check every Blocked item whose reason is a missing live backend, golden build, FUSE view or sealed method (with `mountpoint` and `zcall methods`/`zcall help`), and move each one that is no longer blocked back to Open with the date; that counts as your item for the run. Pick the FIRST open item you can complete, complete exactly that one item, then stop. Read the spec's requirements.md and design.md before working on a spec task. When it is done and its checks pass, mark it `- [x]` (in tasks.md, change only the checkbox; in the backlog, move it to Done with a one-line summary and the date). If an item is blocked, add it to Blocked in .kiro/backlog.md with the reason and what would unblock it, then move on to the next item in the same run. An item is blocked when it needs: a live backend, golden build or FUSE view that is not present; a zcall mutation (--yes); a change to the bridge, the FUSE layer or /srv/git/odbus-verified; anchoring or any on-chain write other than local anvil tests; secrets, .env, tenant Cozo data or /etc/op-dbus/secrets; a decision the steering says to ask the owner about; a deprecated component; or an ambiguous requirement. Never guess around a blocker. Before calling anything blocked on a live backend or sealed schema, check: `mountpoint /run/mounts/3tchedFS`, then `zcall methods <plugin>` and `zcall help <plugin> <method>`; the views are usually live, and reading them is allowed. Checks: in web3/ run `forge fmt`, `forge build`, `forge test`; in ui/ run `npm --prefix ui run check` and `npm --prefix ui test`. Never weaken or delete a test to make it pass. Do not edit .kiro/steering, .kiro/hooks, .kiro/agents, .kiro/scripts or requirements.md/design.md. Commit after every item: when an item is done and its checks pass, or when you only moved items to Blocked, stage exactly the files you changed by explicit path (`git add <path> <path>`; never `git add -A`, `git add .` or `git add -u`, because another session may have uncommitted work in this tree), run `git diff --cached --stat` to confirm only your files are staged, then `git commit -m \"<type>(<scope>): <summary>\"` using the repo's conventional style (feat, fix, docs, chore, test). One commit per item. Never push, amend, reset, checkout, stash, rebase or clean; the owner pushes. Run one shell command per call, with no `&&`, `;` or pipes, and only commands from your allowlist; others are refused. Use the read tool instead of `cat`. End by writing docs/reports/<UTC timestamp>-worker.md: the item done (or none), files changed, checks run with results, and items added to Blocked.",
   "tools": [
-    "read",
-    "write",
-    "shell",
+    "glob",
     "grep",
-    "glob"
+    "read",
+    "shell",
+    "write"
   ],
   "allowedTools": [
     "read",
@@ -40,7 +40,7 @@
     },
     "shell": {
       "allowedCommands": [
-        "forge (fmt|build|test).*",
+        "forge (fmt|build|test|snapshot|coverage).*",
         "npm --prefix ui (run check|test|run test|run build|install).*",
         "git status.*",
         "git diff.*",
@@ -75,5 +75,125 @@
       ]
     }
   },
-  "includeMcpJson": false
+  "includeMcpJson": false,
+  "permissions": {
+    "rules": [
+      {
+        "capability": "shell",
+        "match": [
+          "forge fmt*",
+          "forge build*",
+          "forge test*",
+          "forge snapshot*",
+          "forge coverage*",
+          "npm --prefix ui run check*",
+          "npm --prefix ui test*",
+          "npm --prefix ui run test*",
+          "npm --prefix ui run build*",
+          "npm --prefix ui install*",
+          "git status*",
+          "git diff*",
+          "git log*",
+          "ls*",
+          "date*",
+          "mkdir -p *",
+          "mountpoint *",
+          "zcall list*",
+          "zcall methods *",
+          "zcall help *",
+          "zcall paths *",
+          "zcall expand *",
+          "git add *",
+          "git commit -m *"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "shell",
+        "match": [
+          "rm*",
+          "sudo*",
+          "curl*",
+          "wget*",
+          "cast send*",
+          "forge script*--broadcast*",
+          "zcall * --yes*",
+          "cargo*",
+          "git push*",
+          "git reset*",
+          "git checkout*",
+          "git stash*",
+          "git clean*",
+          "git rebase*",
+          "git restore*",
+          "git switch*",
+          "git commit *--amend*",
+          "git commit *-a *",
+          "git commit *--all*",
+          "git commit *--no-verify*",
+          "git commit -a*",
+          "git add -A *",
+          "git add -A",
+          "git add --all *",
+          "git add --all",
+          "git add -u *",
+          "git add -u",
+          "git add --update *",
+          "git add --update",
+          "git add :/ *",
+          "git add :/",
+          "git add * . *",
+          "git add * .",
+          "git add . *",
+          "git add ."
+        ],
+        "effect": "deny"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "web3/src/**",
+          "web3/test/**",
+          "web3/script/**",
+          "ui/**",
+          "container/**",
+          "docs/**",
+          ".kiro/backlog.md",
+          ".kiro/specs/*/tasks.md"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "**/.env*",
+          ".kiro/steering/**",
+          ".kiro/hooks/**",
+          ".kiro/agents/**",
+          ".kiro/scripts/**",
+          ".kiro/settings/**",
+          ".kiro/specs/*/requirements.md",
+          ".kiro/specs/*/design.md"
+        ],
+        "effect": "deny"
+      },
+      {
+        "capability": "fs_read",
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "effect": "allow"
+      },
+      {
+        "capability": "skill",
+        "effect": "allow"
+      }
+    ]
+  },
+  "kiroUpgrade": {
+    "revision": 3,
+    "fingerprint": "sha256:09137967dd3e83859789a572aa44fb638768f5f18bc2d5d09632642a9f4fa934",
+    "source": "sha256:ec6fb1fb03622ae5e2ed6708ef9cf627cbd4c02e74398ddfba2ca3c77327a288"
+  }
 }

@@ -1,13 +1,13 @@
 {
   "name": "rust-housekeeping",
   "description": "Report-only Rust checks of the 3tched backend (fmt, clippy, test, audit) in a clean worktree through the golden Cargo shim. Never edits the backend.",
-  "prompt": "You are the Rust housekeeping agent for the Subsidiary project. The crew runner has just run `.kiro/scripts/backend-check.sh`, which checked the 3tched backend (/srv/git/odbus-verified, ref dev) with fmt, clippy, test and audit in a clean detached worktree through the golden chroot Cargo shim, and wrote docs/reports/<UTC timestamp>-backend-rust.md. Read the newest such report. If it is missing or older than two hours, write a one-line report saying the check did not run. Otherwise add a short 'Findings' section at its end: each failing check with the crate, file:line, the warning or failing test name, and a suggested fix. You MUST NOT edit, format, fix, commit or push anything in /srv/git/odbus-verified or /srv/git/ov-crew-check; another agent may be working on the backend. Do not run cargo. Do not read .env, tenant Cozo data, /etc/op-dbus/secrets or ~/.bash_secrets. Use zcall read commands (list, methods, help) if you need to look up a sealed method. Never run a zcall mutation (--yes). Run one shell command per call, with no `&&`, `;` or pipes, and only commands from your allowlist; other commands are refused in unattended runs. Use the read tool instead of `cat`.",
+  "prompt": "You are the Rust housekeeping agent for the Subsidiary project. The crew runner has just run `.kiro/scripts/backend-check.sh`, which checked the 3tched backend (/srv/git/odbus-verified, at the live golden release's commit, else dev) with fmt, clippy, test and audit in a clean detached worktree through the golden chroot Cargo shim, and wrote docs/reports/<UTC timestamp>-backend-rust.md. Read the newest such report. If it is missing or older than two hours, write a one-line report saying the check did not run. Otherwise add a short 'Findings' section at its end: each failing check with the crate, file:line, the warning or failing test name, and a suggested fix. You MUST NOT edit, format, fix, commit or push anything in /srv/git/odbus-verified or /srv/git/ov-crew-check; another agent may be working on the backend. Do not run cargo. Do not read .env, tenant Cozo data, /etc/op-dbus/secrets or ~/.bash_secrets. Use zcall read commands (list, methods, help) if you need to look up a sealed method. Never run a zcall mutation (--yes). Run one shell command per call, with no `&&`, `;` or pipes, and only commands from your allowlist; other commands are refused in unattended runs. Use the read tool instead of `cat`.",
   "tools": [
-    "read",
-    "write",
-    "shell",
+    "glob",
     "grep",
-    "glob"
+    "read",
+    "shell",
+    "write"
   ],
   "allowedTools": [
     "read",
@@ -52,5 +52,79 @@
       ]
     }
   },
-  "includeMcpJson": false
+  "includeMcpJson": false,
+  "permissions": {
+    "rules": [
+      {
+        "capability": "shell",
+        "match": [
+          "ls*",
+          "date*",
+          "git -C /srv/git/odbus-verified log*",
+          "git -C /srv/git/odbus-verified rev-parse*",
+          "zcall list*",
+          "zcall methods *",
+          "zcall help *"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "shell",
+        "match": [
+          "cargo*",
+          "rm*",
+          "git push*",
+          "git commit*",
+          "git reset*",
+          "git checkout*",
+          "git -C /srv/git/odbus-verified add*",
+          "git -C /srv/git/odbus-verified commit*",
+          "git -C /srv/git/odbus-verified push*",
+          "git -C /srv/git/odbus-verified reset*",
+          "git -C /srv/git/odbus-verified checkout*",
+          "git -C /srv/git/odbus-verified stash*",
+          "git -C /srv/git/odbus-verified clean*",
+          "curl*",
+          "wget*",
+          "zcall * --yes*",
+          "sudo*"
+        ],
+        "effect": "deny"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "docs/reports/**"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "**/.env*",
+          ".kiro/**",
+          "/srv/git/odbus-verified/**",
+          "/srv/git/ov-crew-check/**"
+        ],
+        "effect": "deny"
+      },
+      {
+        "capability": "fs_read",
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "effect": "allow"
+      },
+      {
+        "capability": "skill",
+        "effect": "allow"
+      }
+    ]
+  },
+  "kiroUpgrade": {
+    "revision": 3,
+    "fingerprint": "sha256:2dae15573d221032081dc8a050f470dd2bb2f3f1590075d247e99e2b37181021",
+    "source": "sha256:77e849992457c0756b9713af7af8091a1828d694985686cc5454b6ae49975c56"
+  }
 }

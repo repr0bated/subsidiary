@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Report-only Rust checks of the 3tched backend (odbus-verified), for the crew.
-# - Checks a clean, detached worktree at the current `dev` commit; never the live tree.
+# - Checks a clean, detached worktree at the live golden release's commit (tests run after
+#   deployment, on what is deployed), else `dev`; never the live tree.
 # - Cargo goes through the golden chroot shim (~/.local/bin/cargo), same as golden builds.
 # - One Cargo at a time: skips if Cargo, rustc, Clippy, a golden build or a queued golden deploy
 #   is running, or less than BACKEND_MIN_AVAIL_GIB (12) GiB is available. Builds with one job.
@@ -10,7 +11,8 @@ set -u
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 repo="${BACKEND_REPO:-/srv/git/odbus-verified}"
 tree="${BACKEND_CHECK_TREE:-/srv/git/ov-crew-check}"
-ref="${BACKEND_REF:-dev}"
+live_commit="$(jq -r '.live.commit // empty' /mnt/@upper/golden-state.json 2>/dev/null)"
+ref="${BACKEND_REF:-${live_commit:-dev}}"
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 report="$root/docs/reports/$stamp-backend-rust.md"
 mkdir -p "$root/docs/reports"
