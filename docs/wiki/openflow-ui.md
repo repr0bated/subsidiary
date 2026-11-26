@@ -32,7 +32,7 @@ the container's own 3tchedFS mount
 - Open, for the backend:
   - which sled field holds the route;
   - how the flows match the identity's traffic at the shared entry;
-  - where the UI door listens. Today it is the container's own `127.0.0.1:8443`. Packets steered in by OpenFlow arrive on an interface, not on loopback, so the door either listens on the address the flow delivers to (`parse_listen` already allows `10.0.0.2`), or the flow rewrites to it.
+  - how the flow delivers into the container's loopback. The UI door stays on `127.0.0.1:8443`: 127.0.0.1 is the only address in the container (owner, 2026-11-26). Linux drops packets for 127.0.0.0/8 that arrive on any interface other than `lo` (martian destination) unless `route_localnet` is enabled on that interface, so the delivery mechanism has to be chosen with that in mind.
 - Not built yet. The rovs-openflow work so far is the foundation: the bridge creates, changes and deletes flows on `ovsbr0` itself, admitted and verified. The per-container route flows and the sled route field are the next pieces, and neither is in the `rovs-openflow` spec's task list.
 
 ### Current path (what the target replaces)
