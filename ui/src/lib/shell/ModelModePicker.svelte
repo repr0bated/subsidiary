@@ -68,7 +68,7 @@
     {#each modes as m (m)}
       <label class="mode" class:on={m === current}>
         <input type="radio" name="mode" value={m} checked={m === current} disabled={!session} onchange={() => pickMode(m)} />
-        {modeLabel(m)}
+        {modeLabel(m, subsidiary)}
       </label>
     {/each}
   </fieldset>

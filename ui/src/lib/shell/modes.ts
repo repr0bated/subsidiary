@@ -14,4 +14,6 @@ const LABELS: Record<ChatMode, string> = {
   notebook_lm: 'Notebook',
   ui_render: 'Render a view'
 };
-export const modeLabel = (m: ChatMode) => LABELS[m];
+/** In a subsidiary, control_plane administers this container, not the host, so it reads as Administrative. */
+export const modeLabel = (m: ChatMode, subsidiary = false) =>
+  subsidiary && m === 'control_plane' ? 'Administrative' : LABELS[m];

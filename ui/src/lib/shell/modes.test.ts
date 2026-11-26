@@ -21,4 +21,7 @@ describe('mode labels', () => {
   it('are human readable', () => {
     expect(modeLabel('control_plane')).toBe('Control plane');
   });
+  it('call a subsidiary control plane Administrative', () => {
+    expect(modeLabel('control_plane', true)).toBe('Administrative');
+  });
 });
