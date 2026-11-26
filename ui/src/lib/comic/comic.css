@@ -3,13 +3,15 @@
 @font-face { font-family: 'Comic Neue'; src: url('/fonts/ComicNeue-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Comic Neue'; src: url('/fonts/ComicNeue-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 /* Lichtenstein-style pop art, drawn for this project: Ben-Day dots, thick black outlines,
-   flat red, yellow and blue on white. No copied artworks, characters, logos or lettering. */
+   flat colors on white. No copied artworks, characters, logos or lettering.
+   Palette: hot pink, gold and noir ink on a pale pink paper (owner's choice). The token names
+   are kept so components don't change: --pop-red is the pink, --pop-blue is the noir accent. */
 :root {
-  --ink: #111;
-  --paper: #fffdf6;
-  --pop-red: #e3242b;
-  --pop-yellow: #ffd60a;
-  --pop-blue: #1f5fd6;
+  --ink: #141414;
+  --paper: #fff9fb;
+  --pop-red: #ff007f;
+  --pop-yellow: #ffe600;
+  --pop-blue: #111111;
   --outline: 4px solid var(--ink);
   --dot-size: 7px;
   --font-display: 'Bangers', 'Impact', 'Arial Black', system-ui, sans-serif;
@@ -41,7 +43,7 @@ body {
   font-family: var(--font-body);
 }
 /* Keyboard focus stays visible on every control, in the same ink as the outlines. */
-:focus-visible { outline: 3px dashed var(--pop-blue); outline-offset: 3px; }
+:focus-visible { outline: 3px dashed var(--pop-red); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }

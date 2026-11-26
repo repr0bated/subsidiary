@@ -37,7 +37,7 @@
     inset: 0;
     overflow: auto;
     background-color: var(--paper);
-    background-image: radial-gradient(var(--pop-blue) 22%, transparent 24%);
+    background-image: radial-gradient(var(--pop-red) 22%, transparent 24%);
     background-size: 32px 32px;
   }
   .placeholder {
