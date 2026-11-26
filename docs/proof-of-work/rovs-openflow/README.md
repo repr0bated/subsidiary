@@ -68,3 +68,32 @@ G. OF1.3 NX monitor error: BAD_REQUEST: unknown experimenter type
 - Red check: dropping the 8-byte padding after the statistics fails `decodes_the_captured_ovsbr0_flow_desc_entry`.
 - Whole `op-network` lib: 92 passed, 1 failed (the same `ovsdb-tool` test as before, unrelated).
 - `grep -nE "todo!|unimplemented!|not yet implemented|placeholder"` over `openflow.rs` and `openflow_cookie.rs`: no matches.
+
+## Owner decision, 2026-11-26: checks and tests after deployment
+
+From here on nothing is compiled or tested before deployment (AGENTS.md: tests, Clippy and checks only on explicit owner request; automated agents verify afterwards). Each entry below says what was written and where; none of it has been compiled. The verification an automated agent should run afterwards is listed at the end of each entry.
+
+Work was split across parallel agents on disjoint files; the parent reviewed each diff, grepped for stubs (`todo!|unimplemented!|not yet implemented|placeholder`: no matches), and committed one task per commit.
+
+## Task 4: in-process admitted compare-and-swap flow writes
+
+- Commit: `062de97`. Files: `crates/op-grpc-bridge/src/openflow_methods.rs`, `runtime_network.rs` (flow branch of `openflow()`), `crates/op-network/src/openflow.rs` (`port_desc`, `flow_mod`, fake switch with a real flow table behind feature `fake-switch`), `openflow_translate.rs` (`json_flow_to_modify`), `crates/op-grpc-bridge/Cargo.toml` (dev-dependency on the fake switch).
+- Order per call, under a per-bridge lock: validate > read ports and flows > compare > FinalAdmission > one strict FLOW_MOD + barrier > read back and verify. The D-Bus hop to op-of-controller is gone for these three methods.
+- Verify afterwards: `cargo test -p op-network --lib openflow`, `cargo test -p op-grpc-bridge --lib openflow_methods`.
+
+## Tasks 5.1 and 6.3: flow child schema; `ensure_fallback_normal` retired
+
+- Commit: `549929b`. File: `crates/op-plugins/src/state_plugins/openflow.rs` (+ `openflow_schema_tests.rs`).
+- Subids added: `obs.network.openflow.flow.{bridge,table,priority,cookie,match,actions,flags,idle_timeout,hard_timeout,packet_count,byte_count,duration_sec}@v1`. Subid leaving at the next seal: `mut.network.openflow.datapath.ensure-fallback-normal@v1`.
+- Verify afterwards: `cargo test -p op-plugins --lib openflow`.
+
+## Task 7: packet-in controller wiring (off by default)
+
+- Commit: `0ba1f8b`. File: `crates/op-network/src/openflow_packet_in.rs`; `rovs-ext = "=0.2.0"`.
+- Verify afterwards: `cargo test -p op-network --lib openflow_packet_in`.
+
+## Task 10: docs
+
+- Commit: `183f2b8`. Files: `crates/op-chat/src/system_prompt.rs`, `deploy/README-network-runtime.md`.
+- Found, not edited (for the owner): `docs/src/operations/network.md` lines 104-106 still describe the permit design; lines 92-94 give an `ovs-vsctl del-br etched0` command.
+- Verify afterwards: `cargo test -p op-chat --lib system_prompt`.
