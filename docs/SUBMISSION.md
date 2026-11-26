@@ -12,7 +12,7 @@ Subsidiary closes it with two linked records. *Our record* is the identity's pri
 
 The demo puts this in front of you as a used car salesman. He's the one person nobody trusts, and here you don't have to. "I've got everything you need right here, no need to go searching!" He pitches, you shake on it (CHING!), the work leaves receipts (KA-CHUNK!), the head is anchored (POW!), and then you put him on the stand. You bring the hash from the public record and ask what else his record says about the deal. He can only answer from his own receipts, and you check one yourself (BAM!).
 
-The Frankenstein part is what gets stitched together. Solidity contracts hold the public proof. The identity is a container that sees its granted world as files in its own FUSE mount. The interface is a chatbot that renders every view on the fly from sealed json-render components, in Lichtenstein pop-art style.
+The Frankenstein part is what gets stitched together. Solidity contracts hold the public proof. The identity is a container that sees its granted world as files in its own FUSE mount. The interface is a chatbot that renders every view on the fly from sealed json-render components, in a 1960s comic pop-art style.
 
 What is new in this period:
 - the contracts (`EtchedAnchor`, `HireContract`), their tests and the holder-side verifier;

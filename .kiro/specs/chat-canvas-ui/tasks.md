@@ -51,7 +51,7 @@ Revised 2026-11-24 for the backend path (door, `fuse.get_catalog`, StateSync). T
   - [ ] 11.2 Live check: `search_own_events` returns `outcome_unknown` today (operation 5e9fceac-…), likely the same model-path gap as the persona agents (seed networking)
 - [ ] 10. Look and feel (Requirement 8), started 2026-11-25
   - [x] 10.1 Catalog built at runtime from the sealed `json_render.list_components` (`catalogFromSealed`, `z.fromJSONSchema`); no copy of the catalog
-  - [x] 10.2 Lichtenstein implementations of 12 of the 36 sealed components (Card, Stack, Grid, Heading, Text, Badge, Alert, Button, Separator, Table, Progress, Spinner); rendered through the real json-render `Renderer` on `/preview` (sample data, labelled)
+  - [x] 10.2 Pop-art implementations of 12 of the 36 sealed components (Card, Stack, Grid, Heading, Text, Badge, Alert, Button, Separator, Table, Progress, Spinner); rendered through the real json-render `Renderer` on `/preview` (sample data, labelled)
   - [x] 10.3 Candidate components ready to register with `json_render.save_candidate`: Burst (seven events, text equivalents), SpeechBalloon, ReceiptCard (capabilities stripped)
   - [x] 10.4 The other 24 sealed components (all 36 implemented; inputs bind to local view state only and never write into /plugins)
   - [x] 10.5 Bangers and Comic Neue bundled under the SIL OFL (no runtime font requests)

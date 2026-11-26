@@ -38,6 +38,6 @@ import ToggleGroup from './ToggleGroup.svelte';
 import Toggle from './Toggle.svelte';
 import Tooltip from './Tooltip.svelte';
 
-/** Lichtenstein-styled implementations of every sealed json_render catalog component, by sealed name. */
+/** Pop-art implementations of every sealed json_render catalog component, by sealed name. */
 export const comicComponents = { Burst, ReceiptCard, SpeechBalloon, Accordion, Alert, Avatar, Badge, ButtonGroup, Button, Card, Carousel, Checkbox, Collapsible, Dialog, Drawer, DropdownMenu, Grid, Heading, Image, Input, Link, Pagination, Popover, Progress, Radio, Select, Separator, Skeleton, Slider, Spinner, Stack, Switch, Table, Tabs, Textarea, Text, ToggleGroup, Toggle, Tooltip };
 export type ImplementedComponent = keyof typeof comicComponents;

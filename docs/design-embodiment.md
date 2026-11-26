@@ -3,7 +3,7 @@
 Owner direction, 2026-11-23. Draft for the UI, the video and the write-up.
 
 ## Idea
-The identity is the business, and it should feel like someone. 3tched already maps its components to a body (below). Subsidiary keeps that anatomy and shows the body acting: talking, offering, closing the deal, doing the work and proving it. The look is Roy Lichtenstein pop art: Ben-Day dots, thick black outlines, flat primary colors (red, yellow, blue) on white, speech balloons and narration boxes, and sound-effect bursts when something happens.
+The identity is the business, and it should feel like someone. 3tched already maps its components to a body (below). Subsidiary keeps that anatomy and shows the body acting: talking, offering, closing the deal, doing the work and proving it. The look is 1960s comic pop art: Ben-Day dots, thick black outlines, flat primary colors (red, yellow, blue) on white, speech balloons and narration boxes, and sound-effect bursts when something happens.
 
 ## The accountability view: the chatbot on the stand (owner, 2026-11-23)
 Search an event by meaning, then put the chatbot on the stand and question it about its own receipts. It runs in the existing Accountability chat mode.
@@ -78,12 +78,12 @@ Companion diagram, "One system. Connected by design." (https://www.3tched.com/ki
 - 03 Generated interfaces: typed schema → declared components → generated interface, on Svelte/SvelteKit, Vite and json-render. This is the UI path Subsidiary uses.
 - Controlled transport: ingress to the application door; intended egress through a private Xray socket to the REALITY gateway.
 
-Video order: the regular diagram (the system), then the embodied one (the system is a body), then the Lichtenstein panels (the body at work as a business).
+Video order: the regular diagram (the system), then the embodied one (the system is a body), then the pop-art panels (the body at work as a business).
 
 The diagrams are pre-existing 3tched material; list it in `PREEXISTING.md` if it or its wording is reused.
 
 ## What Subsidiary adds: the business in action
-The diagram shows the anatomy. Subsidiary shows the same body at work as a business closing a deal, drawn as Lichtenstein panels. Each panel is one step of the flow, told by what the business does:
+The diagram shows the anatomy. Subsidiary shows the same body at work as a business closing a deal, drawn as pop-art panels. Each panel is one step of the flow, told by what the business does:
 
 | Panel | Part at work | What the visitor sees |
 |---|---|---|
@@ -173,7 +173,7 @@ Each burst fires only on a real backend event, so the effects double as a readab
 | Host refused an actual call | BONK! |
 
 ## Rules
-- Lichtenstein style, our own drawings. The style is free to use; his paintings are not. Do not copy or trace a specific work (for example *Whaam!* or *Drowning Girl*), and use no comic publisher's characters, logos or lettering. The rules forbid third-party trademarks and copyrighted material in the video without permission.
+- Generic pop-art style, our own drawings and text. The style is free to use; any artist's specific works are not. Do not copy or trace a painting or quote its text, do not use an artist's name as branding, and use no comic publisher's characters, logos or lettering. The rules forbid third-party trademarks and copyrighted material in the video without permission.
 - Palette: red, yellow, blue, black, white. Dots as an SVG or CSS pattern, so they stay crisp at any size.
 - Bursts and panels are components in the sealed `json_render` catalog, like every other visible element. No ad-hoc DOM.
 - A burst never fakes an event. No receipt, no KA-CHUNK.

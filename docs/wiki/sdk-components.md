@@ -48,7 +48,7 @@ Source: `github.com/vercel-labs/json-render` at `c926907` (2026-11-18), Apache-2
 | `@json-render/svelte` 0.23.2 | `svelte` ^5, `zod` ^4 | Svelte 5 renderer: `Renderer`, `JsonUIProvider`, `CatalogRenderer`, `ConfirmDialog` |
 | `@json-render/directives` | `zod` ^4 | Optional: `$format`, `$math`, `$concat`, `$count` and others inside specs |
 | `@json-render/devtools-svelte` | `svelte` ^5 | Optional, development only |
-| `@json-render/shadcn-svelte` | `tailwindcss` ^4 and bits-ui, lucide | Not used: we draw our own Lichtenstein components |
+| `@json-render/shadcn-svelte` | `tailwindcss` ^4 and bits-ui, lucide | Not used: we draw our own pop-art components |
 | `@json-render/chat` | `chat` ^4.43 | Not used: renders specs as Slack/Teams cards |
 | React, Vue, Solid, Next and other renderers | | Not used (Svelte only) |
 

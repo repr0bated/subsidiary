@@ -113,7 +113,7 @@ Working plugin state is required before the UI can be built or demonstrated: wit
 
 ### Requirement 8: Look and feel
 **User story:** As a viewer, I want the identity to feel like someone at work.
-1. THE UI SHALL use a Lichtenstein pop-art style (Ben-Day dots, thick black outlines, flat red, yellow and blue, speech balloons) drawn for this project, with no copied artworks and no third-party characters, logos or lettering.
+1. THE UI SHALL use a 1960s comic pop-art style (Ben-Day dots, thick black outlines, flat red, yellow and blue, speech balloons) drawn for this project, with no copied artworks and no third-party characters, logos or lettering.
 2. THE UI SHALL show a sound-effect burst only for a real backend event: call written (ZAP!), receipt returned (KA-CHUNK!), contract accepted (CHING!), head anchored (POW!), receipt verified (BAM!), candidate registered (ZING!), host refusal (BONK!).
 3. THE UI SHALL honour reduced-motion settings and give every burst a text equivalent for screen readers.
 

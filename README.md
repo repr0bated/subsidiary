@@ -11,7 +11,7 @@ Subsidiary is a personal project by Jeremy Hobson. It builds on 3tched, earlier 
 | Path | What it is |
 |---|---|
 | `web3/` | Foundry project: `EtchedAnchor` (anchors receipt-chain heads, hash only) and `HireContract` (hire, deliver against an anchored head, two-party completion, warranty claims and anchored remedies, a public provider record). Tests, deploy and demo scripts, and a holder-side verifier |
-| `ui/` | The chat canvas: a Svelte 5 static build served by the 3tched door. The chatbot is the UI; views are rendered from sealed catalog components in a Lichtenstein pop-art style |
+| `ui/` | The chat canvas: a Svelte 5 static build served by the 3tched door. The chatbot is the UI; views are rendered from sealed catalog components in a 1960s comic pop-art style |
 | `.kiro/` | How this was built with Kiro: steering, specs, hooks and the crew agents |
 | `docs/` | Plan, design notes and research wiki |
 
