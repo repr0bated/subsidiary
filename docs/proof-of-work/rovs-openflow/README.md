@@ -97,3 +97,15 @@ Work was split across parallel agents on disjoint files; the parent reviewed eac
 - Commit: `183f2b8`. Files: `crates/op-chat/src/system_prompt.rs`, `deploy/README-network-runtime.md`.
 - Found, not edited (for the owner): `docs/src/operations/network.md` lines 104-106 still describe the permit design; lines 92-94 give an `ovs-vsctl del-br etched0` command.
 - Verify afterwards: `cargo test -p op-chat --lib system_prompt`.
+
+## Tasks 6.1, 6.2, 6.4 and 8
+
+- Commit: `93f1129`. `runtime_network.rs` (datapath health from OVSDB + switch; uplink pre-seed; fail mode secure in `attach_controller_safe`; `ensure_openflow15`), `obfuscation_methods.rs` (in-process CAS), `admission.rs` (`FinalAdmission` moved there), import changes in `decoy_network.rs`, `proxy_methods.rs`, `xray_methods.rs`, `openflow_permit.rs`.
+- Flagged for the owner: obfuscation flows now carry the derived cookie on the switch, not their own `0x4f42...` cookie; the sealed `DatapathHealthOutput` still has the old `fallback_*` fields.
+- The same commit carries task-5 projection helpers in `openflow_methods.rs` that are not called yet.
+
+## Golden deploy at 93f1129 (owner: "golden build activate"), started 2026-11-26 08:48Z
+
+- Before starting: the golden lock was held by an orphaned test binary from a cancelled agent run (`op_network-81fa... openflow_packet_in`, PID 31368, root, 40 min); it was stopped. The storage error that broke the 02:31Z deploy (btrfs on `/dev/ublkb3` forced read-only) is gone after the reboot: `/mnt/cozo-btrfs-500g` mounts `rw`.
+- Script, log and receipt: `~/provisioning/runs/golden-deploy-93f1129-20261126T084829Z.{sh,log,receipt}`. Same procedure as the previous deploy: build, seal, cut, catalog-prepare, activate, each `--apply --jobs 1`, stop at first failure, refuse if HEAD moves.
+- Not in this release: task 5.2-5.6 (flow children wiring), task 9 (removing op-of-controller code), task 11 (reseal check). Nothing in the release writes to the switch on start; flow writes happen only when a method is called.
