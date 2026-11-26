@@ -2,7 +2,7 @@
 
 Topic: generative UI constrained to a component catalog.
 Sources: https://github.com/vercel-labs/json-render (README, Apache-2.0); Svelte skill: https://skillsmp.com/skills/vercel-labs-json-render-skills-svelte-skill-md
-Retrieved: 2026-11-19
+Retrieved: 2026-11-19. Live parts re-checked 2026-11-26 (see the two "For Subsidiary" bullets on actions and the catalog).
 
 ## Idea
 The model does not write UI code. You define a catalog: component names, a zod schema for each component's props, a description, and a list of named actions. The model returns a JSON spec that may only reference catalog entries. A renderer turns the spec into live UI.
@@ -28,5 +28,5 @@ Packages: `@json-render/core` and `@json-render/svelte` (Svelte 5, runes). `defi
 ## For Subsidiary
 - Catalog-only rendering: output outside the catalog cannot render, so no sandbox is needed to stop arbitrary code. This is a json-render constraint, not the seal. The seal (owner, 2026-11-23) is the sealed scaffolding and functional core elements in the blobs: the chat interface, the model and mode picker, the shell.
 - Pages are still generated per view; only the vocabulary of primitives is fixed. The project owner must decide whether a fixed vocabulary counts as "nothing static".
-- Catalog actions are names. They must be wired to grant-checked FUSE call files, never to direct HTTP. VERIFY how action handlers are registered in the Svelte renderer.
-- The catalog can be generated from the live schema, so schema changes change what the chatbot can offer without code changes. VERIFY feasibility of building a catalog at runtime.
+- Catalog actions are names. They must be wired to grant-checked FUSE call files, never to direct HTTP. Checked 2026-11-26: `json_render.list_actions` exists, and the backlog (chat-canvas-ui 7.2, 2026-11-25) records that the sealed blob declares only `setState`, `pushState`, `removeState` and `validateForm`, so no action can call a backend method yet. VERIFY the list with `list_actions` and how handlers are registered in the Svelte renderer when the backend seals such an action.
+- The catalog is not built at runtime by us. It is sealed in the `json_render` blob and read through FUSE (`json_render.list_components`, `get_component_schema`, `export_json_schema`, `list_catalog`, all present on 2026-11-26). Schema changes reach the chatbot by resealing, with no UI code change.

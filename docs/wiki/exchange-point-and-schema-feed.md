@@ -2,7 +2,7 @@
 
 Topic: how the chatbot UI sets mode and model, and how the schema it renders reaches it.
 Sources: `odbus-verified` `crates/op-grpc-bridge/src/exchange_point.rs`, `chat_mode_policy.rs`, `.kiro/specs/identity-chat-interface` Requirement 34; the live 3tchedFS mounts on antix1; `/srv/git/3tched.com` package.json and `src/`.
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Re-checked against the live view 2026-11-26 (see the exchange-point line below).
 
 ## Owner rules (2026-11-23)
 - Clear cut: the UI runs strictly in the container; the backend runs strictly on the host.
@@ -35,7 +35,7 @@ For code this means:
   - `session`: `principal_id`, `session_id`
   - `modes`: `allowed`, `default`, `current`
   - `plugins`: each with `plugin_id`, `version`, `schema_hash` and the methods the caller may call (`name`, `required_capability`, `subid`)
-- The bridge source also serves it on the door at `/exchange/v1`. Per the owner rule above, the UI reaches it through FUSE. VERIFY which FUSE path exposes the exchange point.
+- The bridge source also serves it on the door at `/exchange/v1`. Per the owner rule above, the UI reaches it through FUSE. Checked 2026-11-26: the live view (generation 75) has no exchange plugin or operation. Mode and model go through `project.select_context` and `chat_router.SetSelection`, and the grant-filtered schema is meant to come from `fuse.get_catalog`, which is not sealed yet.
 
 ## Chat modes
 Personal, Project, ControlPlane, Accountability, NotebookLm, UiRender.
@@ -44,12 +44,12 @@ Personal, Project, ControlPlane, Accountability, NotebookLm, UiRender.
 - Personal chat, personal namespace and soul writes stay in the container's own RocksDB and never reach the sled or its vectors. Other modes go to the sled and are vectorized at the end of the session.
 
 ## FUSE layout (3tchedfs/1)
-- `view.json`: `view_id`, `source_catalog_hash`, `source_catalog_generation`, `parent_view`, and `objects` (plugin to object hash). Catalog generation 75 when retrieved.
+- `view.json`: `view_id`, `source_catalog_hash`, `source_catalog_generation`, `parent_view`, and `objects` (plugin to object hash). Catalog generation 75 when retrieved; still 75 on 2026-11-26.
 - `plugins/<plugin>/`: `schema.json`, `capabilities.json`, `object.blob.json`, `object.hash`, `value.json`, `data/`, `operations`.
 - `operations/<plugin>/<method>/`: `call`, `input.schema.json`, `output.schema.json`, `metadata.json`.
 - `capabilities/`: one entry per capability, for example `agent.invoke`, `cap.container.oci.create@v1` (URL-encoded on disk).
 - `relationships/`.
-- 75 plugins. Render-related: `json_render` (catalog, components, specs, validation, candidate save and promote), `schema_renderer` (`render_schema`, `get_rendering`, `list_galleries`, `validate_schema`; needs `schema_renderer.read`), `web_ui` (`render_page`, `update_component`, `handle_event`). Mode and model: `project`, `chat_router`.
+- 74 plugins in `view.json` on 2026-11-26 (this page said 75 before; the host mount section already said 74). Render-related: `json_render` (catalog, components, specs, validation, candidate save and promote), `schema_renderer` (`render_schema`, `get_rendering`, `list_galleries`, `validate_schema`; needs `schema_renderer.read`), `web_ui` (`render_page`, `update_component`, `handle_event`). Mode and model: `project`, `chat_router`.
 
 ## Host FUSE mounts (`/run/mounts`, 2026-11-23)
 - `/run/mounts/3tchedFS` (fuse.3tchedFS): our OP-DBUS plugins, 74 of them, catalog generation 75.
@@ -66,7 +66,7 @@ Personal, Project, ControlPlane, Accountability, NotebookLm, UiRender.
   - `chat_router.SetSelection`: mutation, `cap.software.threetched.selection.set@v1`. Sets provider and model; both required.
   - `schema_renderer.render_schema`: read, `schema_renderer.read`.
   - `web_ui.render_page`: takes `spec_id`, returns a UI spec record with its `catalog_hash`.
-- `plugins/<id>/value.json` is meant for live state but returns EIO today (known; DEV-CYCLE.md says so). Use the plugin's read operations instead.
+- `plugins/<id>/value.json` is live public-projected state: only `public_state.paths` are disclosed, and a plugin with no public policy discloses nothing. On 2026-11-26 `plugins/project/value.json` does not exist. The EIO described in DEV-CYCLE.md was not reproduced. Use the plugin's read operations instead.
 - Live consumers get each plugin's schema feed over the bridge's `Subscribe`, with values derived from committed state.
 - The UI is derived from the blobs: screens from `schema_renderer.render_schema`, components only from the catalog sealed in the `json_render` blob, every generated spec validated against that catalog. Every action shows its receipt, and a refusal shows the missing capability.
 
