@@ -7,12 +7,12 @@
   import SpeechBalloon from '../comic/SpeechBalloon.svelte';
   import type { Session } from './session';
 
-  let { session, conversationId, onview, incoming = null }: { session: Session; conversationId: string; onview: (spec: Spec) => void; incoming?: { id: number; text: string } | null } = $props();
+  let { session, conversationId = '', onview, incoming = null }: { session: Session; conversationId?: string; onview: (spec: Spec) => void; incoming?: { id: number; text: string } | null } = $props();
   let lastIncoming = 0;
 
   // svelte-ignore state_referenced_locally
   const chat = new Chat({
-    transport: doorChatTransport({ call: (p, m, a) => session.call(p, m, a), conversationId: () => conversationId, waitForCommit: session.waitForCommit })
+    transport: doorChatTransport({ call: (p, m, a) => session.call(p, m, a), conversationId: () => conversationId || session.conversation(), waitForCommit: session.waitForCommit })
   });
   let text = $state('');
 

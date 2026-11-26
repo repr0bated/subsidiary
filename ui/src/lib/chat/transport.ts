@@ -20,7 +20,7 @@ export type ResponseContent =
 export interface TransportOptions {
   call: Call;
   /** The backend-minted conversation id (never minted here). */
-  conversationId: () => string;
+  conversationId: () => string | Promise<string>;
   /** Resolves when the response turn is committed; rejects on abort. */
   waitForCommit: (responseTurnId: string, signal?: AbortSignal) => Promise<void>;
   responseMode?: 'text' | 'application';
@@ -81,7 +81,7 @@ export function doorChatTransport(opts: TransportOptions): ChatTransport<UIMessa
       const last = messages[messages.length - 1];
       const submitted = resultOf(
         await opts.call('chat_response', 'submit_turn', {
-          conversation_id: opts.conversationId(),
+          conversation_id: await opts.conversationId(),
           message: last ? textOf(last) : '',
           response_mode: opts.responseMode ?? 'application'
         })

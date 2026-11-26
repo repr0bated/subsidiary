@@ -8,7 +8,7 @@
   import ModelModePicker from './ModelModePicker.svelte';
   import type { Session } from '../app/session';
   import type { Spec } from '@json-render/svelte';
-  let { session = null, conversationId = '' }: { session?: Session | null; conversationId?: string } = $props();
+  let { session = null }: { session?: Session | null } = $props();
   let spec = $state<Spec | null>(null);
 </script>
 <div class="window">
@@ -19,8 +19,8 @@
     <ModelModePicker {session} />
   </EdgeDrawer>
   <EdgeDrawer edge="bottom" label="Chat" closedLabel="Pull up to chat">
-    {#if session && conversationId}
-      <ChatPanel {session} {conversationId} onview={(s) => (spec = s)} />
+    {#if session}
+      <ChatPanel {session} onview={(s) => (spec = s)} />
     {:else}
       <p class="placeholder">Not connected yet.</p>
     {/if}

@@ -127,6 +127,23 @@ export class Session {
     });
   };
 
+  // ---- conversation ----
+  private conversationId: Promise<string> | null = null;
+  /** This container's conversation: the most recent one it already has, else a new one the bridge
+   * mints. Asked for on the first message, so opening the page creates nothing. */
+  conversation(): Promise<string> {
+    this.conversationId ??= (async () => {
+      const listed = inner(await this.call('chat_response', 'list_conversations', {}));
+      const latest = (listed.conversations as { conversation_id?: string }[] | undefined)?.[0]?.conversation_id;
+      if (latest) return latest;
+      const started = inner(await this.call('chat_response', 'start_conversation', {}));
+      const id = String(started.conversation_id ?? '');
+      if (!id) throw new Error('start_conversation returned no conversation_id');
+      return id;
+    })();
+    this.conversationId.catch(() => (this.conversationId = null));
+    return this.conversationId;
+  }
   // ---- model and mode (requirement 4) ----
   listProviders() {
     return this.call('chat_router', 'ListProviders', {});
