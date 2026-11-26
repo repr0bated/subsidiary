@@ -25,3 +25,6 @@ ui/src/lib/door/gen/
 # pop-art mockup (reference only)
 docs/design/pop-art-mockup/app/node_modules/
 docs/design/pop-art-mockup/app/.svelte-kit/
+
+# mdBook build output (docs/book.toml)
+.mdbook/
