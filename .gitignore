@@ -21,3 +21,7 @@ ui/build/
 
 # generated from the backend proto (ui/scripts/gen-door.sh)
 ui/src/lib/door/gen/
+
+# pop-art mockup (reference only)
+docs/design/pop-art-mockup/app/node_modules/
+docs/design/pop-art-mockup/app/.svelte-kit/
