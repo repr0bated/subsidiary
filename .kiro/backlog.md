@@ -8,7 +8,6 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and the chain) first, then **Structure**, then **Cleanup and tests**. When everything here is blocked, the crew still runs the checks (tests, Rust lint) as fallback work, at least every three hours.
 
 ## Open
-- [ ] Cleanup: compare odbus-verified's docs with what exists, report only (never edit odbus-verified). Scope: its `AGENTS.md`, `README.md`, and the mdBook in `docs/` (`docs/book.toml` points to `src/`, which holds only `operations/network.md` and no `SUMMARY.md`; its repository URL is `Factory-AI/odbus`). Check claims against its source tree and `zcall`. Add the findings as a second table in `docs/docs-audit.md` with file:line and a suggested fix. (added 2026-11-26, owner)
 - [ ] Cleanup: update the wiki (`docs/wiki/`). Re-check each page against the live system (release in `/mnt/@upper/golden-state.json`, `zcall methods`/`zcall help`, the odbus-verified source): for example whether `fuse.get_catalog` is sealed yet (`backend-fuse-ui-feed.md`), the chat path (`chat-trace.md`), the threetched method count (`threetched-catalog.md`) and the anchoring flow (`two-chains.md`). Fix what changed, update each page's Retrieved date, resolve VERIFY marks you can confirm, and update `docs/wiki/README.md`. (added 2026-11-26, owner)
 
 ## Blocked
@@ -32,6 +31,7 @@ Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and
 - demo-hire-and-receipt-check 7: recording the video needs a tagged known-good version and the live tasks 3, 4 and 6 first (2026-11-24)
 
 ## Done
+- Cleanup: odbus-verified docs audit, table 2 in docs/docs-audit.md (28 rows with file:line and fixes: crate count 37 vs 43, missing getting-started pages, op-cognitive-mcp, s6 install text, book.toml with no SUMMARY.md); nothing edited in odbus-verified (2026-11-26)
 - Cleanup: docs audit table 1 in docs/docs-audit.md; fixed stale counts, hook list, persona method args and a video command, VERIFY marks left for what the allowlist could not check (2026-11-26)
 - Structure: mdBook for the docs: docs/book.toml and docs/SUMMARY.md link the existing pages in place; `mdbook build docs` succeeds (2026-11-26)
 - Foundation: gas snapshot in web3/.gas-snapshot and coverage table under "Test evidence" in web3/README.md (39 tests pass; contracts 100% lines) (2026-11-26)
