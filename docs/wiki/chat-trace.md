@@ -2,7 +2,7 @@
 
 Topic: how a chat turn travels, which code owns each step, and what is current vs deprecated.
 Sources: `3tched.com` `crates/op-chat-interface` (commit `ed1891a`, 2026-11-21), `odbus-verified` `crates/op-grpc-bridge`, `crates/op-plugins/src/state_plugins/chat_response.rs`, `.kiro/specs/identity-chat-interface/records/ts-rust-conversion-inventory.md` (2026-11-19), and the live 3tchedFS operation list.
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Re-checked 2026-11-26 against the live release (golden 352, commit `c5f7180`): the `chat_response` methods listed below are all still sealed.
 
 ## Owner statements (2026-11-23)
 - The chat is the Vercel stack (AI SDK and Chat SDK). Its server-side TypeScript has been converted to Rust. Only the browser UI stays TypeScript/Svelte.
@@ -35,5 +35,5 @@ Every one of these is a `Runtime::call`, so the execution tracker reserves it, a
 ## Open
 - With EMQX gone, how is the responder told a turn is pending? (First person: it should see the pending turn in its own mount, not be woken or poll.)
 - Where the chat interface and the model and mode picker are declared as UI surfaces now, if not in `chat_router`.
-- Which methods set model and mode now, if `chat_router.SetSelection` is deprecated. `project.select_context` sets the chat mode.
+- Resolved 2026-11-26: `chat_router.SetSelection` (`cap.software.threetched.selection.set@v1`) is current and sets provider and model; `ListProviders` and `ListModels` read them. `project.select_context` sets the chat mode and `project.get_context` reads it. Both are in the live sealed catalog.
 - Known gaps from the 2026-11-19 inventory: no turn trace id across a turn's tool calls; no sealed method to read one's own execution records; the UI message stream emits whole parts, not AI SDK deltas.

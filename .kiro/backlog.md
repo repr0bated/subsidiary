@@ -8,7 +8,7 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and the chain) first, then **Structure**, then **Cleanup and tests**. When everything here is blocked, the crew still runs the checks (tests, Rust lint) as fallback work, at least every three hours.
 
 ## Open
-- [ ] Cleanup: update the wiki (`docs/wiki/`). Re-check each page against the live system (release in `/mnt/@upper/golden-state.json`, `zcall methods`/`zcall help`, the odbus-verified source): for example whether `fuse.get_catalog` is sealed yet (`backend-fuse-ui-feed.md`), the chat path (`chat-trace.md`), the threetched method count (`threetched-catalog.md`) and the anchoring flow (`two-chains.md`). Fix what changed, update each page's Retrieved date, resolve VERIFY marks you can confirm, and update `docs/wiki/README.md`. (added 2026-11-26, owner)
+- [ ] Cleanup: re-check the remaining wiki pages not covered on 2026-11-26 (`exchange-point-and-schema-feed.md`, `plugin-feeds.md`, `ui-surfaces.md`, `sdk-components.md`, `openflow-ui.md`, `privacy.md`, `json-render.md`, `chat-as-canvas-route.md`, `backend-source-of-truth.md`, `embedding-plan.md`, `subsidiary-implications.md`) against the live system; update Retrieved dates and resolve VERIFY marks you can confirm (added 2026-11-26, worker)
 
 ## Blocked
 - Owner item: kiroween container TLS UI listener (`OP_UI_LISTEN`) and provisioned browser port, then the live two-container check from docs/handoff/browser-door-dispatch/tasks.md task 9. Blocked: container provisioning and a live two-container check are owner actions outside the worker's scope. Unblock: owner configures the listener and port, then the check can run (2026-11-25)
@@ -31,6 +31,7 @@ Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and
 - demo-hire-and-receipt-check 7: recording the video needs a tagged known-good version and the live tasks 3, 4 and 6 first (2026-11-24)
 
 ## Done
+- Cleanup: wiki update for the four pages the item named (2026-11-26): `fuse.get_catalog` still not sealed (golden 352, catalog gen 75), `chat_response` path unchanged, 147 threetched methods confirmed, `SetSelection` resolved as current, Keccak-256 note added to `two-chains.md`; README updated. The other pages are a new Open item
 - Cleanup: odbus-verified docs audit, table 2 in docs/docs-audit.md (28 rows with file:line and fixes: crate count 37 vs 43, missing getting-started pages, op-cognitive-mcp, s6 install text, book.toml with no SUMMARY.md); nothing edited in odbus-verified (2026-11-26)
 - Cleanup: docs audit table 1 in docs/docs-audit.md; fixed stale counts, hook list, persona method args and a video command, VERIFY marks left for what the allowlist could not check (2026-11-26)
 - Structure: mdBook for the docs: docs/book.toml and docs/SUMMARY.md link the existing pages in place; `mdbook build docs` succeeds (2026-11-26)

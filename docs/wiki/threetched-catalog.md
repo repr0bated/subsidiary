@@ -2,7 +2,7 @@
 
 Topic: the ZeroClaw-derived `threetched` commands available as sealed methods, so they can be used without a menu or spec.
 Source: `/run/mounts/threetched/operations/threetched/` (147 methods, catalog generation 75). Each method is a D-Bus-wrapped binary command: its arguments are the CLI flags. Each has `metadata.json` with `usage` and `help` text.
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Re-checked 2026-11-26 (golden 352): `/run/mounts/threetched/operations/threetched/` still lists 147 methods and the mount is still catalog generation 75. `zcall methods threetched` does not work for this view; list the directory instead.
 
 Owner note: this catalog is usable now; it is just not in any menu or spec yet.
 

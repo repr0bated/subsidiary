@@ -58,6 +58,10 @@ State: the catalog deliberately carries none (`state: "not_requested"`). State r
 - The live sealed `fuse` plugin has only FUSE-operation methods (`open`, `read`, `write` and so on). It does not yet declare `get_catalog`: `zcall help fuse get_catalog` reports no such method. So `get_catalog` is in source, waiting for the rebuild and reseal.
 - Only 10 live plugins declare any `public_state.paths`: `chat_router` (5), `fuse` (5), `grafana` (4), `hardware` (5), `incus` (6), `json_render` (3), `net` (4), `ovsdb_bridge` (16), `procfs` (4), `prometheus` (10). Plugins such as `chat_response`, `project` and `identity_sled` declare none, so their `value.json` discloses nothing. That fits the EIO seen earlier on `value.json`.
 
+## Live check (2026-11-26, here)
+- Live release is golden 352 (commit `c5f7180`, from `/mnt/@upper/golden-state.json`). The mounted catalog is still generation 75 (hash `da7c733a…`), so the sealed catalog did not change.
+- `zcall methods fuse` still lists only FUSE-operation methods. `get_catalog` is not sealed yet. The UI must not rely on it until it appears.
+
 ## What this changes for Subsidiary
 - Schema: the UI gets the granted schema from `fuse.get_catalog`, not by subscribing. It is already grant-filtered and checked against the sealed catalog.
 - State: per plugin, through read methods, or `value.json` for plugins with a public policy. There is no push feed in this path; fresh state comes from reopening or calling again. The "one feed per plugin" requirement needs either this read-again model or a push mechanism the rebuild adds.

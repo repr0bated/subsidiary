@@ -2,7 +2,9 @@
 
 Topic: how the identity's own chain compares to the public blockchain, and how they connect.
 Sources: `docs/wiki/chat-trace.md` (execution tracker), `docs/wiki/backend-source-of-truth.md`, specs `receipt-anchoring` and `service-contract`.
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Updated 2026-11-26 for the hash change below. The sealed `snowball` methods used for anchoring (`verify_chain`, `query_events`, `search_own_events`) are still present in the live catalog.
+
+Hash function: the receipt chain has used Keccak-256 since odbus-verified `bf3c4a8` (2026-11-25), 64 hex characters, anchored as `bytes32` unchanged. Events with `event_id` below 976 on this host keep MD5 hashes and still verify, but are not collision-resistant, so anchoring them does not give tamper-proof commitment against the host's operator. Clients that check receipts must be built from `bf3c4a8` or later. (Source: project steering, `current-vs-deprecated.md`; not re-derived from backend source.)
 
 | | Our record: 3tched's receipt chain | The public record: the blockchain (anvil now; a public chain later) |
 |---|---|---|
