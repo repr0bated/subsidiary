@@ -1,0 +1,7 @@
+[book]
+title = "Subsidiary"
+src = "."
+
+[build]
+build-dir = "../.mdbook"
+create-missing = false
