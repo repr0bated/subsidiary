@@ -1,21 +1,23 @@
 <script lang="ts">
   // The page, laid out by the skeleton in chat_router's sealed "Shell" ui_surface (built-in copy
-  // until the reseal ships it). The canvas fills the window; the model and chat-mode picker is a
-  // drawer along the top; the chatbot is a drawer along the bottom; the nav row sits below the
-  // chat. The canvas and the nav row show only what the chatbot renders.
+  // until the reseal ships it). A pink top bar holds the model and chat-mode picker as a pull-down
+  // drawer. The canvas is a centred column on a Ben-Day page and scrolls under everything. The
+  // chatbot floats over the canvas in the bottom-right corner (minimize, normal, maximize), so the
+  // canvas stays visible behind it. The nav row is pinned to the bottom. The canvas and the nav
+  // row show only what the chatbot renders.
   import Canvas from '../canvas/Canvas.svelte';
   import ChatPanel from '../app/ChatPanel.svelte';
-  import EdgeDrawer from './EdgeDrawer.svelte';
+  import ChatDock, { type DockSize } from './ChatDock.svelte';
+  import TopBar from './TopBar.svelte';
   import ModelModePicker from './ModelModePicker.svelte';
   import { builtInSkeleton, skeletonFrom, splitSpec, type Skeleton, type Slot } from './skeleton';
   import type { Session } from '../app/session';
   import type { Spec } from '@json-render/svelte';
-
   let { session = null }: { session?: Session | null } = $props();
   let spec = $state<Spec | null>(null);
   let skeleton = $state<Skeleton>(builtInSkeleton);
   let navHeight = $state(0);
-
+  let topHeight = $state(0);
   $effect(() => {
     const s = session;
     if (!s) return;
@@ -27,7 +29,6 @@
       () => {}
     );
   });
-
   type Drawer = Extract<Slot, { kind: 'drawer' }>;
   type Row = Extract<Slot, { kind: 'row' }>;
   const drawer = (holds: Drawer['holds']) => skeleton.slots.find((s): s is Drawer => s.kind === 'drawer' && s.holds === holds);
@@ -37,25 +38,35 @@
   const views = $derived(splitSpec(spec, nav ? [nav.id] : []));
   const navSpec = $derived(nav ? (views.slots[nav.id] ?? null) : null);
   const components = $derived(session?.components ?? []);
+  // The skeleton's open flags are the starting state; the user's changes stay in memory.
+  let pickerOpen = $state(false);
+  let chatSize = $state<DockSize>('min');
+  let seeded = false;
+  $effect(() => {
+    if (seeded || !chat) return;
+    seeded = true;
+    pickerOpen = picker?.open ?? false;
+    chatSize = chat.open ? 'normal' : 'min';
+  });
 </script>
-
-<div class="window" style:--nav-h="{navSpec ? navHeight : 0}px">
+{#snippet pickerView()}<ModelModePicker {session} />{/snippet}
+<div class="page" style:--nav-h="{navSpec ? navHeight : 0}px">
+  <div bind:clientHeight={topHeight}>
+    <TopBar bind:open={pickerOpen} children={picker ? pickerView : undefined} />
+  </div>
   <main class="canvas" aria-label="Canvas">
-    <Canvas spec={views.canvas} {components} />
+    <div class="column">
+      <Canvas spec={views.canvas} {components} />
+    </div>
   </main>
-  {#if picker}
-    <EdgeDrawer edge="top" label="Model and mode" closedLabel="Pull down for model and mode" open={picker.open} height={picker.height}>
-      <ModelModePicker {session} />
-    </EdgeDrawer>
-  {/if}
   {#if chat}
-    <EdgeDrawer edge="bottom" label="Chat" closedLabel="Pull up to chat" open={chat.open} height={chat.height} offset="var(--nav-h)">
+    <ChatDock bind:size={chatSize} title="Chat" bottom="{navSpec ? navHeight : 0}px" top="{topHeight}px">
       {#if session}
         <ChatPanel {session} onview={(s) => (spec = s)} />
       {:else}
         <p class="placeholder">Not connected yet.</p>
       {/if}
-    </EdgeDrawer>
+    </ChatDock>
   {/if}
   {#if nav && navSpec}
     <nav class="nav-row" aria-label="Navigation" bind:clientHeight={navHeight}>
@@ -63,27 +74,29 @@
     </nav>
   {/if}
 </div>
-
 <style>
-  .window {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
+  .page {
+    min-height: 100vh;
+    background: var(--paper);
   }
   .canvas {
-    position: absolute;
-    inset: 0 0 var(--nav-h) 0;
-    overflow: auto;
-    background-color: var(--paper);
-    background-image: radial-gradient(var(--pop-red) 22%, transparent 24%);
-    background-size: 32px 32px;
+    padding: 2rem 1.25rem calc(var(--nav-h) + 4rem);
+  }
+  /* The canvas column: a dotted border shows its extent; the chat floats over it. */
+  .column {
+    max-width: 72rem;
+    margin: 0 auto;
+    min-height: 60vh;
+    padding: 1rem;
+    background-image: radial-gradient(var(--pop-red) 1.75px, transparent 1.75px);
+    background-size: 12px 12px;
   }
   .nav-row {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 3;
+    z-index: 4;
     background: var(--ink);
     border-top: var(--outline);
     padding: 0.45rem 0.5rem;
@@ -96,7 +109,7 @@
     box-shadow: 0 3px 0 var(--paper);
   }
   .placeholder {
-    margin: 1rem 0;
+    margin: 1rem;
     font-weight: 700;
   }
 </style>
