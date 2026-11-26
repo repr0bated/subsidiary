@@ -4,32 +4,36 @@ How the browser reaches the container, how the container serves the `openflow` p
 
 ## 1. From the browser to the container
 
-This is why the OpenFlow work exists (owner, 2026-11-26; `docs/handoff/identity-aware-mux`). The host already knows which container a connection belongs to, because the login links the connection to its identity. What was missing is a route to that container. The identity sled holds the route, and OpenFlow carries the traffic into the container's network namespace. The container needs no NIC of its own for this.
+This is why the OpenFlow work exists (owner, 2026-11-26). The host already knows which container a connection belongs to, because the login links the connection to its identity. What was missing is a route to that container. The identity sled holds the route, and OpenFlow carries the traffic into the container's network namespace. The container needs no NIC of its own for this.
 
-### Target path (identity-aware mux, PROPOSED)
+### Target path (OpenFlow only, PROPOSED)
+
+There is no mux in this path (owner, 2026-11-26). OpenFlow alone carries the browser's traffic to the container.
 
 ```
 browser
-  │  one shared entry for every identity (no per-container port)
+  │  one shared entry on the host for every identity (no per-container port)
   ▼
-mux (host)          login already links this connection to its identity
-  │  read the committed identity sled at accept time: it names the route
+ovsbr0 OpenFlow flows   flow children of the `openflow` plugin, made by add_flow
+  │                     (derived cookies, no NORMAL); the identity sled names
+  │                     which container the identity's traffic goes to
   ▼
-OpenFlow on ovsbr0  flow children of the `openflow` plugin, created by add_flow
-  │  (derived cookies, no NORMAL) steer the traffic into that container's namespace
+the container's network namespace (no NIC of its own needed)
   ▼
-op-grpc-bridge UI door, 127.0.0.1:8443 in the container   TLS ends here
-  │
+op-grpc-bridge UI door in the container   TLS ends here
   ▼
 the container's own 3tchedFS mount
 ```
 
-- No route in the sled, or an identity that is inactive, unanchored or expired: the connection is refused. There is no fallback to another container.
-- Nothing is looked up from the browser's request, peer IP or port number.
+- The host already knows which container is the identity's, so nothing is looked up from the browser's request, peer IP or port number. The route comes from the identity sled; the flows implement it.
+- No route in the sled, or an identity that is inactive, unanchored or expired: no flow, so the traffic goes nowhere. There is no fallback to another container, and no NORMAL flow to fall back on.
 - The flows are managed only through the sealed plugins (`openflow`, `ovsdb_bridge`, `rovs_commands`, `rtnetlink`) via zcall; never `ovs-*`.
-- This replaces `BrowserSelector::select` (`crates/op-grpc-bridge/src/runtime_tunnel.rs`, which picks by listener port) and the per-identity browser ports 20000+.
-- Open, for the backend: which sled field holds the route, and what the login hands the mux at accept.
-- Not built yet. The rovs-openflow work so far is the foundation: the bridge can create, change and delete flows on `ovsbr0` itself, admitted and verified. The per-container route flows and the mux change that reads the sled are the next pieces, and neither is in the `rovs-openflow` spec's task list.
+- This replaces the tunnel path below: `op-tunnel-mux`, `BrowserSelector::select` (picks by listener port) and the per-identity browser ports 20000+.
+- Open, for the backend:
+  - which sled field holds the route;
+  - how the flows match the identity's traffic at the shared entry;
+  - where the UI door listens. Today it is the container's own `127.0.0.1:8443`. Packets steered in by OpenFlow arrive on an interface, not on loopback, so the door either listens on the address the flow delivers to (`parse_listen` already allows `10.0.0.2`), or the flow rewrites to it.
+- Not built yet. The rovs-openflow work so far is the foundation: the bridge creates, changes and deletes flows on `ovsbr0` itself, admitted and verified. The per-container route flows and the sled route field are the next pieces, and neither is in the `rovs-openflow` spec's task list.
 
 ### Current path (what the target replaces)
 
@@ -177,7 +181,7 @@ These are taken from `input.schema.json`; always read the live file.
 
 | Part | State |
 |---|---|
-| Identity-aware mux routing into the container over OpenFlow (§1 target) | Proposed design only (`docs/handoff/identity-aware-mux`); no route flows and no sled route field exist yet |
+| OpenFlow route into the container, no mux (§1 target) | Proposed design only; no route flows and no sled route field exist yet |
 | Browser → `op-tunnel-mux` → `op-tunnel-door` → UI door at `127.0.0.1:8443` (§1 current) | In source (`bf56615`, `container_ui_door.rs`). Not running in any container: no container has a bridge with the door enabled (HANDOFF 2026-11-25). |
 | `openflow` methods in the live catalog | 8 methods, as in §3 (host view read on 2026-11-26) |
 | In-process flow writes over rovs at OpenFlow 1.5 (task 4), bridge methods (task 6) | Committed (`062de97`, `93f1129`). In the golden deploy started 08:48Z; not live until that deploy's receipt says `phase=activated` |
