@@ -55,3 +55,16 @@ G. OF1.3 NX monitor error: BAD_REQUEST: unknown experimenter type
 - Command: `CARGO_BUILD_JOBS=2 cargo test -p op-network --lib openflow_cookie`.
 - Red: with stub bodies, 6 failed, 2 passed (bridge bounds and pinned match layout do not depend on the stubs).
 - Green: 8 passed, 0 failed: bridge_name_bounds, empty_match_encoding_is_the_pinned_layout, cookie_matches_independent_sha256_vectors, same_identity_same_cookie, each_identity_field_changes_the_cookie, cookie_is_never_zero_and_carries_the_prefix, foreign_cookies_are_not_plugin_cookies, free_cookie_and_same_flow_pass_and_a_different_flow_collides.
+
+## Fix: placeholders removed from the client (owner: no stubs or placeholders)
+
+- Commit: `7c2d7f9bf030b1dc62526bf8eeb573fe37e972d2`.
+- Task 2 had carried over two placeholders from the old client: `add_flow_rule` (logged "not yet implemented") and `query_flows` (always returned an empty list). Neither had a caller. `add_flow_rule` is removed. `query_flows` is replaced by a real `dump_flows()` with an OpenFlow 1.5 `ofp_flow_desc` decoder.
+- Process change from here on: the red step of test-first work is a compile failure against functions that do not exist yet. No `todo!()` bodies, not even uncommitted. (Task 3's red run used `todo!()` bodies that were never committed; the committed code had none.)
+- Fixture: one full entry captured read-only from `ovsbr0.mgmt` with the probe in `probe/` (updated to print the whole entry):
+  `0070000000000000000000000000000000000000000000000001000400000000000000348002000800003ab710089d408002020800000000000000008002080800000000000eeb0a80020a0800000000355baca000000000000400180000000000000010fffffffa0000000000000000`
+  That is the NORMAL flow: duration 15031 s, 977674 packets, 0x355baca0 bytes, apply-actions output:NORMAL (port 0xfffffffa).
+- Command: `CARGO_BUILD_JOBS=2 cargo test -p op-network --lib openflow`: 25 passed, 0 failed.
+- Red check: dropping the 8-byte padding after the statistics fails `decodes_the_captured_ovsbr0_flow_desc_entry`.
+- Whole `op-network` lib: 92 passed, 1 failed (the same `ovsdb-tool` test as before, unrelated).
+- `grep -nE "todo!|unimplemented!|not yet implemented|placeholder"` over `openflow.rs` and `openflow_cookie.rs`: no matches.

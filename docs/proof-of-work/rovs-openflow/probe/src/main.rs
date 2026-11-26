@@ -106,7 +106,7 @@ async fn main() {
                 while off + 4 <= b.len() {
                     let len = u16::from_be_bytes([b[off], b[off + 1]]) as usize;
                     let raw = &b[off..off + len.min(b.len() - off)];
-                    println!("   entry len={len} first56={:02x?}", &raw[..raw.len().min(56)]);
+                    println!("   entry len={len} hex={}", raw.iter().map(|b| format!("{b:02x}")).collect::<String>());
                     match FlowStatsEntry::decode(raw) {
                         Ok((e, _)) => println!(
                             "   rovs FlowStatsEntry (OF1.3 layout): table={} prio={} cookie={:#x} pkts={} match={:?}",
