@@ -45,3 +45,13 @@ G. OF1.3 NX monitor error: BAD_REQUEST: unknown experimenter type
 ## Housekeeping, 2026-11-26
 
 - A duplicate unattended agent (tmux session `rovs`, same prompt) was running in the extra worktree `/srv/git/odbus-verified-wt/kiroween` and rewrote `openflow.rs` after task 2. Stopped on the owner's instruction; the worktree was clean with nothing unpushed, then removed with its build cache. Work continues in `/srv/git/odbus-verified`.
+
+## Task 3: derived flow cookies
+
+- Commit: `4aa316405db03728972859e44e8b797a958edcb8` (`crates/op-network/src/openflow_cookie.rs`).
+- Rule: cookie = `0x33444348` prefix | first 32 bits of SHA-256 over `"3tched.openflow.cookie.v1\0" || len(bridge) || bridge || table || priority (BE) || rovs match encoding`. Hash is SHA-256 as in design D2 (Keccak-256 to match the receipt chain was proposed; owner has not chosen).
+- Independent check of the pinned vectors, outside the code:
+  `printf '3tched.openflow.cookie.v1\0\x06ovsbr0\x00\x00\x0a\x00\x01\x00\x04\x00\x00\x00\x00' | sha256sum` gives `1aa9a527...` (table 0, priority 10, empty match); priority 0 gives `bf93851b...`.
+- Command: `CARGO_BUILD_JOBS=2 cargo test -p op-network --lib openflow_cookie`.
+- Red: with stub bodies, 6 failed, 2 passed (bridge bounds and pinned match layout do not depend on the stubs).
+- Green: 8 passed, 0 failed: bridge_name_bounds, empty_match_encoding_is_the_pinned_layout, cookie_matches_independent_sha256_vectors, same_identity_same_cookie, each_identity_field_changes_the_cookie, cookie_is_never_zero_and_carries_the_prefix, foreign_cookies_are_not_plugin_cookies, free_cookie_and_same_flow_pass_and_a_different_flow_collides.
