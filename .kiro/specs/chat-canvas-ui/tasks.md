@@ -55,6 +55,6 @@ Revised 2026-11-24 for the backend path (door, `fuse.get_catalog`, StateSync). T
   - [x] 10.3 Candidate components ready to register with `json_render.save_candidate`: Burst (seven events, text equivalents), SpeechBalloon, ReceiptCard (capabilities stripped)
   - [x] 10.4 The other 24 sealed components (all 36 implemented; inputs bind to local view state only and never write into /plugins)
   - [x] 10.5 Bangers and Comic Neue bundled under the SIL OFL (no runtime font requests)
-  - [ ] 10.6 Register the candidates (needs `json_render.gallery`; owner)
+  - [x] 10.6 Burst, SpeechBalloon and ReceiptCard are in the catalog directly (`catalog/comic-components.ts`, merged at render time; no registration step)
 
 Deferred until state works: Requirement 6c (accountability view data) and 7 (candidate flow at runtime).

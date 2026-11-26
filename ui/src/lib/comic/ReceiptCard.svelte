@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Candidate component: a receipt, stamped. Capability fields are stripped before rendering.
+  // Catalog component: a receipt, stamped. Capability fields are stripped before rendering.
   import { stripCapabilities } from '../catalog/runnable';
   import type { Receipt } from '../door/types';
   let { receipt, anchored = false }: { receipt: Receipt; anchored?: boolean } = $props();

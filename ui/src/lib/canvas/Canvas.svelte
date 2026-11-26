@@ -3,6 +3,7 @@
   // feed data read-only under /plugins, and only sealed actions (design §7).
   import { defineRegistry, JsonUIProvider, Renderer, type Spec } from '@json-render/svelte';
   import { catalogFromSealed, type SealedComponent } from '../catalog/sealed-catalog';
+  import { withComicComponents } from '../catalog/comic-components';
   import { comicComponents } from './registry';
   import { handlersFor, type SealedAction } from './actions';
 
@@ -15,10 +16,11 @@
     compact = false
   }: { spec?: Spec | null; components?: SealedComponent[]; actions?: SealedAction[]; feeds?: Record<string, unknown>; label?: string; compact?: boolean } = $props();
 
-  const sealedNames = $derived(new Set(components.map((c) => c.name)));
+  const all = $derived(components.length ? withComicComponents(components) : []);
+  const sealedNames = $derived(new Set(all.map((c) => c.name)));
   const implemented = $derived(Object.fromEntries(Object.entries(comicComponents).filter(([n]) => sealedNames.has(n))));
   const registry = $derived(
-    components.length ? defineRegistry(catalogFromSealed(components), { components: implemented as never, actions: handlersFor(actions) as never }).registry : null
+    all.length ? defineRegistry(catalogFromSealed(all), { components: implemented as never, actions: handlersFor(actions) as never }).registry : null
   );
 </script>
 

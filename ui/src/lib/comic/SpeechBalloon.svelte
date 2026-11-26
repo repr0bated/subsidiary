@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Candidate component: the identity's own voice in a speech balloon.
+  // Catalog component: the identity's own voice in a speech balloon.
   let { text, speaker = '' }: { text: string; speaker?: string } = $props();
 </script>
 <figure class="balloon">

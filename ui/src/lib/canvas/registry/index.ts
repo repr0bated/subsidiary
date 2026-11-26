@@ -3,6 +3,9 @@ import Alert from './Alert.svelte';
 import Avatar from './Avatar.svelte';
 import Badge from './Badge.svelte';
 import ButtonGroup from './ButtonGroup.svelte';
+import Burst from './Burst.svelte';
+import ReceiptCard from './ReceiptCard.svelte';
+import SpeechBalloon from './SpeechBalloon.svelte';
 import Button from './Button.svelte';
 import Card from './Card.svelte';
 import Carousel from './Carousel.svelte';
@@ -36,5 +39,5 @@ import Toggle from './Toggle.svelte';
 import Tooltip from './Tooltip.svelte';
 
 /** Lichtenstein-styled implementations of every sealed json_render catalog component, by sealed name. */
-export const comicComponents = { Accordion, Alert, Avatar, Badge, ButtonGroup, Button, Card, Carousel, Checkbox, Collapsible, Dialog, Drawer, DropdownMenu, Grid, Heading, Image, Input, Link, Pagination, Popover, Progress, Radio, Select, Separator, Skeleton, Slider, Spinner, Stack, Switch, Table, Tabs, Textarea, Text, ToggleGroup, Toggle, Tooltip };
+export const comicComponents = { Burst, ReceiptCard, SpeechBalloon, Accordion, Alert, Avatar, Badge, ButtonGroup, Button, Card, Carousel, Checkbox, Collapsible, Dialog, Drawer, DropdownMenu, Grid, Heading, Image, Input, Link, Pagination, Popover, Progress, Radio, Select, Separator, Skeleton, Slider, Spinner, Stack, Switch, Table, Tabs, Textarea, Text, ToggleGroup, Toggle, Tooltip };
 export type ImplementedComponent = keyof typeof comicComponents;

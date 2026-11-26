@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Candidate component (not in the sealed catalog yet; register with json_render.save_candidate).
+  // Catalog component (added directly in catalog/comic-components.ts).
   import { burstFor, type BackendEvent } from './bursts';
   let { event }: { event: BackendEvent } = $props();
   const b = $derived(burstFor(event));
