@@ -8,7 +8,6 @@ Format: `- [ ] <what to do> (added <date>, <who>)`. The worker checks an item of
 Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and the chain) first, then **Structure**, then **Cleanup and tests**. When everything here is blocked, the crew still runs the checks (tests, Rust lint) as fallback work, at least every three hours.
 
 ## Open
-- [ ] Foundation: invariant tests for `EtchedAnchor` in `web3/test/EtchedAnchor.invariant.t.sol` (forge-std `StdInvariant` with a handler that anchors bounded random heads from several senders, including repeats and zero). Invariants: the zero head is never anchored; once anchored, a head's `anchorOf` timestamp and sender never change; `isAnchored(h)` holds exactly for the heads the handler anchored successfully (ghost set). Uses the `[invariant]` settings in `foundry.toml`. Done when `forge fmt`, `forge build` and `forge test` pass. (added 2026-11-26, Kiro)
 - [ ] Foundation: invariant tests for `HireContract` in `web3/test/HireContract.invariant.t.sol` (handler with client and provider actors calling createHire, accept, cancel, deliver, confirm, fileClaim and resolveClaim with bounded ids and inputs, anchoring work and remedy heads through `EtchedAnchor` first). Invariants, tracked with ghost state: status only moves along the transitions the contract allows (Created to Accepted or Cancelled, Accepted to Delivered, Delivered to Completed) and never back; client, provider, termsHash and warrantyPeriod never change after creation; every Delivered or Completed hire has a nonzero workHead that is anchored; a Completed hire has both confirmations; each provider's `providerRecord` counts equal the ghost counts; claims exist only on Completed hires and a resolved claim's remedyHead is anchored. Done when `forge fmt`, `forge build` and `forge test` pass. (added 2026-11-26, Kiro)
 - [ ] Foundation: gas snapshot for both contracts (`forge snapshot` into `web3/.gas-snapshot`, committed) and a `forge coverage --report summary` table appended to `web3/README.md` under a "Test evidence" heading with the date. Done when both run clean. (added 2026-11-26, Kiro)
 
@@ -33,6 +32,7 @@ Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and
 - demo-hire-and-receipt-check 7: recording the video needs a tagged known-good version and the live tasks 3, 4 and 6 first (2026-11-24)
 
 ## Done
+- Foundation: `EtchedAnchor` invariant tests in web3/test/EtchedAnchor.invariant.t.sol (3 invariants, handler with ghost set; fmt, build, test pass) (2026-11-26)
 - UI build: Node 22.23.5 through nvm (v0.41.0, cloned from github.com/nvm-sh/nvm into ~/.nvm), pinned in ui/.nvmrc and used by the crew and worker scripts; build writes build/index.html with the config script (2026-11-25)
 - chat-canvas-ui 2.4: no browser identity; the host handles identity (owner) (2026-11-25)
 - receipt-anchoring 6: deferred until 3tched exposes the full canonical event payload (2026-11-25)
