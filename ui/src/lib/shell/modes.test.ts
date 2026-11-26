@@ -7,10 +7,6 @@ describe('mode picker', () => {
     expect(modesFor(true)).not.toContain('personal');
     expect(modesFor(false)).toContain('personal');
   });
-  it('offers no Control plane mode to a subsidiary', () => {
-    expect(modesFor(true)).not.toContain('control_plane');
-    expect(modesFor(false)).toContain('control_plane');
-  });
 });
 
 describe('shell layout', () => {

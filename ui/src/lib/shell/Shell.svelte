@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { clampChatWidth, fallbackLayout, gridColumns, type ShellLayout } from './layout';
+  import { fallbackLayout, gridColumns, type ShellLayout } from './layout';
   import NavMenu from './NavMenu.svelte';
   import ModelModePicker from './ModelModePicker.svelte';
   import Canvas from '../canvas/Canvas.svelte';
@@ -15,38 +15,14 @@
   let incoming = $state<{ id: number; text: string } | null>(null);
   // The default is read once; later changes are the user's (requirement 3.5).
   let layout = $state<ShellLayout>(untrack(() => ({ ...initial })));
-  // Chat width stays where the user releases the handle (in memory only, like the rest of the layout).
-  let chatWidth = $state<number | undefined>(undefined);
-  let dragging = $state(false);
-  let shellEl: HTMLDivElement;
-  const columns = $derived(gridColumns(layout, chatWidth));
-  function currentChatWidth(): number {
-    return chatWidth ?? shellEl.querySelector('.chat')!.getBoundingClientRect().width;
-  }
-  function startDrag(e: PointerEvent) {
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    dragging = true;
-  }
-  function drag(e: PointerEvent) {
-    if (!dragging) return;
-    chatWidth = clampChatWidth(window.innerWidth - e.clientX, window.innerWidth);
-  }
-  function endDrag() {
-    dragging = false;
-  }
-  function nudge(e: KeyboardEvent) {
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-    e.preventDefault();
-    const step = e.key === 'ArrowLeft' ? 24 : -24;
-    chatWidth = clampChatWidth(currentChatWidth() + step, window.innerWidth);
-  }
+  const columns = $derived(gridColumns(layout));
 
   function toggle(panel: keyof ShellLayout) {
     layout[panel] = !layout[panel];
   }
 </script>
 
-<div class="shell" class:dragging bind:this={shellEl} style:grid-template-columns={columns}>
+<div class="shell" style:grid-template-columns={columns}>
   <aside class="nav" class:collapsed={!layout.nav} aria-label="Navigation">
     {#if layout.nav}<NavMenu />{/if}
   </aside>
@@ -68,22 +44,6 @@
   </main>
 
   <section class="chat" class:collapsed={!layout.chat} aria-label="Chat">
-    {#if layout.chat}
-      <!-- A focusable separator is the WAI-ARIA window splitter pattern. -->
-      <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
-      <div
-        class="resizer"
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="Resize chat"
-        tabindex="0"
-        onpointerdown={startDrag}
-        onpointermove={drag}
-        onpointerup={endDrag}
-        onpointercancel={endDrag}
-        onkeydown={nudge}
-      ></div>
-    {/if}
     {#if layout.picker}<ModelModePicker />{/if}
     {#if layout.chat}
       {#if session && conversationId}
@@ -146,30 +106,8 @@
     font-weight: 700;
   }
   .chat {
-    position: relative;
     overflow: auto;
     background: var(--paper);
-  }
-  .resizer {
-    position: sticky;
-    top: 0;
-    float: left;
-    width: 8px;
-    height: 100vh;
-    margin-right: -8px;
-    z-index: 5;
-    cursor: col-resize;
-    touch-action: none;
-    background: transparent;
-  }
-  .resizer:hover,
-  .resizer:focus-visible,
-  .dragging .resizer {
-    background: var(--pop-red);
-  }
-  .dragging {
-    transition: none;
-    user-select: none;
   }
   .chat,
   .nav {
