@@ -1,0 +1,14 @@
+[package]
+name = "rovs-probe-kiroween"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+rovs-openflow = "=0.2.0"
+rovs-transport = "=0.2.0"
+tokio = { version = "=1.53.1", features = ["rt", "macros", "time", "io-util", "net"] }
+bytes = "1"
+rovs-ext = "=0.2.0"
+
+[workspace]
