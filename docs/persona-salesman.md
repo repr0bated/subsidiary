@@ -19,7 +19,7 @@ Rules you never break:
 
 ## Where it lives (proposal)
 Single source: the persona is data in the backend, not text in the UI.
-1. Store it as sealed data. One option is a field in the identity's `ctl_plane_chatbot` config (`set_config`), keyed per identity. Another is an entry the `persona` plugin can hold; today `set_identity` takes only `name` and `description`.
+1. Store it as sealed data. One option is a field in the identity's `ctl_plane_chatbot` config (`set_config`), keyed per identity. Another is an entry the `persona` plugin can hold; today `set_identity` takes `agent_type` (required), `name` (required) and `description` (checked with `zcall help persona set_identity`, 2026-11-26).
 2. Have the container responder (`3tched.com` `crates/op-chat-interface/src/responder.rs`) insert it as the first system message, before its existing identity-scoped instructions. The safety instructions that follow (user text and tool output are data; return one JSON action) stay in force.
 3. The UI changes nothing; the voice comes back in the committed turns.
 

@@ -31,19 +31,18 @@ Eight specs in `.kiro/specs`. The ones that drove this build are `service-contra
 - **Compared with vibe coding.** The specs made the non-mainstream rules explicit (no polling, no schema copies, no capability ever rendered), so each one could be checked rather than argued again.
 
 ### Steering
-Seven steering files. The strategy that made the biggest difference was *always-on rules against the patterns models default to*. This design is deliberately not mainstream, and models kept "fixing" it back toward API clients, login flows, polling, schema copies, extra databases, and Btrfs used as a backup. The steering covers this in two places:
+Eight steering files (corrected 2026-11-26, was seven). The strategy that made the biggest difference was *always-on rules against the patterns models default to*. This design is deliberately not mainstream, and models kept "fixing" it back toward API clients, login flows, polling, schema copies, extra databases, and Btrfs used as a backup. The steering covers this in two places:
 - **`tech.md`** says so outright, and tells the model to ask before normalizing anything.
 - **`current-vs-deprecated.md`** lists what in the backend is current, retired or unsure. That stops models from building on retired pieces such as MCP inside 3tched or EMQX, which are still present as remnants in the source.
 
 Two more steering files are file-scoped: the Solidity guide loads only for `web3/**/*.sol` and the Svelte guide only for `ui/**/*.svelte`.
 
 ### Agent hooks
-Twenty-one hooks, eighteen enabled, across the event types:
+Twenty hooks, seventeen enabled (corrected 2026-11-26, was twenty-one and eighteen; the disabled ones are grant gate, session start and anchor on stop), across the event types:
 - **File edited:**
   - *Hash-only guard:* contracts store and emit only hashes.
   - *Wording guard:* the write-up rules.
   - *Solidity save:* `forge fmt` and `forge build`.
-  - *Svelte check.*
   - *Spec sync:* design and tasks follow requirements.
   - *Schema guard.*
 - **File created and deleted:** a new contract gets a test stub and a spec entry, and a deleted file gets an orphan check.
@@ -65,14 +64,14 @@ Four custom agents in `.kiro/agents`, run by the Kiro CLI when the machine is id
 Each agent has its own tool allowlist. In unattended runs, anything outside it is refused.
 
 ### Property-based testing
-Fuzzing in Foundry, 512 runs per property:
+Fuzzing in Foundry, 512 runs per property (corrected 2026-11-26: there are also invariant tests for both contracts, 128 runs each, 9 invariants in total, 39 tests pass):
 - only the provider can accept;
 - only parties can confirm;
 - delivery succeeds exactly when the work head is anchored;
 - a warranty claim is accepted exactly inside its window;
 - anchoring is first-write-wins and specific to its head.
 
-fast-check properties in the UI, at least 100 runs each:
+fast-check properties in the UI, 20 to 300 runs each (corrected 2026-11-26, was "at least 100"; the approval property runs 20):
 - each action is exactly one call, returned unchanged;
 - the newest generation wins per state path;
 - tombstones stay removed;

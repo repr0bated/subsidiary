@@ -6,6 +6,7 @@
 - [Design embodiment](design-embodiment.md)
 - [Salesman persona](persona-salesman.md)
 - [Video shot list](video-shotlist.md)
+- [Docs audit](docs-audit.md)
 
 # Wiki
 

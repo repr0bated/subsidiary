@@ -65,7 +65,7 @@ Extensions to mention: website-creator agent, Rust debugger agent, business spec
 ## Architecture
 Pre-existing (see `PREEXISTING.md`): the backend, the FUSE call-file channel, per-tenant Cozo storage, and the container. They are used as they are, not rebuilt for the hackathon. New: `ui/`, `web3/`, the demo wiring and `.kiro/`.
 
-- LXD container on antix1 (Ubuntu 26.04; Incus is not used), unprivileged, no nesting, resource limits, read-only base plus overlay, snapshot, runit with log services. Spec lives in 3tched `.kiro/specs/subsidiary-container/`.
+- LXD container on antix1 (Ubuntu 26.04; Incus is not used), unprivileged, no nesting, resource limits, read-only base plus overlay, snapshot, runit with log services. Spec lives in 3tched `.kiro/specs/subsidiary-container/` (exists in `/srv/git/odbus-verified`, checked 2026-11-26). VERIFY 2026-11-26: the steering file `current-vs-deprecated.md` says Incus runs the current containers and LXD is being prepared, and `tech.md` reaches the container with `sudo lxc exec kiroween`; "Incus is not used" is left as written because it is an owner decision.
 - Only backend channel: FUSE call files.
 - Storage: ext4 host volumes with one Cozo (RocksDB) DB per tenant, bind-mounted; host ownership must match shifted container UIDs.
 - Chain: Foundry (forge, anvil, cast, forge script). Base Sepolia (84532) optional later.
@@ -196,21 +196,19 @@ Subsidiary renders a content management system from a live schema inside a seale
 - **Specs vs vibe coding:** the rules ask for this comparison. Note concrete cases.
 
 ## Progress so far
+Updated 2026-11-26 (the earlier text said no contracts or UI existed yet).
+
 Done:
-- Planning: `docs/PLAN.md`, `PREEXISTING.md`, five specs, six steering files, plus `docs/wiki/` research notes.
-- Tooling: Foundry 1.10.0 installed; `web3/` initialised with `forge init` (template contract removed, no project contracts yet); git initialised with the `repr0bated/subsidiary` remote and a `.gitignore`.
-- Hooks: 19 files, 16 enabled.
-- Agents and scripts: three agents; `idle-check.sh`, `idle-watch.sh`, `crew-run.sh`, `preflight.sh`, `receipt.sh`; a cron job runs the idle watcher every 10 minutes.
+- Planning: `docs/PLAN.md`, `PREEXISTING.md`, eight spec directories in `.kiro/specs` (`cockpit-lxd-standalone` holds only a workspace file), eight steering files, plus `docs/wiki/` research notes.
+- Contracts: `EtchedAnchor` and `HireContract` in `web3/src`, with unit, fuzz and invariant tests (39 tests pass), deploy and demo scripts, `verify-hire.sh`, `anchor-head.sh` and `verify-receipt.sh`. The Foundry version is VERIFY (not rechecked 2026-11-26).
+- UI: the Svelte 5 chat canvas in `ui/` (door client, catalog, state reducer, chat transport, canvas registry, comic components, accountability view) with property tests. The live parts wait on the backend items in `.kiro/backlog.md` (Blocked).
+- Hooks: 20 files, 17 enabled.
+- Agents and scripts: four agents (validator, tester, rust-housekeeping, worker); eight scripts in `.kiro/scripts` (`idle-check.sh`, `idle-watch.sh`, `crew-run.sh`, `work-run.sh`, `preflight.sh`, `receipt.sh`, `backend-check.sh`, `toolchain.sh`); git has the `repr0bated/subsidiary` remote and two tags, `demo-good-2026-11-25` and `demo-good-2026-11-25b`.
 
-Not started (all spec tasks are still unchecked):
-- `EtchedAnchor`, the service contract, and their Foundry tests and scripts
-- `ui/` scaffold and the sealed surface
-- `container/`, the tenant Cozo mounts, and the FUSE call files
-- The demo spec's requirements, design and tasks
-- The fictional businesses and their schemas
-- The video and the final write-up
-
-Not yet run end to end: the crew agents and the hooks added this session.
+Not done:
+- `container/` holds only a README; the tenant Cozo mounts and the live FUSE wiring are parked or blocked (see the backlog).
+- The live demo path: door, persona backend home, model path for persona agents.
+- The video and the final write-up.
 
 ## Usage
 
@@ -220,7 +218,7 @@ Not yet run end to end: the crew agents and the hooks added this session.
     cd web3 && forge fmt && forge build && forge test -vv
 
 ### Hooks
-Hooks fire inside the Kiro IDE. Enabled now: preflight, contract tests, Solidity save, Svelte check, schema guard, spec sync, hash-only guard, wording guard, secret scan, new-contract spec, orphan check, reports digest, receipt on tool use, and three on-demand buttons (Ready for demo, Explain this contract, Crew now). Off until the FUSE door and the anchor contract exist: grant gate, session start, anchor on stop. Toggle a hook by changing `"enabled"` in its file.
+Hooks fire inside the Kiro IDE. Enabled now (17 of 20, checked 2026-11-26): preflight, contract tests, Solidity save, schema guard, spec sync, hash-only guard, wording guard, secret scan, new-contract spec, orphan check, reports digest, receipt on tool use, backlog on stop, and four on-demand buttons (Ready for demo, Explain this contract, Crew now, Work now). Disabled: grant gate, session start, anchor on stop (the anchor contract now exists; whether to enable them is the owner's call). VERIFY: removed the "Svelte check" hook from this list: no hook file mentions Svelte or npm (2026-11-26). Toggle a hook by changing `"enabled"` in its file.
 
 ### Crew
 Validator, tester and rust-housekeeping run when the server is idle: no logged-in terminal and no Kiro session has had a command in the last 15 minutes, and files changed since the last run. Cron calls `.kiro/scripts/idle-watch.sh` every 10 minutes, and the run stops if you return. The tester and rust-housekeeping agents fix lint, format and test errors and log each change; the validator only reports. Reports go to `docs/reports/` (not committed). Start a run immediately with the "Crew now" hook or `CREW_FORCE=1 bash .kiro/scripts/crew-run.sh`. Agents use anvil only and never read `.env`, tenant data or `/etc/op-dbus/secrets`. They do not commit or push.
