@@ -34,3 +34,10 @@ curl -sk -X POST https://10.0.0.2:20001/operation.v1.PluginService/ListPlugins \
 
 - `100.96.0.5:8080` (the WARP address) is still `socat → 10.0.0.2:20000` (runit `opdbus-vip-door-8080`), which is another container, not kiroween. It was left running because it may be the path someone is using. Replacing it with the bridge's own tonic listener on `100.96.0.5` is a bridge change plus a deploy.
 - OpenFlow does not carry this traffic. WARP traffic arrives on `CloudflareWARP`, a layer-3 tun that is not an `ovsbr0` port; the only `ovsbr0` port is `eth0`. Putting `CloudflareWARP` on `ovsbr0` needs the OF1.5 `packet_type` match and changes the live ingress path; not done while the owner was away, because a wrong flow there would cut off the way back in.
+
+## WARP without socat: tonic browser listener on 100.96.0.5 (owner: "you take ownership")
+
+- `53d97dd`: Codex's uncommitted, already-live chatbot shared lungs work committed as found (task `chatbot-shared-lungs-20261126`); Kiro owns it from here.
+- `bdacd7d`: `OP_BROWSER_DOOR` is a comma-separated list; the host run script sets `10.0.0.2,100.96.0.5`. Every identity's browser port is bound on both, served by the same tonic browser listener over the shared browser socket into that container. Not compiled before deployment (owner, AGENTS.md).
+- Decision, not asked: `CloudflareWARP` is not put on `ovsbr0`. All host egress uses the WARP table (`ip rule`: `not from all fwmark 0x100cf lookup 65743`), so bridging that tun would cut every outbound path at once.
+- Golden deploy at `bdacd7d` started 2026-11-26 23:45Z: `~/provisioning/runs/golden-deploy-bdacd7d-20261126T234519Z.{sh,log,receipt}`. Verification after activation: `https://100.96.0.5:20001/` must serve kiroween's `start.B3vC46NB` and answer gRPC-Web `ListPlugins` with `grpc-status:0`.
