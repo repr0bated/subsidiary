@@ -18,9 +18,9 @@ No mux. One shared entry `:8080`. A BPF program ties the connection to the seale
 
 Blocker found 2026-11-27: the host never sees a WireGuard peer (next section). The spec says to stop in that case rather than weaken it.
 
-## Live browser path (2026-11-27)
+## Browser path (2026-11-27)
 
-`https://10.0.0.2:8080` (over WARP, lands on `100.96.0.5:8080`) shows kiroween's own axum UI on its `127.0.0.1:8443`. It is kiroween's LXD proxy device `ui` (`listen=tcp:100.96.0.5:8080 connect=tcp:127.0.0.1:8443 bind=host`). No mux, no port 20000, no NIC, no route. Checked: page, `start.B3vC46NB.js` and `ListPlugins` all come from kiroween. The socat relay `opdbus-vip-door-8080` is down with a `down` file. Undo: `sudo lxc config device remove kiroween ui`.
+No proxy devices (owner). OpenFlow carries the browser to the container. Nothing listens on `100.96.0.5:8080` now: the socat relay `opdbus-vip-door-8080` is down with a `down` file, and the LXD proxy device tried briefly was removed.
 
 ## WireGuard and the Decoy
 
