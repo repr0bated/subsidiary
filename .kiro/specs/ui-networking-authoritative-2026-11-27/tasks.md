@@ -59,7 +59,7 @@ Do not proceed until Tasks 2–4 build together in one Cargo invocation, BPF art
   - **Verification:** Safe package build. With test approval, focused tests cover two identities, stale/dead peers, at-most-once custody, bounded waiters, cancellation, and fd leaks.
   - **Requirements:** REQ-004, REQ-007.
 
-- [ ] **Task 6 — Replace the framed container browser relay with a local raw splice**
+- [x] **Task 6 — Replace the framed container browser relay with a local raw splice**
   - **Outcome:** Make `op-tunnel-door` hold bounded lungs browser waiters, receive an owned TCP fd, open `127.0.0.1:8443` inside the identity container, and splice raw streams with backpressure and half-close semantics. Do not serve the axum router directly.
   - **Likely files:** `crates/op-tunnel-mux/src/bin/op-tunnel-door.rs`, one new `crates/op-tunnel-mux/src/browser_fd.rs`, `crates/op-tunnel-mux/src/lib.rs`, and `crates/op-tunnel-mux/Cargo.toml`.
   - **Dependencies:** Task 5.
