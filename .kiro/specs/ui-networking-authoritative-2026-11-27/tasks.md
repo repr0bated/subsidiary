@@ -26,7 +26,7 @@ File lists below are expected scope, not permission to rewrite unrelated code. S
   - **Verification:** Focused lifecycle tests when the owner authorizes tests; safe package build otherwise.
   - **Requirements:** REQ-001, REQ-002, REQ-003.3, REQ-007.
 
-- [ ] **Task 3 — Add the trusted browser-ingress BPF association**
+- [x] **Task 3 — Add the trusted browser-ingress BPF association**
   - **Outcome:** Add a dedicated browser-ingress BPF program and userspace loader/map wrapper. Classify post-WireGuard TCP destination port `8080`, preserve a kernel-derived connection key to the opaque route handle, and expire bounded per-flow state.
   - **Likely files:** `crates/op-network/bpf/browser_ingress.bpf.c`, `crates/op-network/bpf/browser_ingress_loader.c` or a Rust loader module, `crates/op-network/bpf/build-browser-ingress.sh`, `crates/op-network/src/browser_ingress.rs`, and `crates/op-network/src/lib.rs`.
   - **Dependencies:** Task 2.
