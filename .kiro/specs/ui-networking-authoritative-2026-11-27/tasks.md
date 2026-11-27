@@ -74,7 +74,7 @@ Do not touch live `:8080` or attach BPF until all affected packages build togeth
 
 ## Phase C — Cut over, prove, then remove legacy delivery
 
-- [ ] **Task 7 — Prepare the runit and golden cutover without activating it**
+- [x] **Task 7 — Prepare the runit and golden cutover without activating it**
   - **Outcome:** Define fail-closed service ordering for BPF state, shared ingress, lungs, and the container waiter. Stop `op-web` from owning the WireGuard-facing `10.0.0.2:8080`; preserve unrelated required services only on a non-conflicting internal binding. Update the container door command to use lungs and `127.0.0.1:8443`.
   - **Likely files:** `deploy/runit/op-web/run`, `deploy/provisioning/runit/op-tunnel-door/run`, the shared-ingress runit `run` file identified by Task 1, `deploy/lib/golden/activate-services.tsv`, and its focused activation contract test.
   - **Dependencies:** Checkpoint B.
