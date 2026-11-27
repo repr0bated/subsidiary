@@ -8,7 +8,7 @@ File lists below are expected scope, not permission to rewrite unrelated code. S
 
 ## Phase A — Prove and preserve identity at ingress
 
-- [ ] **Task 1 — Claim the work and pin the current source boundaries**
+- [x] **Task 1 — Claim the work and pin the current source boundaries**
   - **Outcome:** Record the active task in `HANDOFF.md`; identify the exact sealed WireGuard-to-sled authority, live `:8080` owner, lungs bootstrap, and current relay/selector removal points. Choose the strongest supported BPF hook and accepted-socket key only from source and live read-only evidence.
   - **Likely files:** `HANDOFF.md` only. This task is otherwise read-only.
   - **Dependencies:** Approved requirements and design.
