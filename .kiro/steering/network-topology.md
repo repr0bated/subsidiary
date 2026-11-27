@@ -24,7 +24,7 @@ Identification is sealed at login and already determined. Do not revisit it: not
 
 The committed identity sled has everything needed: UUID, session ID, container ID/name, hostname. Any of them can be the identifier. At login, use that identifier with OpenFlow to get to the container. BPF then delivers the container's UI (axum on its own `127.0.0.1:8443`) to the browser on the shared `8080`. No mux, no port 20000+, no socat relay, no proxy devices.
 
-Now: nothing listens on `100.96.0.5:8080`. The socat relay `opdbus-vip-door-8080` is down with a `down` file; a proxy device tried on kiroween was removed.
+The networking is already set up (owner, 2026-11-27). Do not redo, re-probe or re-derive it, and do not stop, start or add network services, relays or devices. There is no socat in the design. The only open work is the browser path above.
 
 ## WireGuard and the Decoy (reference only; not part of the browser path)
 
