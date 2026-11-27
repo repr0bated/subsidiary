@@ -50,7 +50,7 @@ Do not proceed until Tasks 2–4 build together in one Cargo invocation, BPF art
 
 ## Phase B — Transfer custody and serve from container localhost
 
-- [ ] **Task 5 — Add at-most-once browser fd waiters to the existing lungs D-Bus connection**
+- [x] **Task 5 — Add at-most-once browser fd waiters to the existing lungs D-Bus connection**
   - **Outcome:** Add a bounded `AcceptBrowser`-style call to `org.opdbus.v1.LungsV1`. The connection's existing peer proof and committed container binding key the waiter; the method accepts no caller-supplied identity. Transfer the accepted TCP socket with D-Bus Unix-fd semantics.
   - **Likely files:** `crates/op-grpc-bridge/src/runtime_lungs.rs`, `crates/op-grpc-bridge/src/runtime_lungs_identity.rs`, one new `crates/op-grpc-bridge/src/runtime_lungs_browser.rs`, and `crates/op-grpc-bridge/Cargo.toml` if required.
   - **Dependencies:** Task 4.
