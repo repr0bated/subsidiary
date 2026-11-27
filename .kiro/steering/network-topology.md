@@ -14,7 +14,7 @@ The first step is the identity sled: the identifier it already holds names the c
 
 ## Target: `.kiro/specs/ui-networking-authoritative-2026-11-27/` (authoritative, not built)
 
-One shared entry `:8080`. A BPF program ties the connection to the sealed WireGuard peer, and so to the sled. The host hands the accepted socket itself to that identity's bound lungs connection (D-Bus Unix fd). Inside the container it is spliced to `127.0.0.1:8443`, where TLS ends at the axum door. The spec forbids OpenFlow routes into the container, `route_localnet`, a container NIC, and selection by port, SNI or headers. It supersedes `identity-aware-mux`, `browser-door-dispatch`, `openflow-browser-route` and `browser-lungs-handoff`.
+No mux. One shared entry `:8080`. A BPF program ties the connection to the sealed WireGuard peer, and so to the sled. The host hands the accepted socket itself to that identity's bound lungs connection (D-Bus Unix fd). Inside the container it is spliced to `127.0.0.1:8443`, where TLS ends at the axum door. The spec forbids OpenFlow routes into the container, `route_localnet`, a container NIC, and selection by port, SNI or headers. It supersedes `identity-aware-mux`, `browser-door-dispatch`, `openflow-browser-route` and `browser-lungs-handoff`.
 
 Blocker found 2026-11-27: the host never sees a WireGuard peer (next section). The spec says to stop in that case rather than weaken it.
 
@@ -26,9 +26,11 @@ Blocker found 2026-11-27: the host never sees a WireGuard peer (next section). T
 - `wg-opdbus` peers: `lnF9hBrc…` = `10.0.0.5/32` (the router, handshaking); `HzneJZpK…` = `10.0.0.8/32`; `8fUis0DF…` (kiroween's key) has no allowed IPs and no handshake; `1CWFO9e6…` has no allowed IPs.
 - Router `10.0.0.5` (OpenWrt): answers ping from the Decoy; refuses TCP 22, 2222, 2022, 8022, 80, 443 and 8080. Its SSH must be opened from the WireGuard zone before its key can be changed.
 
-## The browser path running today
+## Not used
 
-`browser (device 100.96.0.7, over WARP)` → `100.96.0.5:8080` socat → `10.0.0.2:20000` host `op-grpc-bridge` → `PortSelector` (`browser_port` file) → Jeremy's `op-tunnel-door` → Jeremy's `127.0.0.1:8443`. It never sees a WireGuard key, so it always lands in Jeremy. The owner's browser does not come through `wg-opdbus`. The door speaks only TLS: open `https://`, never `http://`.
+No mux. Port `20000` and the other `20000+` ports are not used (owner, 2026-11-27). Neither are the socat relay `opdbus-vip-door-8080` (`100.96.0.5:8080` to `10.0.0.2:20000`), `PortSelector`, `BrowserSelector::select`, `op-tunnel-mux` or the `op-tunnel-door` byte splice for the browser. They are leftovers still running until the BPF path replaces them. Do not route, test or debug the UI through them, and do not offer them as a fix.
+
+The browser reaches its container only by BPF and the lungs hand-off (see Target). The door speaks only TLS: `https://`, never `http://`.
 
 ## The container
 
@@ -42,10 +44,8 @@ Blocker found 2026-11-27: the host never sees a WireGuard peer (next section). T
 
 ## Host ports (not the UI)
 
-- `10.0.0.2:20000` and `:20001` — host `op-grpc-bridge` per-identity browser listeners (legacy; to be removed)
-- `10.0.0.2:8080` — host `op-web-server`
-- `100.96.0.5:8080` — socat to `10.0.0.2:20000` (legacy; to be removed)
-- `100.96.0.5:8090` — socat to `10.0.0.2:8090`
+- `10.0.0.2:8080` — host `op-web-server` (the spec moves it off `:8080`)
+- `100.96.0.5:8090` — socat to `10.0.0.2:8090` (control-plane door)
 - `100.96.0.5:8443` — incusd
 
 ## OpenFlow
