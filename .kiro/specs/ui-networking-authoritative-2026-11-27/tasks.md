@@ -35,7 +35,7 @@ File lists below are expected scope, not permission to rewrite unrelated code. S
   - **Verification:** Build BPF artifacts into an explicit temporary directory without attaching them. With test approval, run map/key/lifecycle negative cases using fixtures or a disposable namespace.
   - **Requirements:** REQ-002.3–REQ-002.4, REQ-003, REQ-006.4, REQ-007.1.
 
-- [x] **Task 4 — Replace dynamic browser selection with one raw `:8080` ingress**
+- [ ] **Task 4 — Replace dynamic browser selection with one raw `:8080` ingress**
   - **Outcome:** Accept raw TCP on the shared WireGuard-facing `:8080` socket, recover the kernel connection key and route handle, revalidate the current sled, and offer the untouched `OwnedFd` to the hand-off service. Remove port- and browser-data-based selection from the new path.
   - **Likely files:** one new `crates/op-grpc-bridge/src/runtime_browser_ingress.rs`, `crates/op-grpc-bridge/src/runtime_bootstrap.rs`, `crates/op-grpc-bridge/src/runtime_tunnel.rs`, `crates/op-grpc-bridge/src/lib.rs`, and `crates/op-grpc-bridge/Cargo.toml` if needed.
   - **Dependencies:** Tasks 2–3.
@@ -74,7 +74,7 @@ Do not touch live `:8080` or attach BPF until all affected packages build togeth
 
 ## Phase C — Cut over, prove, then remove legacy delivery
 
-- [x] **Task 7 — Prepare the runit and golden cutover without activating it**
+- [ ] **Task 7 — Prepare the runit and golden cutover without activating it**
   - **Outcome:** Define fail-closed service ordering for BPF state, shared ingress, lungs, and the container waiter. Stop `op-web` from owning the WireGuard-facing `10.0.0.2:8080`; preserve unrelated required services only on a non-conflicting internal binding. Update the container door command to use lungs and `127.0.0.1:8443`.
   - **Likely files:** `deploy/runit/op-web/run`, `deploy/provisioning/runit/op-tunnel-door/run`, the shared-ingress runit `run` file identified by Task 1, `deploy/lib/golden/activate-services.tsv`, and its focused activation contract test.
   - **Dependencies:** Checkpoint B.
