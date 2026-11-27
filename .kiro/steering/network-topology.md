@@ -18,11 +18,15 @@ No mux. One shared entry `:8080`. A BPF program ties the connection to the seale
 
 Blocker found 2026-11-27: the host never sees a WireGuard peer (next section). The spec says to stop in that case rather than weaken it.
 
-## Browser path (2026-11-27)
+## Browser path (owner, 2026-11-27)
 
-No proxy devices (owner). OpenFlow carries the browser to the container. Nothing listens on `100.96.0.5:8080` now: the socat relay `opdbus-vip-door-8080` is down with a `down` file, and the LXD proxy device tried briefly was removed.
+Identification is sealed at login and already determined. Do not revisit it: not the Decoy, not WireGuard peers, not assertions or source addresses, and never re-authenticate the browser.
 
-## WireGuard and the Decoy
+The committed identity sled has everything needed: UUID, session ID, container ID/name, hostname. Any of them can be the identifier. At login, use that identifier with OpenFlow to get to the container. BPF then delivers the container's UI (axum on its own `127.0.0.1:8443`) to the browser on the shared `8080`. No mux, no port 20000+, no socat relay, no proxy devices.
+
+Now: nothing listens on `100.96.0.5:8080`. The socat relay `opdbus-vip-door-8080` is down with a `down` file; a proxy device tried on kiroween was removed.
+
+## WireGuard and the Decoy (reference only; not part of the browser path)
 
 - WireGuard ends on the Decoy only (`standalone-network` design). The host has no WireGuard interface. Host interfaces: `CloudflareWARP` (`100.96.0.5/32`), `eth0`, `ovsbr0`, `ovs-system`, `dummy0`, `lo`.
 - Decoy: `ubuntu@129.80.64.127`, key `~jeremy/.ssh/vps_key` (no `decoy` host alias for jeremy). Interfaces: `wg-opdbus` (`10.0.0.1/24`, port 51821), `wg0` (51820), `wgcf-ingress`, `mesh-wg` (`192.168.250.1/30`; table 28061 routes `10.0.0.2` and `100.96.0.5` via `.2`), `enp0s6`.
