@@ -17,7 +17,7 @@ File lists below are expected scope, not permission to rewrite unrelated code. S
   - **Verification:** `rg`/read-only inspection plus `git diff --check`; no live mutation.
   - **Requirements:** REQ-001, REQ-002, REQ-003, REQ-008.
 
-- [ ] **Task 2 — Implement the sealed route-handle lifecycle**
+- [x] **Task 2 — Implement the sealed route-handle lifecycle**
   - **Outcome:** Add typed, opaque browser route handles derived from the active committed sled/WireGuard binding. Publish and revoke eligibility from the existing sealed lifecycle; do not create a copied identity database.
   - **Likely files:** `crates/op-network/src/wireguard_kernel.rs`, one new `crates/op-network/src/browser_route.rs`, `crates/op-network/src/lib.rs`, and the identity-sled lifecycle module identified by Task 1.
   - **Dependencies:** Task 1.
