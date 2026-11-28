@@ -3,9 +3,8 @@ import { etchedAnchor, hireContract } from './abi';
 /**
  * Read-only view of the public record: HireContract hires and EtchedAnchor heads, over plain
  * JSON-RPC `eth_call`. It sends no transaction and holds no key. It mirrors the holder checks in
- * web3/script/verify-hire.sh (status, anchor, head); the terms-hash check stays in that script.
- * shortcut: no keccak in the UI, so terms are not re-hashed here; add it with a hash library if the
- * canvas must check terms itself.
+ * web3/script/verify-hire.sh (status, anchor, head). For the terms check, compare
+ * `termsHash(doc)` from ./terms (in-repo Keccak-256, no dependency) with `getHire(id).termsHash`.
  */
 
 export type Hex = `0x${string}`;

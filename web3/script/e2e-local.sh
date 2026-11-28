@@ -86,7 +86,7 @@ if bash "$here/script/verify-hire.sh" --rpc "$rpc" --hire "$hire" --id "$id" --t
 ui="$here/../ui"
 if [ -x "$ui/node_modules/.bin/vitest" ]; then
   if ( cd "$ui" && WEB3_RPC_URL="$rpc" WEB3_HIRE="$hire" WEB3_ANCHOR="$anchor" WEB3_HEAD="$head" \
-    WEB3_TERMS_HASH="$terms_hash" WEB3_CLIENT="$(cast wallet address --private-key "$client")" \
+    WEB3_TERMS_HASH="$terms_hash" WEB3_TERMS_JSON="$(cat "$tmp/terms.json")" WEB3_CLIENT="$(cast wallet address --private-key "$client")" \
     WEB3_PROVIDER="$(cast wallet address --private-key "$provider")" \
     node_modules/.bin/vitest --run src/lib/web3/client.anvil.test.ts ) > "$tmp/ui-client.log" 2>&1; then
     pass ui-client "client.ts read hire $id and the head"

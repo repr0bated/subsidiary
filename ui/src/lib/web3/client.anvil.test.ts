@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RpcError, createChainReader } from './client';
+import { termsHash } from './terms';
 
 /**
  * Opt-in: the read-only client against a real node, so the decoder is checked against real ABI
@@ -56,6 +57,12 @@ describe.skipIf(!rpcUrl)('web3 client against a local anvil', () => {
     const r = reader();
     expect(await r.checkReceipt(head, 1)).toMatchObject({ ok: true, hire: { id: 1n, completed: true, matchesWorkHead: true } });
     expect(await r.checkReceipt(unanchored, 1)).toMatchObject({ ok: false, hire: { completed: true, matchesWorkHead: false } });
+  });
+
+  it('re-hashes the terms document to the hire terms hash (in-repo keccak, as verify-hire.sh)', async () => {
+    const h = await reader().getHire(1);
+    expect(termsHash(need('WEB3_TERMS_JSON'))).toBe(h.termsHash);
+    expect(termsHash({ ...JSON.parse(need('WEB3_TERMS_JSON')), task: 'changed' })).not.toBe(h.termsHash);
   });
 
   it('turns the revert for an unknown hire into RpcError', async () => {
