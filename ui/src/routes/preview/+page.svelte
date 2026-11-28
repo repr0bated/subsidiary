@@ -9,6 +9,8 @@
   import SpeechBalloon from '../../lib/comic/SpeechBalloon.svelte';
   import ReceiptCard from '../../lib/comic/ReceiptCard.svelte';
   import { BURSTS, type BackendEvent } from '../../lib/comic/bursts';
+  // Draft, off by default: renders nothing unless PUBLIC_WEB3_RPC_URL is set (hire-card.ts).
+  import HireStatusCard from '../../lib/web3/HireStatusCard.svelte';
 
   const catalog = catalogFromSealed(Object.keys(comicComponents).map((name) => ({ name, props_schema: {}, slots: ['default'] })));
   const { registry } = defineRegistry(catalog, { components: comicComponents as never });
@@ -40,6 +42,7 @@
   </JsonUIProvider>
   <section class="row">{#each events as e (e)}<Burst event={e} />{/each}</section>
   <ReceiptCard receipt={{ operation_id: 'sample-op', outcome: 'completed', event_id: 42, required_capability: 'never.shown' }} anchored />
+  <HireStatusCard />
 </main>
 
 <style>
