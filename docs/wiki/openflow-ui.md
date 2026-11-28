@@ -1,6 +1,6 @@
 # OpenFlow in the container UI
 
-How the browser reaches the container, how the container serves the `openflow` plugin's schema from its own loopback, and what the UI does with it. The sources are in `odbus-verified`, branch `hackathon/kiroween`, and each section names its files. Status is as of 2026-11-26. The last section says what is live and what is not.
+How the browser reaches the container, how the container serves the `openflow` plugin's schema from its own loopback, and what the UI does with it. The sources are in `odbus-verified`, branch `hackathon/kiroween`, and each section names its files. Status is as of 2026-11-26. Re-checked the same day: `zcall methods openflow` lists the same 8 methods as §3, and `plugins/openflow/value.json` still fails with `Input/output error` (§7 last row). The last section says what is live and what is not.
 
 ## 1. From the browser to the container
 

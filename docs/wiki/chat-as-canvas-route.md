@@ -2,8 +2,8 @@
 
 Topic: the route the project owner intends to take for the sealed surface. For use when the sealed-surface-gui spec is revised.
 Sources: https://ai-sdk.dev/docs/getting-started/svelte ; https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-tool-usage ; https://svelte.dev/docs/svelte/legacy-svelte-component ; json-render.md in this wiki
-Retrieved: 2026-11-19
-Status: direction from the owner's own research and notes. Items marked VERIFY are not yet confirmed.
+Retrieved: 2026-11-19. Re-checked 2026-11-26.
+Status: direction from the owner's own research and notes. VERIFY marks resolved on 2026-11-26 are noted inline; the rest are still open.
 
 ## Route in one paragraph
 The chat message list is the canvas. Each assistant message has ordered parts. Tool parts and structured parts are rendered inline by precompiled Svelte 5 components chosen from a fixed catalog, mounted dynamically from a JSON tree. Components keep their own `$state` and `bind:` controls. User interactions return to the model loop as tool output. The catalog is compiled at build time; nothing compiles in the browser.
@@ -17,14 +17,14 @@ Stated by the project owner. Interpreting a voice-typed note, so correct if wron
 Consequences:
 - Nothing compiles in the browser, so no compiler needs shipping and no generated code needs sealing. The seal is the sealed scaffolding and functional core elements (owner, 2026-11-23); the catalog only limits what can be drawn.
 - "Rendered on the fly" means choosing and filling compiled structure per view, not producing new component code.
-- Schema changes require re-running the compile phase before they show up. VERIFY how this fits "live schema, no copies"; the compile output must be derived from the live schema through FUSE and not kept as a second source of truth.
+- Schema changes require re-running the compile phase before they show up. VERIFY how this fits "live schema, no copies"; the compile output must be derived from the live schema through FUSE and not kept as a second source of truth. (Still open 2026-11-26: the UI's grant-filtered schema source `fuse.get_catalog` is not yet in the sealed catalog.)
 
 ## Confirmed in the AI SDK docs
 - Tool results go back with `addToolOutput`; approvals with `addToolApprovalResponse`.
 - `sendAutomaticallyWhen` resumes the model loop; helper `lastAssistantMessageIsCompleteWithToolCalls` (and a variant for approval responses) exists.
 - Tool part states include `input-streaming`, `input-available`, `output-available` and `approval-requested`. Tool parts are typed `tool-{name}`; dynamic tools use `dynamic-tool`.
 - A tool can require approval (`needsApproval`) and the client can use `onToolCall`.
-- The Svelte `Chat` class exposes reactive `messages`, and its API is described as largely the same as React's `useChat`. The tool-usage page itself is written for `useChat`; VERIFY each name against `@ai-sdk/svelte` types before use.
+- The Svelte `Chat` class exposes reactive `messages`, and its API is described as largely the same as React's `useChat`. The tool-usage page itself is written for `useChat`; VERIFY each name against `@ai-sdk/svelte` types before use. (Resolved in part 2026-11-26: `ui/src/lib/chat/transport.ts` implements `ChatTransport<UIMessage>` from `ai` and `ChatPanel.svelte` passes it to the Svelte `Chat`, so a custom transport works. Individual tool-usage names are not re-checked.)
 - Svelte 5 rule: do not destructure `Chat` properties; pass reactive args by reference (getters). `createAIContext()` shares state across components.
 - Server-streamed React Server Components (`streamUI`, `@ai-sdk/rsc`) are React only. The Svelte path is client-side rendering of parts.
 
@@ -50,5 +50,5 @@ Message parts, the catalog renderer, local component state, and a thin adapter t
 1. What the backend returns per request: ready UI tree, tool-call-shaped parts, or schema the chatbot turns into a tree.
 2. Whether to use json-render or a hand-written registry.
 3. How action names map to call files, and how a denied grant is shown in the canvas.
-4. Whether the `Chat` class is used as the client state holder or replaced by a thin FUSE-backed equivalent with the same part shapes. VERIFY whether `Chat` can use a custom transport.
+4. Whether the `Chat` class is used as the client state holder or replaced by a thin FUSE-backed equivalent with the same part shapes. Decided in the build: the `Chat` class is used with a custom transport (`doorChatTransport`, 2026-11-26).
 5. State persistence across page reloads: from what, and through which call file.

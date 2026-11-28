@@ -2,7 +2,7 @@
 
 Topic: how 3tched's schema marks private data, how that ties to compliance, and what may never reach the public record.
 Sources: live sealed schemas in `/run/mounts/3tchedFS/plugins/*/schema.json`; `odbus-verified` `crates/op-plugins/src/state_plugins/oscal_field_classification.rs`, `chat_response.rs`, `privacy_routes.rs`, `op-grpc-bridge/src/chat_mode_policy.rs`; `op-core/src/projection_shm.rs`.
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Re-checked 2026-11-26: `identity_sled` is still sealed in the live view (generation 75) and `privacy_routes` is present; the `x-opdbus-private` count of 103 and the Rust source claims were not recounted
 
 ## Privacy is in the schema
 - Fields are marked in the sealed schema itself. Counted across the live catalog: `x-opdbus-private` appears 103 times (for example `chat_response`, `cognitive`, `ctl_plane_chatbot`, `workflows` content fields), and fields such as `sensitive`, `pii_flagged`, `sensitivity`, `sensitive_fields` and `privacy_policy` appear in plugin schemas.

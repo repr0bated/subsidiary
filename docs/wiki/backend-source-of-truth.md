@@ -1,7 +1,7 @@
 # Principle: the 3tched backend is the single source of truth
 
 Topic: what Subsidiary must use from the backend and must not reimplement.
-Source: project owner, 2026-11-19. Detail of backend internals is not in this repo; items marked VERIFY need the 3tched owner.
+Source: project owner, 2026-11-19. Re-checked 2026-11-26 against the live view and the steering files. Detail of backend internals is not in this repo; items marked VERIFY need the 3tched owner.
 
 ## Rule
 Use the full backend: grants, capabilities, agents, the live schema, the execution tracker and the hashchain. Reach all of it through the bridge and FUSE call files. Subsidiary adds the sealed surface, the contracts, and the Kiro setup. It does not keep its own copy or its own version of any backend concept.
@@ -10,7 +10,7 @@ Use the full backend: grants, capabilities, agents, the live schema, the executi
 - Identity, grants and capabilities. Admission (identity AND grants AND sealed) is decided by the backend. The UI shows the result and never decides.
 - Agents. Anything an agent does is run and tracked by the backend.
 - Schema. One live source, read through FUSE. No copy in the repo, none in the UI. Compile output (see chat-as-canvas-route.md) is derived from it and must not become a second source.
-- Receipts. VERIFY: the execution tracker issues receipts and records them in the private hashchain.
+- Receipts. Confirmed 2026-11-26 (steering, "Current vs deprecated"): every call is a `Runtime::call`, reserved, admitted, receipted and appended to the sled ledger in one commit. The chain hash is Keccak-256 from event 976 on this host (older events keep MD5).
 - The linkage layer, which has three parts (interpreted from a voice-typed note; VERIFY each):
   1. The hashchain (`event_chain.rs`): tamper-evident record of events. Heads are read through a sealed method or the bridge feed.
   2. The chain vectors in Qdrant (`chain_vector_projector.rs`, `chain_vectors.rs`): embeddings of the chain's events, for semantic recall.
@@ -20,7 +20,7 @@ Use the full backend: grants, capabilities, agents, the live schema, the executi
 - Identity ledger (from a voice-typed note; VERIFY terms). Every identity has its own ledger of everything it does, connected to that identity. The container is an identity, so the Subsidiary container has its own ledger and its own Qdrant collection. Ledger entries are vectorized into Qdrant with their payload, user and timestamps, and any other information that passes through. The ledger was called a "snowball ledger"; the exact name and meaning are not confirmed.
 - Payloads are vectorized too, not only the event metadata. The vectors cover the whole of the activity in an action.
 - Terms (from the project owner): in 3tched, what is traditionally called a session (one bounded interaction, like a chat) is called an episode. A 3tched session is the lifetime of the container/account. Use "episode" for the first and "session" only for the second. Kiro and the AI SDK use "session" in the traditional sense (for example Kiro's Session Start hook), so map those to episodes when writing about 3tched and say which meaning is intended.
-- Field names: `session_id` and `application_session_id`. Both are part of the identity record that 3tched already keeps in its identity store (sled). The backend assigns and tracks them; the UI does not mint or store its own. The UI only carries `application_session_id` (what the prose calls an episode) to group one canvas's messages and views. Receipts, anchoring and the verifier do not key on it. Likely mapping, not confirmed: `session_id` is the container/account lifetime. VERIFY. Use the field names exactly in specs and code, and "episode" only in prose.
+- Field names: `session_id` and `application_session_id`. Both are part of the identity record that 3tched already keeps in its identity store (sled). The backend assigns and tracks them; the UI does not mint or store its own. The UI only carries `application_session_id` (what the prose calls an episode) to group one canvas's messages and views. Receipts, anchoring and the verifier do not key on it. Likely mapping, not confirmed: `session_id` is the container/account lifetime. VERIFY. (Checked 2026-11-26: `session_id` is a required string in the sealed `identity_sled` schema, described as "Session the event belongs to". `application_session_id` appears in no sealed schema in the live view, and nothing in this repo uses it, so the UI cannot rely on it yet.) Use the field names exactly in specs and code, and "episode" only in prose.
 - The full set of linkage keys and fields is already defined in the backend and is comprehensive. Subsidiary does not define or copy it. Read it through FUSE when the spec needs it, in line with "live schema, no copies".
 - Storage. One Cozo/RocksDB database per tenant, opened by the backend from the mounts.
 - Knowledge base retrieval and any model, including embeddings. Subsidiary's knowledge base lives in its own Qdrant collection, separate from the chain vectors, managed by the backend.
@@ -36,13 +36,13 @@ Use the full backend: grants, capabilities, agents, the live schema, the executi
 Subsidiary does not own how receipts are made, what grants allow, or what the schema is. It links to them.
 
 ## Consequences for work already written
-- `.kiro/scripts/receipt.sh` and the local `.kiro/hashchain.log` are not the real receipt path. They invent a second hashchain. Remove or replace.
+- `.kiro/scripts/receipt.sh` and the local `.kiro/hashchain.log` are not the real receipt path. They invent a second hashchain. Remove or replace. (2026-11-26: `receipt.sh` is still present, and it still writes a local sha256 chain. `.kiro/scripts` is outside the worker's edit scope, so the owner decides.)
 - The receipt verifier idea must be built against the backend's real receipt format, not this script.
 - The `receipt-anchoring`, `tenant-storage` and `sealed-surface-gui` specs describe parts the backend already does. They need rewriting to say what Subsidiary asks of the backend instead of how it is done.
 - Hooks that talk about grants or receipts should call the backend (through the door or FUSE), not stand in for it.
 
 ## Open items for the 3tched owner
 - Method names to spawn a subsidiary and to issue a grant.
-- Which call file returns the current chain head, and its hash width and canonical JSON.
+- Which call file returns the current chain head, and its hash width and canonical JSON. (Answered for the chain head: `snowball.verify_chain` then `snowball.query_events`, see receipt-anchoring task 4; hash is Keccak-256, 64 hex, from event 976. The canonical event JSON is still not exposed, receipt-anchoring task 6.)
 - How the execution tracker exposes receipts.
 - What the backend returns to the UI per request.

@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "name": "Network topology",
+  "description": "First reply of the session repeats the network map back to the user. No host probe to relearn it.",
+  "version": "1",
+  "when": { "type": "promptSubmit" },
+  "then": {
+    "type": "askAgent",
+    "prompt": "If this is the first message of the session, the first thing in your reply to the user is a repeat-back of .kiro/steering/network-topology.md, before any tool call. Cover four points in your own short words: the container is the identity (no mux, no port or peer lookup; sled identifier, then OpenFlow); the browser UI is the container's own 127.0.0.1:8443, not a host port; what is running today (op-tunnel-door splice) versus the OpenFlow target, which is not built; do not bridge CloudflareWARP and do not write flows with ovs-*. Then do the task. Do not probe listeners, flows, namespaces, or docs/src/operations/network.md to relearn this. If this is not the first message, do not repeat it."
+  }
+}

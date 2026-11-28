@@ -1,7 +1,9 @@
-/* Bundled under the SIL Open Font License 1.1 (static/fonts/OFL-*.txt). No runtime font requests. */
-@font-face { font-family: 'Bangers'; src: url('/fonts/Bangers-Regular.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Comic Neue'; src: url('/fonts/ComicNeue-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Comic Neue'; src: url('/fonts/ComicNeue-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+/* Bundled under the SIL Open Font License 1.1 (./fonts/OFL-*.txt). No runtime font requests.
+   Relative URLs so Vite bundles the files under /assets: the container UI door serves only /, /chat
+   and /assets, and answers any other path (such as /fonts/...) with an empty gRPC response. */
+@font-face { font-family: 'Bangers'; src: url('./fonts/Bangers-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Comic Neue'; src: url('./fonts/ComicNeue-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Comic Neue'; src: url('./fonts/ComicNeue-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 /* 1960s comic pop art, drawn for this project: Ben-Day dots, thick black outlines,
    flat colors on white. No copied artworks, characters, logos or lettering.
    Palette: hot pink, gold and noir ink on a pale pink paper (owner's choice). The token names

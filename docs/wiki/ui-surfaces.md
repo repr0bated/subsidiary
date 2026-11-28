@@ -2,7 +2,7 @@
 
 Topic: how a plugin's schema declares a UI surface, where the Svelte chat interface is defined, and how the UI reads it.
 Sources: `odbus-verified` `crates/op-plugins/src/state_plugins/common/llm_projection.rs`, `chat_router.rs`, `antigravity.rs`, commit `b0f8caf` (2026-10-31, "UiSurface purpose sealed in blob"); `op-grpc-bridge/src/mutation_engine.rs`; `3tched.com` `src/svelte/App.svelte`, `runtime.svelte.ts`, `src/chat/door-chat-adapter.ts`; live `/run/mounts/3tchedFS/plugins/chat_router/schema.json`.
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Re-checked against the live view 2026-11-26: `chat_router` methods (including `ListUiSurfaces`) and `ui_surfaces` defaults read from `plugins/chat_router/schema.json`; Shell surface added
 
 ## The type
 `UiSurface` (in `common/llm_projection.rs`) is a schemars struct, so it is part of the schema that gets sealed:
@@ -31,6 +31,9 @@ Sealed defaults in `chat_router.rs` (catalog `ui_surfaces`):
 | Chat | `/chat` | `chat_router.chat` | `vite, svelte-kit, json-render, ai-sdk, chat-sdk` |
 | gRPC Diagnostics | `/grpc` | `plugin-service` | (empty) |
 | Routable Models | `/models` | `chat_router.providers` | `vite, svelte-kit, json-render, ai-sdk, chat-sdk` |
+| Shell | `/` | `json_render.canvas` | A JSON skeleton: slots `canvas` (rendered by the chatbot), `picker` (top drawer holding `model_mode`), `chat` (bottom drawer holding `chat`) and `nav` (row below the chat, rendered by the chatbot) |
+
+The Shell row was added after the 2026-11-23 reading; it is in the live `schema.json` of `chat_router` on 2026-11-26 (catalog generation 75). Its purpose is structured JSON, not a stack list, so a renderer must parse `purpose` and not assume a comma-separated stack.
 
 So the Svelte chat interface is the `/chat` surface in the `chat_router` blob, and the model picker is `/models`.
 

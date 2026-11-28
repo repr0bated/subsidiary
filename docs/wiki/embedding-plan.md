@@ -1,6 +1,7 @@
 # Embedding plan
 
 Topic: using this wiki as the chatbot's knowledge base.
+Re-checked 2026-11-26: no sealed method for knowledge chunks was found (see Open items); the VERIFY mark stays.
 
 ## Decision
 All models, including any embedding model, run in the backend and are reached only through FUSE. The UI and chatbot never hold a model, an embedding, or a key. They send a request through a call file and receive a result (schema, or retrieved chunks with source URLs).

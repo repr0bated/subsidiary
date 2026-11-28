@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "planning-and-task-breakdown": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/planning-and-task-breakdown/SKILL.md",
+      "computedHash": "931226fae47ab1762144495c44288c3752e7c0273ce1e229f4a9cc0f00d44e1c"
+    },
+    "spec-driven-development": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/spec-driven-development/SKILL.md",
+      "computedHash": "c6d2be37d6c5ea3d16481347585a8de1bc243fff137b83f694d0a4e18b2c6940"
+    },
+    "using-agent-skills": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/using-agent-skills/SKILL.md",
+      "computedHash": "f54555e41cef7dc6e19936dd3b45d1519b57cd9ee9afd8f01e5326837a59f8d3"
+    }
+  }
+}

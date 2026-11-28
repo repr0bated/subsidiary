@@ -2,7 +2,7 @@
 
 Topic: what the Vercel AI SDK and Chat SDK provide, and how each piece maps to 3tched.
 Sources: `github.com/vercel/ai` at `fac1d6a` (2026-11-22; `@ai-sdk/svelte` 5.0.179, Apache-2.0) and `github.com/vercel/chat` at `3527c72` (2026-11-21; `chat` and `@chat-adapter/web` 4.45.0, MIT). Local reference clones in `.kiro/state/ref/` (not committed).
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Re-checked 2026-11-26: the Node note below is out of date (the project now builds with Node 22 through nvm, pinned in `ui/.nvmrc`); package versions were not re-fetched
 
 The 3tched.com UI pins `@ai-sdk/svelte` ^5.0.159, `ai` ^7.0.159 and `chat` ^4.43.0, slightly behind these.
 
@@ -31,7 +31,7 @@ When reading SDK docs, translate React examples (`useChat` hook) to the Svelte `
 | `@chat-adapter/web` | 4.45.0 | >= 20 | all optional: `ai`, `@ai-sdk/svelte` ^4 or ^5, `svelte` ^5 (and React/Vue, unused) | `chat`, `@chat-adapter/shared` |
 
 What this means here:
-- Node: the AI SDK needs Node 22 or newer to build. This host has Node v20.19.2, so builds need Node 22 (3tched.com already builds with Node 22 for golden). The browser bundle itself has no Node requirement.
+- Node: the AI SDK needs Node 22 or newer to build. The host's system Node was v20.19.2, so this project uses Node 22 through nvm (`ui/.nvmrc`), as 3tched.com does for golden. The browser bundle itself has no Node requirement.
 - Svelte 5.31 or newer (3tched.com pins ^5.57.1).
 - `zod` is a required peer of `ai`.
 - Browser APIs used by the client: `ReadableStream`, `TextDecoderStream`, `structuredClone`, `AbortController`. All current browsers have them.

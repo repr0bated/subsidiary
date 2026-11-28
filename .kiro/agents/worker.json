@@ -60,19 +60,18 @@
         "zcall expand .*",
         "git add .*",
         "git commit -m .*",
-        "mdbook (build|test) docs.*"
+        "mdbook (build|test) docs.*",
+        "cargo.*",
+        "sudo.*"
       ],
       "deniedCommands": [
         "rm.*",
-        "sudo.*",
         "curl.*",
         "wget.*",
         "cast send.*",
         "forge script.*--broadcast.*",
         "zcall .* --yes.*",
-        "cargo.*",
         "git (push|reset|checkout|stash|clean|rebase|restore|switch).*",
-        "git add *$",
         "git commit .*(--amend|-a |--all|--no-verify).*",
         "git commit -a.*",
         "git add (-A|--all|-u|--update|:/)( .*)?",
@@ -111,7 +110,9 @@
           "git add *",
           "git commit -m *",
           "mdbook build docs*",
-          "mdbook test docs*"
+          "mdbook test docs*",
+          "cargo*",
+          "sudo*"
         ],
         "effect": "allow"
       },
@@ -119,13 +120,11 @@
         "capability": "shell",
         "match": [
           "rm*",
-          "sudo*",
           "curl*",
           "wget*",
           "cast send*",
           "forge script*--broadcast*",
           "zcall * --yes*",
-          "cargo*",
           "git push*",
           "git reset*",
           "git checkout*",
@@ -200,7 +199,7 @@
   },
   "kiroUpgrade": {
     "revision": 3,
-    "fingerprint": "sha256:09137967dd3e83859789a572aa44fb638768f5f18bc2d5d09632642a9f4fa934",
-    "source": "sha256:ec6fb1fb03622ae5e2ed6708ef9cf627cbd4c02e74398ddfba2ca3c77327a288"
+    "fingerprint": "sha256:72841510e1abb12d341bc0bd77e16fdbbdbdcf1a75979880b1f50048bb06670b",
+    "source": "sha256:8f41495f9381a4e91393dd000d4bd3a5c04515dd1e790615a706d512ff014c6b"
   }
 }

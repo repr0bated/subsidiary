@@ -4,7 +4,7 @@
 
 Topic: what the bridge sends as a plugin's schema and state, the wire format, and how it feeds the UI's state.
 Sources: `odbus-verified` `hackathon/docs/DEV-CYCLE.md` ("Each plugin is a schema feed"), `crates/op-grpc-bridge/proto/operation.proto` (`StateSync.Subscribe`, `StateChange`), `.kiro/specs/identity-chat-interface` Requirements 23 to 28; `3tched.com` `src/grpc/plugin-feeds.ts` (pre-separation reference); `@json-render/svelte` state API.
-Retrieved: 2026-11-23
+Retrieved: 2026-11-23. Re-checked 2026-11-26: the host view is still catalog generation 75 (`view.json`); `plugins/<id>/value.json` still returns `Input/output error` for `chat_router` and `openflow` (item 6 and the last Open question below are unchanged); the shared-memory trees and the door's `StateSync` wire format were not re-read
 
 ## What a feed is
 Every sealed plugin publishes itself. A subscriber gets one stream per plugin:
