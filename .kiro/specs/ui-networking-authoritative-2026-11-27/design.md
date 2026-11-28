@@ -44,7 +44,7 @@ Current and target ownership in `odbus-verified` is:
 
 | Area | Current source | Target responsibility |
 | --- | --- | --- |
-| Login route | login path in `crates/op-grpc-bridge` (session login), sealed `openflow` plugin (`openflow_methods.rs`) | At login, write the identity's login route with `add_flow` from the identifier already in its committed sled; delete it with `delete_flow` at logout, expiry or revocation. |
+| Login route | login path in `crates/op-grpc-bridge` (session login), sealed `openflow` plugin (`openflow_methods.rs`) | At login, write the identity's login route with `add_flow` from the identifier already in its committed sled; delete it with `delete_flow` only when the `session_id` ends (container teardown, expiry, revocation); logout ends an episode and keeps the route. |
 | BPF custody | `crates/op-network/bpf/browser_ingress.bpf.c`, `crates/op-network/src/browser_ingress.rs` | Carry the identity named by the login route onto each accepted `:8080` socket, keyed by socket cookie, bounded. Separate from the unchanged NIC-less egress program. |
 | Lungs | `crates/op-grpc-bridge/src/runtime_lungs.rs`, `runtime_lungs_identity.rs`, `runtime_lungs_browser.rs` | The identity's own lungs connection receives its socket through the bounded `AcceptBrowser` waiter. No re-check of who it is. |
 | Shared browser ingress | `crates/op-grpc-bridge/src/runtime_browser_ingress.rs` | One raw `:8080` listener. Takes the identity from the accepted socket's BPF custody and hands the socket to it. Never picks by waiter count. |
@@ -67,7 +67,7 @@ Primary threats and controls are:
 - **Tampering:** raw TLS bytes are neither parsed nor rewritten on the host; file-descriptor custody is transferred once.
 - **Information disclosure:** TLS ends in the container and logs expose aggregate state only.
 - **Denial of service:** bounded BPF entries, waiter count, accepted-fd count, timeouts, and immediate close when a destination is not ready.
-- **Stale routes:** logout, expiry, revocation and container teardown delete the login route and BPF state; a dead lungs connection receives nothing.
+- **Stale routes:** the end of the `session_id` (container teardown, expiry, revocation) deletes the login route and BPF state; a dead lungs connection receives nothing.
 - **Privilege escalation:** the hand-off carries no identity argument or grant and does not bypass existing 3tchedFS admission.
 
 ## D1. Public contract: keep `:8080`
@@ -90,7 +90,7 @@ The login route matches the identity's incoming browser connection at the shared
 
 BPF carries the identity the login route names onto the accepted socket, in a bounded map keyed by socket cookie, before any application byte is read. After `accept(2)`, the ingress reads that identity from the socket and hands the socket to it. It does not look the identity up, compare bindings or count waiters.
 
-Logout, expiry and revocation delete the login route (`delete_flow`) and its BPF state. Per-connection entries expire when their sockets close.
+The login route lasts for the `session_id`, the container's lifetime. Logout ends an episode and keeps the route. Container teardown, expiry and revocation end the `session_id` and delete the login route (`delete_flow`) and its BPF state. Per-connection entries expire when their sockets close.
 
 ## D3. Lungs is the identity delivery channel
 
@@ -144,7 +144,7 @@ OpenFlow writes the login route at the host's shared entry, through sealed plugi
 4. A browser connection on `:8080` is settled by the login route; BPF carries the identity onto the accepted socket before application data is read.
 5. The ingress hands the fd to that identity's live waiter once and closes its copy.
 6. The container splices the fd to `127.0.0.1:8443` and removes the waiter when the connection ends.
-7. Logout, revocation, expiry or container teardown deletes the login route (`delete_flow`), its BPF state and the identity's waiters.
+7. Container teardown, expiry or revocation ends the `session_id` and deletes the login route (`delete_flow`), its BPF state and the identity's waiters. Logout ends only an episode; the route stays.
 
 Every missing or mismatched step closes the affected connection. There is no queue, retry, alternate identity, per-port fallback, or NORMAL delivery into another container.
 
