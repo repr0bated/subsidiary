@@ -6,7 +6,8 @@
 #   e2e-local.sh            uses port 8546 (E2E_PORT to change); refuses a port already in use
 #
 # Uses only anvil's public default dev accounts; sends nothing to any other chain.
-# Reuses Deploy.s.sol (as demo-setup.sh does), AnchorHead.s.sol, DemoHire.s.sol and verify-hire.sh.
+# Reuses Deploy.s.sol (as demo-setup.sh does), AnchorHead.s.sol, DemoHire.s.sol and verify-hire.sh,
+# then runs ui/src/lib/web3/client.anvil.test.ts against the same node (skipped without ui/node_modules).
 # demo-setup.sh itself is not called: it is fixed to port 8545 and its preflight needs the FUSE view.
 # shortcut: verify-receipt.sh is not run, it needs zcall and a live 3tched chain; add it when the
 # e2e runs inside the container.
@@ -77,6 +78,22 @@ if bash "$here/script/verify-hire.sh" --rpc "$rpc" --hire "$hire" --id "$id" --t
 jq '.task = "changed"' "$tmp/terms.json" > "$tmp/terms-changed.json"
 if bash "$here/script/verify-hire.sh" --rpc "$rpc" --hire "$hire" --id "$id" --terms "$tmp/terms-changed.json" >/dev/null; then
   bad neg-terms "changed terms passed"; else pass neg-terms "changed terms rejected"; fi
+
+# The UI's read-only chain client (ui/src/lib/web3/client.ts) against this same node, so its
+# decoder meets real ABI encoding. The test is opt-in: offline `npm --prefix ui test` skips it.
+ui="$here/../ui"
+if [ -x "$ui/node_modules/.bin/vitest" ]; then
+  if ( cd "$ui" && WEB3_RPC_URL="$rpc" WEB3_HIRE="$hire" WEB3_ANCHOR="$anchor" WEB3_HEAD="$head" \
+    WEB3_TERMS_HASH="$terms_hash" WEB3_CLIENT="$(cast wallet address --private-key "$client")" \
+    WEB3_PROVIDER="$(cast wallet address --private-key "$provider")" \
+    node_modules/.bin/vitest --run src/lib/web3/client.anvil.test.ts ) > "$tmp/ui-client.log" 2>&1; then
+    pass ui-client "client.ts read hire $id and the head"
+  else
+    cat "$tmp/ui-client.log" >&2; bad ui-client "client.anvil.test.ts failed"
+  fi
+else
+  echo "SKIP  ui-client  ui/node_modules missing; run npm --prefix ui install to include it"
+fi
 
 [ "$fail" = 0 ] && echo "e2e-local: all checks passed" || echo "e2e-local: FAILED" >&2
 exit $fail
