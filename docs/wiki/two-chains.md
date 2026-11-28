@@ -38,6 +38,18 @@ How they connect:
 3. The hire contract points at that anchored head as the work's proof.
 4. A holder takes their receipt and its chain path, recomputes the head, and checks it against the anchor. If it matches, the receipt was part of the chain the identity committed to, at that time, and cannot have been changed since.
 
+## Records that start on the public chain (owner, 2026-11-28)
+The other direction: a record starts on the public chain, for transparency, and our record verifies it. Spec `public-record-link`.
+
+1. The record is split by 3tched's own field classification (`assess_fields`, `protection_floor`): `none` is shown, `private` is shown only as a salted hash, `secret` and anything unclassified stays off the public chain entirely. Intellectual property and personal information stay in our record.
+2. `EtchedRecord.publish` puts one root over every field on the public chain, with the shown fields (`web3/script/publish-record.sh`).
+3. Our record takes in the whole record with every salt, so any field, hidden ones included, can be proven against the public root later, or revealed to one party without going public (`record.ts reveal`).
+4. The ids are linked in one time bubble: chain id, contract, record id, tx hash, block number and hash on the public side; event id, event hash and the event's vector id (derived from the hash, as the vectorizer does) on ours. The event must fall inside the bubble that opens at the public block's time.
+5. The next anchored head covers that event, so the public chain also holds proof that our record took it in.
+6. `web3/script/verify-record.sh` checks all of it: the public part from the chain alone, the entry and link when you hold them, the event read back through `zcall` on the mount.
+
+Step 3 needs a sealed write in 3tched to record the entry and link, and verification against our record needs a sealed read of it; neither exists yet (spec tasks 7 and 8).
+
 Why both:
 - The private chain has the detail, so it can prove exactly what happened, but on its own it is the identity vouching for itself.
 - The blockchain has no detail, but no one can rewrite it. Anchoring the head ties the two together: the detail stays private, and the commitment is public.
