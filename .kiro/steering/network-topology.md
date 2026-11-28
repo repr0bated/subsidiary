@@ -36,6 +36,8 @@ The committed identity sled has everything needed: UUID, session ID, container I
 
 The networking is already set up (owner, 2026-11-27). Do not redo, re-probe or re-derive it, and do not stop, start or add network services, relays or devices. There is no socat in the design. The only open work is the browser path above.
 
+Once this path is live, it is how every call to an identity's UI is made (owner, 2026-11-28): `https://<label>.perspective.3tched.com:8080/` through the shared entry, pushed to the identity's container. Do not add or keep another way in.
+
 ## WireGuard and the Decoy (reference only; not part of the browser path)
 
 - WireGuard ends on the Decoy only (`standalone-network` design). The host has no WireGuard interface. Host interfaces: `CloudflareWARP` (`100.96.0.5/32`), `eth0`, `ovsbr0`, `ovs-system`, `dummy0`, `lo`.
