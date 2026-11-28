@@ -14,31 +14,21 @@ The first step is the identity sled: the identifier it already holds names the c
 
 ## Target: `.kiro/specs/ui-networking-authoritative-2026-11-27/` (authoritative, not built)
 
-No mux. One shared entry `:8080`. A BPF program ties the connection to the sealed WireGuard peer, and so to the sled. The host hands the accepted socket itself to that identity's bound lungs connection (D-Bus Unix fd). Inside the container it is spliced to `127.0.0.1:8443`, where TLS ends at the axum door. The spec forbids OpenFlow routes into the container, `route_localnet`, a container NIC, and selection by port, SNI or headers. It supersedes `identity-aware-mux`, `browser-door-dispatch`, `openflow-browser-route` and `browser-lungs-handoff`.
+One shared entry `:8080`. A BPF program ties the connection to the sealed WireGuard peer, and so to the sled. The host hands the accepted socket itself to that identity's bound lungs connection (D-Bus Unix fd). Inside the container it is spliced to `127.0.0.1:8443`, where TLS ends at the axum door. OpenFlow routes to the container by the identity id that login takes from the identity sled (owner, 2026-11-27). The spec forbids `route_localnet`, a container NIC, and selection by port, SNI or headers. It supersedes `identity-aware-mux`, `browser-door-dispatch`, `openflow-browser-route` and `browser-lungs-handoff`.
 
-Blocker found 2026-11-27: the host never sees a WireGuard peer (next section). The spec says to stop in that case rather than weaken it.
+The Decoy is not part of this path (owner, 2026-11-27). Identity is settled at login from the WireGuard key and the identity sled; nothing on the browser path re-derives it.
 
-## Browser path (owner, 2026-11-27)
-
-Identification is sealed at login and already determined. Do not revisit it: not the Decoy, not WireGuard peers, not assertions or source addresses, and never re-authenticate the browser.
-
-The committed identity sled has everything needed: UUID, session ID, container ID/name, hostname. Any of them can be the identifier. At login, use that identifier with OpenFlow to get to the container. BPF then delivers the container's UI (axum on its own `127.0.0.1:8443`) to the browser on the shared `8080`. No mux, no port 20000+, no socat relay, no proxy devices.
-
-The networking is already set up (owner, 2026-11-27). Do not redo, re-probe or re-derive it, and do not stop, start or add network services, relays or devices. There is no socat in the design. The only open work is the browser path above.
-
-## WireGuard and the Decoy (reference only; not part of the browser path)
+## WireGuard and the Decoy
 
 - WireGuard ends on the Decoy only (`standalone-network` design). The host has no WireGuard interface. Host interfaces: `CloudflareWARP` (`100.96.0.5/32`), `eth0`, `ovsbr0`, `ovs-system`, `dummy0`, `lo`.
-- Decoy: `ubuntu@129.80.64.127`, key `~jeremy/.ssh/vps_key` (no `decoy` host alias for jeremy). Interfaces: `wg-opdbus` (`10.0.0.1/24`, port 51821), `wg0` (51820), `wgcf-ingress`, `mesh-wg` (`192.168.250.1/30`; table 28061 routes `10.0.0.2` and `100.96.0.5` via `.2`), `enp0s6`.
-- Decoy nft: `wg-opdbus` traffic to `10.0.0.2:8080` and `:8090` is DNATed to `100.96.0.5` and masqueraded, so the peer's address is gone before the host. Other `wg-opdbus` traffic to `10.0.0.2` is marked `0x51820` for WARP or DNATed to the host's public `188.68.58.237`.
+- Decoy: `ubuntu@129.80.64.127`, key `~jeremy/.ssh/vps_key` (no `decoy` host alias for jeremy). Interfaces: `wg-opdbus` (`10.0.0.1/24`, port 51821), `wg0` (51820), `wgcf-ingress`, `mesh-wg` (`192.168.250.1/30`, table 28061 routes `10.0.0.2` and `100.96.0.5` via `.2`), `enp0s6`.
+- Decoy nft: `wg-opdbus` traffic to `10.0.0.2:8080` and `:8090` is DNATed to `100.96.0.5` and masqueraded. The peer's address is gone before the host. Other `wg-opdbus` traffic to `10.0.0.2` is marked `0x51820` for WARP or DNATed to the host's public `188.68.58.237`.
 - `wg-opdbus` peers: `lnF9hBrc…` = `10.0.0.5/32` (the router, handshaking); `HzneJZpK…` = `10.0.0.8/32`; `8fUis0DF…` (kiroween's key) has no allowed IPs and no handshake; `1CWFO9e6…` has no allowed IPs.
-- Router `10.0.0.5` (OpenWrt): answers ping from the Decoy; refuses TCP 22, 2222, 2022, 8022, 80, 443 and 8080. Its SSH must be opened from the WireGuard zone before its key can be changed.
+- Router `10.0.0.5` (OpenWrt): answers ping from the Decoy; refuses TCP 22, 2222, 2022, 8022, 80, 443, 8080. Its SSH must be opened from the WireGuard zone before its key can be changed.
 
-## Not used
+## The browser path running today
 
-No mux. Port `20000` and the other `20000+` ports are not used (owner, 2026-11-27). Neither are the socat relay `opdbus-vip-door-8080` (`100.96.0.5:8080` to `10.0.0.2:20000`), `PortSelector`, `BrowserSelector::select`, `op-tunnel-mux` or the `op-tunnel-door` byte splice for the browser. They are leftovers still running until the BPF path replaces them. Do not route, test or debug the UI through them, and do not offer them as a fix.
-
-The browser reaches its container only by BPF and the lungs hand-off (see Target). The door speaks only TLS: `https://`, never `http://`.
+`browser (device 100.96.0.7, over WARP)` → `100.96.0.5:8080` socat → `10.0.0.2:20000` host `op-grpc-bridge` → `PortSelector` (`browser_port` file) → Jeremy's `op-tunnel-door` → Jeremy's `127.0.0.1:8443`. It never sees a WireGuard key, so it always lands in Jeremy. The owner's browser does not come through `wg-opdbus`. The door speaks only TLS: open `https://`, never `http://`.
 
 ## The container
 
@@ -52,10 +42,12 @@ The browser reaches its container only by BPF and the lungs hand-off (see Target
 
 ## Host ports (not the UI)
 
-- `10.0.0.2:8080` — host `op-web-server` (the spec moves it off `:8080`)
-- `100.96.0.5:8090` — socat to `10.0.0.2:8090` (control-plane door)
+- `10.0.0.2:20000` and `:20001` — host `op-grpc-bridge` per-identity browser listeners (legacy; to be removed)
+- `10.0.0.2:8080` — host `op-web-server`
+- `100.96.0.5:8080` — socat to `10.0.0.2:20000` (legacy; to be removed)
+- `100.96.0.5:8090` — socat to `10.0.0.2:8090`
 - `100.96.0.5:8443` — incusd
 
 ## OpenFlow
 
-`ovsbr0` has `eth0` and its internal port only. One flow: cookie `0`, priority `0`, action `NORMAL`. OpenFlow carries no browser traffic. Do not put `CloudflareWARP` on `ovsbr0`: it is a layer-3 tun, and host egress uses the WARP table (`not from all fwmark 0x100cf lookup 65743`), so bridging it cuts every outbound path. Flow writes go only through the sealed plugins (`openflow`, `ovsdb_bridge`, `rovs_commands`, `rtnetlink`) via zcall. Never `ovs-*` writes.
+`ovsbr0` has `eth0` and its internal port only. One flow: cookie `0`, priority `0`, action `NORMAL`. Browser connections are routed to the container by the login's identity id (owner, 2026-11-27); no such flow exists yet. Do not put `CloudflareWARP` on `ovsbr0`: it is a layer-3 tun, and host egress uses the WARP table (`not from all fwmark 0x100cf lookup 65743`), so bridging it cuts every outbound path. Flow writes go only through the sealed plugins (`openflow`, `ovsdb_bridge`, `rovs_commands`, `rtnetlink`) via zcall. Never `ovs-*` writes.
