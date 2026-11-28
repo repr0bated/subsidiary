@@ -21,8 +21,8 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 - **Episode**: one login of the identity; the traditional session. Episodes come and go within one `session_id`.
 - **UI URI**: the canonical browser URI obtained from the committed identity sled. It uses the shared entry on port `8080`.
 - **Ingress**: the host process that accepts raw browser TCP connections on the shared `:8080` entry. It does not serve HTTP or terminate TLS.
-- **Login route**: the OpenFlow flow that login writes for the identity, from the identifier already in its committed sled, so that the identity's incoming browser connection is settled to it. Written and deleted only through the sealed `openflow` plugin. It carries only the incoming connection setup; traffic after the browser is connected does not go through OpenFlow.
-- **BPF custody**: kernel state that carries the identity named by the login route onto the accepted socket, so the socket can be handed to that identity unread.
+- **UI label**: the identity's `session_id` encrypted under a host key; the first DNS label of its UI URI. The host decrypts it from the ClientHello `server_name`; nothing maps or looks it up.
+- **BPF custody**: optional kernel state that carries the `session_id` with the accepted socket until it is handed over.
 - **Lungs connection**: the identity's own peer-to-peer D-Bus connection to the host. It is the identity's; nothing re-proves it.
 - **Hand-off**: transfer of the accepted TCP file descriptor as a D-Bus Unix fd over that identity's lungs connection.
 - **Local door**: the container's existing TLS UI listener at `127.0.0.1:8443`.
@@ -37,20 +37,19 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 
 ## REQ-002: Login settles the identity; nothing re-derives it
 
-1. The identity SHALL be the one login sealed. Login already established it from the WireGuard key and the committed identity sled; the browser path SHALL NOT check it again.
-2. AT login, the system SHALL write the identity's login route with `add_flow` through the sealed `openflow` plugin (via zcall; admitted and receipted), using the identifier already held in the committed sled (session ID, UUID, container name or hostname).
-3. The login route SHALL carry only the incoming connection to the shared `:8080` entry. Traffic after the browser is connected SHALL NOT go through OpenFlow.
-4. HTTP bytes, TLS SNI, cookies, URL paths, query strings, browser headers, source ports, and browser-supplied identity values SHALL NOT name the identity.
+1. The identity SHALL be the one login sealed. The browser path SHALL NOT check it again.
+2. THE identity's UI URI in its committed sled SHALL be `https://<label>.perspective.3tched.com:8080/` (owner, 2026-11-27; the domain is one configuration value). `<label>` SHALL be the identity's `session_id` encrypted under a host key (one AES-128 block, 32 lowercase hex characters). The raw `session_id` SHALL NOT appear on the wire.
+3. ON `:8080`, the host SHALL read only the TLS ClientHello `server_name`, with `peek` (non-consuming), bounded in size and time, and SHALL decrypt its label to the `session_id`. SNI is allowed (owner, 2026-11-27). The label carries the `session_id`, so no lookup is needed.
+4. HTTP bytes, cookies, URL paths, query strings, browser headers, source addresses and ports SHALL NOT name the identity.
 5. Nothing on the browser path SHALL perform a second login, a WireGuard peer check, a binding lookup, a search for a container, or a count of containers present.
-6. THE login route SHALL last for the `session_id`, which is the identity's lifetime (owner, 2026-11-27). Nothing on this path SHALL delete it; logout ends only an episode. If the identity's container is not there to take the socket, the connection closes. There SHALL be no fallback identity.
+6. A missing, malformed, oversized, slow, ECH, or undecryptable `server_name`, or a `session_id` with no lungs connection, SHALL close the connection. There SHALL be no fallback identity.
 
-## REQ-003: BPF carries the login's identity onto the socket
+## REQ-003: The ClientHello reaches the container untouched
 
-1. A BPF program SHALL carry the identity named by the login route onto each accepted `:8080` socket, keyed by a kernel-derived socket key (socket cookie), before any application byte is read.
-2. The host ingress SHALL take that identity from the accepted socket and hand the socket to it. It SHALL NOT choose, match or re-derive the identity.
-3. BPF state SHALL follow the login route: written when login writes it, and kept for the `session_id`.
-4. Per-connection BPF entries SHALL be bounded and SHALL expire with the connection.
-5. BPF SHALL carry custody only. It SHALL NOT parse or serve application bytes.
+1. The host SHALL consume no byte of the connection. The ClientHello read by `peek` SHALL reach the container byte for byte.
+2. The host ingress SHALL hand the socket to the `session_id` from the label. It SHALL NOT choose, match or re-derive the identity.
+3. BPF socket custody MAY carry the `session_id` with the socket; it SHALL be bounded and expire with the connection.
+4. The host SHALL NOT parse anything but the ClientHello `server_name`, and SHALL NOT serve application bytes.
 
 ## REQ-004: Lungs delivers the socket to the identity
 
@@ -72,16 +71,16 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 ## REQ-006: The container remains externally IP-less
 
 1. This feature SHALL add no NIC, veth, tap, OVS internal port, routable address, default route, or externally reachable listener to the container.
-2. It SHALL NOT rewrite packets to container loopback with `route_localnet`, NAT, or a namespace route. The login route settles the incoming connection at the host's shared entry; the socket reaches the container only by lungs hand-off.
+2. It SHALL NOT rewrite packets to container loopback with OpenFlow, `route_localnet`, NAT, or a namespace route. The socket reaches the container only by lungs hand-off.
 3. The namespace-local `10.0.0.2/32` alias SHALL remain local and SHALL NOT be described as the container's externally reachable IP.
 4. Existing NIC-less BPF egress SHALL remain independent and unchanged.
-5. The login route SHALL NOT create a data-plane port into a container. All OpenFlow writes SHALL remain sealed plugin calls through zcall; never direct `ovs-*` writes.
+5. This feature SHALL add no OpenFlow flow or data-plane port. All OpenFlow writes SHALL remain sealed plugin calls through zcall; never direct `ovs-*` writes.
 6. The Decoy is not part of this path.
 
 ## REQ-007: Privacy and fail-closed behavior
 
-1. Public state and ordinary logs SHALL expose aggregate counts only. They SHALL NOT disclose WireGuard keys, sled/session identifiers, BPF route handles, login routes, URIs, or call arguments.
-2. Failure at any boundary (no login route, no BPF custody, no live lungs connection, fd transfer, local `127.0.0.1:8443` connection, or TLS) SHALL close that connection with no alternate path.
+1. Public state and ordinary logs SHALL expose aggregate counts only. They SHALL NOT disclose WireGuard keys, sled/session identifiers, UI labels, BPF route handles, URIs, or call arguments.
+2. Failure at any boundary (unreadable or undecryptable `server_name`, no live lungs connection, fd transfer, local `127.0.0.1:8443` connection, or TLS) SHALL close that connection with no alternate path.
 3. The host SHALL never have access to plaintext HTTP, UI assets, schemas, or method arguments on this path.
 4. No browser credential, SID1, OIA1, bearer token, pairing code, or identity cookie SHALL be introduced.
 
@@ -89,7 +88,7 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 
 1. Once this path is live, the browser relay path, socat forwarding for the UI, per-identity ports `20000+`, `PortSelector`, and `BrowserSelector::select` SHALL be removed.
 2. The control-plane door and unrelated host services SHALL remain unchanged.
-3. With two identity containers active, simultaneous connections to the shared `:8080` entry SHALL each reach only the identity whose login wrote its route.
+3. With two identity containers active, simultaneous connections to the shared `:8080` entry SHALL each reach only the identity its UI label names.
 4. Each browser SHALL receive the TLS certificate, UI build, plugin list, and live schema from its own container.
 5. Verification SHALL prove that each container still has only loopback and no default route after deployment.
 6. Deployment and the first live hand-off SHALL require the owner's approval.
@@ -98,11 +97,11 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 
 The feature is complete only when all of the following evidence exists:
 
-1. Two active identity containers can simultaneously receive connections through the same `:8080` entry, and each connection reaches only the identity whose login wrote its route.
+1. Two active identity containers can simultaneously receive connections through the same `:8080` entry, and each connection reaches only the identity its UI label names.
 2. Packet capture or equivalent byte comparison proves that the host does not consume or change the TLS ClientHello before the container's `127.0.0.1:8443` listener receives it.
 3. Each browser receives the certificate, UI build, plugin catalog, and live `GetSchema` result from its own container.
 4. Changing one container's mounted schema changes only that identity's response, without a host copy, cache, restart, or route update.
-5. No-login-route, missing-lungs, and failed-push cases close the affected connection and never reach another identity.
+5. Undecryptable-label, missing-lungs, and failed-push cases close the affected connection and never reach another identity.
 6. Host diagnostics disclose aggregate counts only, and a review finds no identity, sled, route-handle, URI, or request data in ordinary logs.
 7. After cutover, each identity container still exposes only loopback, has no default route, and has no veth, tap, OVS port, NAT rule, or externally reachable listener.
 8. The old UI relay, per-identity `20000+` browser ports, `PortSelector`, and browser `BrowserSelector::select` path are absent after the new path has passed live proof.
@@ -126,9 +125,9 @@ The feature is complete only when all of the following evidence exists:
 ### Never
 
 - Add a container NIC, veth, routable address, default route, OpenFlow route port, NAT path, or `route_localnet` dependency.
-- Select identity from browser-controlled bytes or accept a caller-supplied identity on the hand-off interface.
+- Select identity from browser-controlled bytes other than the ClientHello `server_name` label, or accept a caller-supplied identity on the hand-off interface.
 - Pick the identity by which or how many containers are present, or by a WireGuard peer check, a binding lookup, or the Decoy.
-- Poll, wait, keep waiters or pending calls, index, or cache anywhere on this path.
+- Poll, wait, or keep waiters or pending calls anywhere on this path. Indexes are allowed where something needs one; nothing runs a process that builds or maintains them (owner, 2026-11-27).
 - Terminate TLS or serve/cache UI or schema content on the host.
 - Fall back to another identity, a legacy relay, or a per-container port after an admission or delivery failure.
 - Bypass zcall for OpenFlow mutations or bypass the container's existing 3tchedFS admission for calls.
@@ -137,11 +136,11 @@ The feature is complete only when all of the following evidence exists:
 
 - Redesigning the axum UI, gRPC-Web API, schema format, 3tchedFS, or plugin admission.
 - Giving identity containers general ingress or egress networking.
-- Routing packets into a container namespace (the login route settles the incoming connection at the host entry; lungs delivers the socket).
+- Routing packets into a container namespace (lungs delivers the socket).
 - Changing unrelated control-plane tunnel behavior or unrelated services currently exposed by `op-web`.
 - The Decoy.
-- Adding browser login, pairing, bearer-token, cookie, SNI, or URL-based identity selection.
+- Adding browser login, pairing, bearer-token, cookie, or URL-path identity selection.
 
 ## Open questions
 
-There are no open architecture decisions. Identity is settled at login (owner, 2026-11-27). The login route's identifier is the committed sled's `session_id`, which lasts for the container's lifetime; episodes are the per-login sessions (owner, 2026-11-27). The flow's cookie and the mark it puts on the connection are derived from `session_id`, and BPF carries that `session_id` onto the accepted socket. The packet field the flow matches is the browser address login saw for this identity at login; never anything the browser sends inside the connection (REQ-002.4).
+There are no open architecture decisions. Identity is settled at login (owner, 2026-11-27). `session_id` lasts for the container's lifetime; episodes are the per-login sessions. The UI label is the `session_id` encrypted under a host key, carried in the ClientHello `server_name` (SNI allowed, owner, 2026-11-27); the host decrypts it and needs no table. The domain is `perspective.3tched.com` until the owner sets another; it is one configuration value.

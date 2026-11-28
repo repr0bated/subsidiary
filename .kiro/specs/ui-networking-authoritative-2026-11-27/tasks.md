@@ -36,7 +36,7 @@ File lists below are expected scope, not permission to rewrite unrelated code. S
   - **Requirements:** REQ-002.3–REQ-002.4, REQ-003, REQ-006.4, REQ-007.1.
 
 - [ ] **Task 4 — Replace dynamic browser selection with one raw `:8080` ingress**
-  - **Outcome:** Accept raw TCP on the shared `:8080` socket, take the identity the login route put on the accepted socket, and push the untouched `OwnedFd` to that identity. Never pick by which containers are present. Remove port- and browser-data-based selection from the new path. (Reopened 2026-11-27: the built `ad83b13` picks by `sole_waiting_session`.)
+  - **Outcome:** Accept raw TCP on the shared `:8080` socket, take the `session_id` from the decrypted ClientHello SNI label (peeked, not consumed), and push the untouched `OwnedFd` to that identity. Never pick by which containers are present. Remove port- and browser-data-based selection from the new path. (Reopened 2026-11-27: the built `ad83b13` picks by `sole_waiting_session`.)
   - **Likely files:** one new `crates/op-grpc-bridge/src/runtime_browser_ingress.rs`, `crates/op-grpc-bridge/src/runtime_bootstrap.rs`, `crates/op-grpc-bridge/src/runtime_tunnel.rs`, `crates/op-grpc-bridge/src/lib.rs`, and `crates/op-grpc-bridge/Cargo.toml` if needed.
   - **Dependencies:** Tasks 2–3.
   - **Size:** L.

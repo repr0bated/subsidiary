@@ -16,7 +16,7 @@ Read this first, from inside (owner, 2026-11-27):
 >
 > **Words that mean someone has it backwards:** verify, bind, resolve, look up, select, match, authenticate, which container, re-derive.
 >
-> **Everything is pushed to me.** Nothing polls, waits, holds waiters or pending calls, indexes or caches (owner, 2026-11-27).
+> **Everything is pushed to me.** Nothing polls, waits, or holds waiters or pending calls. Indexes are fine where something needs one; nothing runs a process to build or maintain them (owner, 2026-11-27).
 
 The container is the binding, the proof and the receipt. Do not ask the owner for a WireGuard peer, a binding, or "how the host knows which container": login already settled it.
 
@@ -26,13 +26,13 @@ The first step is the identity sled: the identifier it already holds names the c
 
 ## Target: `.kiro/specs/ui-networking-authoritative-2026-11-27/` (authoritative, not built)
 
-No mux. One shared entry `:8080`. The host hands the accepted socket itself to that identity's bound lungs connection (D-Bus Unix fd). Inside the container it is spliced to `127.0.0.1:8443`, where TLS ends at the axum door. The spec forbids `route_localnet`, a container NIC, and selection by port, SNI or headers. It supersedes `identity-aware-mux`, `browser-door-dispatch`, `openflow-browser-route` and `browser-lungs-handoff`.
+No mux. One shared entry `:8080`. The host peeks the TLS ClientHello's SNI, whose first label is the identity's `session_id` encrypted under a host key (`<label>.perspective.3tched.com`), decrypts it, and pushes the accepted socket itself to that identity's lungs connection (D-Bus Unix fd). Inside the container it is spliced to `127.0.0.1:8443`, where TLS ends at the axum door. SNI is allowed (owner, 2026-11-27). The spec forbids `route_localnet`, a container NIC, and selection by port, source address, path, cookie or headers. It supersedes `identity-aware-mux`, `browser-door-dispatch`, `openflow-browser-route` and `browser-lungs-handoff`.
 
 ## Browser path (owner, 2026-11-27)
 
 Identification is sealed at login and already determined. Do not revisit it: not the Decoy, not WireGuard peers, not assertions or source addresses, and never re-authenticate the browser.
 
-The committed identity sled has everything needed: UUID, session ID, container ID/name, hostname. Any of them can be the identifier. At login, use that identifier with OpenFlow to get to the container. BPF then delivers the container's UI (axum on its own `127.0.0.1:8443`) to the browser on the shared `8080`. No mux, no port 20000+, no socat relay, no proxy devices.
+The committed identity sled has everything needed: UUID, session ID, container ID/name, hostname. Its UI URI carries the encrypted `session_id` label, and the host decrypts it from SNI on `:8080`. No mux, no port 20000+, no socat relay, no proxy devices, no OpenFlow flow.
 
 The networking is already set up (owner, 2026-11-27). Do not redo, re-probe or re-derive it, and do not stop, start or add network services, relays or devices. There is no socat in the design. The only open work is the browser path above.
 
@@ -48,7 +48,7 @@ The networking is already set up (owner, 2026-11-27). Do not redo, re-probe or r
 
 No mux. Port `20000` and the other `20000+` ports are not used (owner, 2026-11-27). Neither are the socat relay `opdbus-vip-door-8080` (`100.96.0.5:8080` to `10.0.0.2:20000`), `PortSelector`, `BrowserSelector::select`, `op-tunnel-mux` or the `op-tunnel-door` byte splice for the browser. They are leftovers still running until the BPF path replaces them. Do not route, test or debug the UI through them, and do not offer them as a fix.
 
-The browser reaches its container only by the login identifier, OpenFlow, BPF and the lungs hand-off (see Browser path). The door speaks only TLS: `https://`, never `http://`.
+The browser reaches its container only by the SNI label and the lungs push (see Browser path). The door speaks only TLS: `https://`, never `http://`.
 
 ## The container
 
@@ -68,4 +68,4 @@ The browser reaches its container only by the login identifier, OpenFlow, BPF an
 
 ## OpenFlow
 
-`ovsbr0` has `eth0` and its internal port only. One flow: cookie `0`, priority `0`, action `NORMAL`. Browser connections go to the container by the identifier login takes from the identity sled (owner, 2026-11-27); that flow does not exist yet. Do not put `CloudflareWARP` on `ovsbr0`: it is a layer-3 tun, and host egress uses the WARP table (`not from all fwmark 0x100cf lookup 65743`), so bridging it cuts every outbound path. Flow writes go only through the sealed plugins (`openflow`, `ovsdb_bridge`, `rovs_commands`, `rtnetlink`) via zcall. Never `ovs-*` writes.
+`ovsbr0` has `eth0` and its internal port only. One flow: cookie `0`, priority `0`, action `NORMAL`. OpenFlow carries no browser route; browser delivery is by SNI label (owner, 2026-11-27). Do not put `CloudflareWARP` on `ovsbr0`: it is a layer-3 tun, and host egress uses the WARP table (`not from all fwmark 0x100cf lookup 65743`), so bridging it cuts every outbound path. Flow writes go only through the sealed plugins (`openflow`, `ovsdb_bridge`, `rovs_commands`, `rtnetlink`) via zcall. Never `ovs-*` writes.
