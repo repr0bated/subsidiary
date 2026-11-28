@@ -35,7 +35,7 @@ File lists below are expected scope, not permission to rewrite unrelated code. S
   - **Verification:** Build BPF artifacts into an explicit temporary directory without attaching them. With test approval, run map/key/lifecycle negative cases using fixtures or a disposable namespace.
   - **Requirements:** REQ-002.3–REQ-002.4, REQ-003, REQ-006.4, REQ-007.1.
 
-- [ ] **Task 4 — Replace dynamic browser selection with one raw `:8080` ingress**
+- [x] **Task 4 — Replace dynamic browser selection with one raw `:8080` ingress**
   - **Outcome:** Accept raw TCP on the shared WireGuard-facing `:8080` socket, recover the kernel connection key and route handle, revalidate the current sled, and offer the untouched `OwnedFd` to the hand-off service. Remove port- and browser-data-based selection from the new path.
   - **Likely files:** one new `crates/op-grpc-bridge/src/runtime_browser_ingress.rs`, `crates/op-grpc-bridge/src/runtime_bootstrap.rs`, `crates/op-grpc-bridge/src/runtime_tunnel.rs`, `crates/op-grpc-bridge/src/lib.rs`, and `crates/op-grpc-bridge/Cargo.toml` if needed.
   - **Dependencies:** Tasks 2–3.
