@@ -35,8 +35,8 @@ File lists below are expected scope, not permission to rewrite unrelated code. S
   - **Verification:** Build BPF artifacts into an explicit temporary directory without attaching them. With test approval, run map/key/lifecycle negative cases using fixtures or a disposable namespace.
   - **Requirements:** REQ-002.3–REQ-002.4, REQ-003, REQ-006.4, REQ-007.1.
 
-- [x] **Task 4 — Replace dynamic browser selection with one raw `:8080` ingress**
-  - **Outcome:** Accept raw TCP on the shared `:8080` socket, take the identity the login route put on the accepted socket, and offer the untouched `OwnedFd` to that identity's hand-off. Never pick by waiter count. Remove port- and browser-data-based selection from the new path.
+- [ ] **Task 4 — Replace dynamic browser selection with one raw `:8080` ingress**
+  - **Outcome:** Accept raw TCP on the shared `:8080` socket, take the identity the login route put on the accepted socket, and push the untouched `OwnedFd` to that identity. Never pick by which containers are present. Remove port- and browser-data-based selection from the new path. (Reopened 2026-11-27: the built `ad83b13` picks by `sole_waiting_session`.)
   - **Likely files:** one new `crates/op-grpc-bridge/src/runtime_browser_ingress.rs`, `crates/op-grpc-bridge/src/runtime_bootstrap.rs`, `crates/op-grpc-bridge/src/runtime_tunnel.rs`, `crates/op-grpc-bridge/src/lib.rs`, and `crates/op-grpc-bridge/Cargo.toml` if needed.
   - **Dependencies:** Tasks 2–3.
   - **Size:** L.
@@ -50,17 +50,17 @@ Do not proceed until Tasks 2–4 build together in one Cargo invocation, BPF art
 
 ## Phase B — Transfer custody and serve from container localhost
 
-- [x] **Task 5 — Add at-most-once browser fd waiters to the existing lungs D-Bus connection**
-  - **Outcome:** Add a bounded `AcceptBrowser`-style call to `org.opdbus.v1.LungsV1`. The connection's existing peer proof and committed container binding key the waiter; the method accepts no caller-supplied identity. Transfer the accepted TCP socket with D-Bus Unix-fd semantics.
+- [ ] **Task 5 — Push browser fds over the identity's lungs D-Bus connection**
+  - **Outcome:** The container's lungs side exports `ReceiveBrowser(h)`; the host calls it on the identity's own lungs connection to push one accepted TCP socket as a D-Bus Unix fd. No waiter, no pending call, no caller-supplied identity. (Reopened 2026-11-27: the built `a5eef32` uses `AcceptBrowser` waiters.)
   - **Likely files:** `crates/op-grpc-bridge/src/runtime_lungs.rs`, `crates/op-grpc-bridge/src/runtime_lungs_identity.rs`, one new `crates/op-grpc-bridge/src/runtime_lungs_browser.rs`, and `crates/op-grpc-bridge/Cargo.toml` if required.
   - **Dependencies:** Task 4.
   - **Size:** L.
-  - **Acceptance:** Immediately before transfer, BPF route identity, current sled identity, lungs peer identity, peer lifetime, and container-init lifetime agree. Success leaves one fd owner in the container. Missing/dead waiter, binding change, peer death, duplicate offer, or saturation closes the browser socket without retry or cross-identity delivery.
-  - **Verification:** Safe package build. With test approval, focused tests cover two identities, stale/dead peers, at-most-once custody, bounded waiters, cancellation, and fd leaks.
+  - **Acceptance:** Success leaves one fd owner in the container. No lungs connection, a failed push, or saturation closes the browser socket without retry or cross-identity delivery. Nothing polls or waits.
+  - **Verification:** Safe package build. With test approval, focused tests cover two identities, at-most-once custody, bounded in-flight pushes, cancellation, and fd leaks.
   - **Requirements:** REQ-004, REQ-007.
 
-- [x] **Task 6 — Replace the framed container browser relay with a local raw splice**
-  - **Outcome:** Make `op-tunnel-door` hold bounded lungs browser waiters, receive an owned TCP fd, open `127.0.0.1:8443` inside the identity container, and splice raw streams with backpressure and half-close semantics. Do not serve the axum router directly.
+- [ ] **Task 6 — Replace the framed container browser relay with a local raw splice**
+  - **Outcome:** Make `op-tunnel-door` serve the pushed `ReceiveBrowser(h)` call, take the owned TCP fd, open `127.0.0.1:8443` inside the identity container, and splice raw streams with backpressure and half-close semantics. No waiters. Do not serve the axum router directly. (Reopened 2026-11-27: the built `9bc98f3` holds waiters.)
   - **Likely files:** `crates/op-tunnel-mux/src/bin/op-tunnel-door.rs`, one new `crates/op-tunnel-mux/src/browser_fd.rs`, `crates/op-tunnel-mux/src/lib.rs`, and `crates/op-tunnel-mux/Cargo.toml`.
   - **Dependencies:** Task 5.
   - **Size:** M.
@@ -75,7 +75,7 @@ Do not touch live `:8080` or attach BPF until all affected packages build togeth
 ## Phase C — Cut over, prove, then remove legacy delivery
 
 - [x] **Task 7 — Prepare the runit and golden cutover without activating it**
-  - **Outcome:** Define fail-closed service ordering for BPF state, shared ingress, lungs, and the container waiter. Stop `op-web` from owning the WireGuard-facing `10.0.0.2:8080`; preserve unrelated required services only on a non-conflicting internal binding. Update the container door command to use lungs and `127.0.0.1:8443`.
+  - **Outcome:** Define fail-closed service ordering for BPF state, shared ingress, lungs, and the container's `ReceiveBrowser` receiver. Stop `op-web` from owning the WireGuard-facing `10.0.0.2:8080`; preserve unrelated required services only on a non-conflicting internal binding. Update the container door command to use lungs and `127.0.0.1:8443`.
   - **Likely files:** `deploy/runit/op-web/run`, `deploy/provisioning/runit/op-tunnel-door/run`, the shared-ingress runit `run` file identified by Task 1, `deploy/lib/golden/activate-services.tsv`, and its focused activation contract test.
   - **Dependencies:** Checkpoint B.
   - **Size:** M.

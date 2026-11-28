@@ -22,7 +22,7 @@ host shared TCP ingress :8080
 the identity's own lungs connection
   │ accepted TCP fd transferred as D-Bus Unix fd
   ▼
-container-side lungs waiter
+container-side lungs receiver (ReceiveBrowser pushed by the host)
   │ raw byte splice entirely inside the identity container
   ▼
 127.0.0.1:8443
@@ -44,10 +44,10 @@ Current and target ownership in `odbus-verified` is:
 
 | Area | Current source | Target responsibility |
 | --- | --- | --- |
-| Login route | login path in `crates/op-grpc-bridge` (session login), sealed `openflow` plugin (`openflow_methods.rs`) | At login, write the identity's login route with `add_flow` from the identifier already in its committed sled; delete it with `delete_flow` only when the `session_id` ends (container teardown, expiry, revocation); logout ends an episode and keeps the route. |
+| Login route | login path in `crates/op-grpc-bridge` (session login), sealed `openflow` plugin (`openflow_methods.rs`) | At login, write the identity's login route with `add_flow` from the `session_id` in its committed sled. The route lasts for the `session_id`; nothing on this path deletes it. |
 | BPF custody | `crates/op-network/bpf/browser_ingress.bpf.c`, `crates/op-network/src/browser_ingress.rs` | Carry the identity named by the login route onto each accepted `:8080` socket, keyed by socket cookie, bounded. Separate from the unchanged NIC-less egress program. |
-| Lungs | `crates/op-grpc-bridge/src/runtime_lungs.rs`, `runtime_lungs_identity.rs`, `runtime_lungs_browser.rs` | The identity's own lungs connection receives its socket through the bounded `AcceptBrowser` waiter. No re-check of who it is. |
-| Shared browser ingress | `crates/op-grpc-bridge/src/runtime_browser_ingress.rs` | One raw `:8080` listener. Takes the identity from the accepted socket's BPF custody and hands the socket to it. Never picks by waiter count. |
+| Lungs | `crates/op-grpc-bridge/src/runtime_lungs.rs`, `runtime_lungs_identity.rs`, `runtime_lungs_browser.rs` | The identity's own lungs connection receives its socket when the host calls `ReceiveBrowser(h)` on it (push). No waiter, no pending call, no re-check of who it is. |
+| Shared browser ingress | `crates/op-grpc-bridge/src/runtime_browser_ingress.rs` | One raw `:8080` listener. Takes the identity from the accepted socket's BPF custody and pushes the socket to it. |
 | Container recipient | `crates/op-tunnel-mux/src/bin/op-tunnel-door.rs` | Replace the framed browser stream with an owned-fd receiver and raw Tokio splice to `127.0.0.1:8443`. |
 | Existing UI door | `crates/op-grpc-bridge/src/container_ui_door.rs` | Remain unchanged as the TLS/axum/3tchedFS serving boundary. |
 | Existing host web server | `crates/op-web/src/main.rs` and its runit service | Stop owning the WireGuard-facing `:8080` socket. Preserve any unrelated service on a non-conflicting internal binding only if still required. |
@@ -63,11 +63,11 @@ The host does admission at login and holds socket custody, but is intentionally 
 
 Primary threats and controls are:
 
-- **Cross-identity delivery:** the socket goes only to the identity its login route names; no route, no delivery; never by waiter count.
+- **Cross-identity delivery:** the socket goes only to the identity its login route names; no route, no delivery; never by which containers are present.
 - **Tampering:** raw TLS bytes are neither parsed nor rewritten on the host; file-descriptor custody is transferred once.
 - **Information disclosure:** TLS ends in the container and logs expose aggregate state only.
-- **Denial of service:** bounded BPF entries, waiter count, accepted-fd count, timeouts, and immediate close when a destination is not ready.
-- **Stale routes:** the end of the `session_id` (container teardown, expiry, revocation) deletes the login route and BPF state; a dead lungs connection receives nothing.
+- **Denial of service:** bounded BPF entries, bounded in-flight pushes, timeouts, and immediate close when the push cannot be delivered.
+- **Absent container:** the login route is kept for the `session_id`; if the identity's container is not there to take the socket, the connection closes; a dead lungs connection receives nothing.
 - **Privilege escalation:** the hand-off carries no identity argument or grant and does not bypass existing 3tchedFS admission.
 
 ## D1. Public contract: keep `:8080`
@@ -88,21 +88,21 @@ login (sealed identity) -> sled identifier -> add_flow (sealed openflow plugin) 
 
 The login route matches the identity's incoming browser connection at the shared `:8080` entry on header fields login already knows for that browser, never on anything the browser sends inside the connection. It carries only the incoming connection setup. Once the socket is handed over, traffic does not go through OpenFlow.
 
-BPF carries the identity the login route names onto the accepted socket, in a bounded map keyed by socket cookie, before any application byte is read. After `accept(2)`, the ingress reads that identity from the socket and hands the socket to it. It does not look the identity up, compare bindings or count waiters.
+BPF carries the identity the login route names onto the accepted socket, in a bounded map keyed by socket cookie, before any application byte is read. After `accept(2)`, the ingress reads that identity from the socket and hands the socket to it. It does not look the identity up, compare bindings or count containers.
 
-The login route lasts for the `session_id`, the container's lifetime. Logout ends an episode and keeps the route. Container teardown, expiry and revocation end the `session_id` and delete the login route (`delete_flow`) and its BPF state. Per-connection entries expire when their sockets close.
+The login route lasts for the `session_id`, the identity's lifetime; nothing on this path deletes it, and logout ends only an episode. Per-connection entries expire when their sockets close.
 
 ## D3. Lungs is the identity delivery channel
 
 The lungs socket is peer-to-peer D-Bus over Unix sockets. Each identity's lungs connection is its own.
 
-Add a browser accept operation on the existing lungs bootstrap object:
+Add a browser delivery method that the container's own lungs side exports, and that the host calls:
 
 ```text
-AcceptBrowser() -> h
+ReceiveBrowser(h)
 ```
 
-`h` is the D-Bus Unix fd for one accepted browser TCP socket. The container keeps a small bounded set of pending calls. The host answers the waiter of the identity the socket's BPF custody names. A waiter whose connection has ended receives nothing. If that identity has no live waiter, the browser connection closes; it never goes to another identity.
+`h` is the D-Bus Unix fd for one accepted browser TCP socket. Delivery is a push (owner, 2026-11-27): when a socket arrives on `:8080`, the host calls `ReceiveBrowser` on the lungs connection of the identity the socket's BPF custody names. The container has nothing pending, polling or waiting; the call arrives and the container serves it. If that identity's lungs connection is not there, or the call fails, the browser connection closes; it never goes to another identity.
 
 ## D4. Localhost stays literally in the data path
 
@@ -140,13 +140,12 @@ OpenFlow writes the login route at the host's shared entry, through sealed plugi
 
 1. Login seals the identity and writes its login route (`add_flow`).
 2. The sled exposes the canonical UI URI.
-3. The identity's lungs connection registers bounded `AcceptBrowser` waiters.
-4. A browser connection on `:8080` is settled by the login route; BPF carries the identity onto the accepted socket before application data is read.
-5. The ingress hands the fd to that identity's live waiter once and closes its copy.
-6. The container splices the fd to `127.0.0.1:8443` and removes the waiter when the connection ends.
-7. Container teardown, expiry or revocation ends the `session_id` and deletes the login route (`delete_flow`), its BPF state and the identity's waiters. Logout ends only an episode; the route stays.
+3. A browser connection on `:8080` is settled by the login route; BPF carries the identity onto the accepted socket before application data is read.
+4. The ingress pushes the fd once with `ReceiveBrowser(h)` on that identity's lungs connection and closes its copy.
+5. The container splices the fd to `127.0.0.1:8443`.
+6. The login route stays for the `session_id`. Logout ends only an episode.
 
-Every missing or mismatched step closes the affected connection. There is no queue, retry, alternate identity, per-port fallback, or NORMAL delivery into another container.
+Every missing or failed step closes the affected connection. There is no polling, waiting, queue, retry, alternate identity, per-port fallback, or NORMAL delivery into another container.
 
 ## D8. Deployment boundary
 
@@ -166,18 +165,18 @@ No live switch, BPF, listener, or deploy mutation is part of writing this spec.
 
 - Represent route handles, connection keys, and verified bindings with distinct Rust newtypes; do not pass interchangeable strings through the custody path.
 - Keep ownership explicit with `OwnedFd`. Any `from_raw_fd` boundary must have a local `SAFETY` explanation and must establish exactly one owner.
-- Use bounded collections and semaphores. No unbounded channel, waiter list, flow map, retry loop, or accepted-socket queue is permitted.
+- Everything is push (owner, 2026-11-27): no polling, waiting, waiters, pending calls, indexing or caching. Use bounded semaphores for in-flight pushes. No unbounded channel, flow map, retry loop, or accepted-socket queue is permitted.
 - Preserve cancellation and half-close behavior with structured Tokio tasks. Dropping a hand-off or splice owner must close both sides and release BPF/user-space state.
 - Use repository error conventions (`anyhow` at process boundaries and typed errors where callers branch). Error text and tracing fields must not include private identifiers.
 - Keep D-Bus as the control/custody plane. Do not add a new gRPC byte relay, host-side HTTP parser, or direct `ovs-*`, `incus`, or `lxc` subprocess path.
-- OpenFlow writes remain zcall/plugin operations. The login route's `add_flow` and `delete_flow` are the only OpenFlow mutations this feature adds.
+- OpenFlow writes remain zcall/plugin operations. The login route's `add_flow` is the only OpenFlow mutation this feature adds.
 - Preserve current `container_ui_door` routing and 3tchedFS code unless live evidence exposes a separate defect.
 
 ## Verification strategy
 
 Verification is layered so failures identify the boundary that broke:
 
-1. **Pure/unit:** route-handle/newtype parsing, bounded map lifecycle, key normalization, waiter at-most-once semantics, stale binding rejection, fd ownership, and splice half-close/cancellation.
+1. **Pure/unit:** route-handle/newtype parsing, bounded map lifecycle, key normalization, push at-most-once semantics, fd ownership, and splice half-close/cancellation.
 2. **Component:** a fake login route plus two identities' lungs connections proves no cross-identity hand-off; malformed/unknown mappings fail closed; the ingress proves it does not read the TCP stream.
 3. **Namespace integration:** an identity-container fixture receives a handed fd and splices it to a loopback TLS fixture at `127.0.0.1:8443`; byte comparison proves the ClientHello is unchanged.
 4. **Repository integration:** `op-network`, `op-grpc-bridge`, `op-tunnel-mux`, and affected `op-web`/runit contracts build together and old selector tests are replaced with shared-entry tests.
@@ -211,6 +210,6 @@ Attaching BPF, changing the live listener, enabling runit services, and running 
 
 ## Rollout and rollback
 
-Build and validate the new path without attaching it. In an owner-approved maintenance window, stop admission on the old UI entry, attach the browser-ingress BPF state, start the lungs waiters, and bind the new raw ingress to the same `:8080` address. Do not run two competing `:8080` owners.
+Build and validate the new path without attaching it. In an owner-approved maintenance window, stop admission on the old UI entry, attach the browser-ingress BPF state, start the container's `ReceiveBrowser` receiver, and bind the new raw ingress to the same `:8080` address. Do not run two competing `:8080` owners.
 
 Until two-identity live proof passes, rollback restores the prior `:8080` service ownership and detaches only the new browser-ingress BPF program/maps. It does not add a legacy fallback inside the new ingress. After proof, remove the old relay, dynamic ports, and selectors; rollback after that point is a golden-version rollback, not an in-process fallback.

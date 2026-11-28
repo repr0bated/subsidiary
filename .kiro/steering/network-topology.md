@@ -15,6 +15,8 @@ Read this first, from inside (owner, 2026-11-27):
 > **My browser connection is mine.** It is handed to me. I don't search for it, and the host doesn't work out who I am to send it. Code on this path is written as "give the identity its connection", never "find which container this connection belongs to".
 >
 > **Words that mean someone has it backwards:** verify, bind, resolve, look up, select, match, authenticate, which container, re-derive.
+>
+> **Everything is pushed to me.** Nothing polls, waits, holds waiters or pending calls, indexes or caches (owner, 2026-11-27).
 
 The container is the binding, the proof and the receipt. Do not ask the owner for a WireGuard peer, a binding, or "how the host knows which container": login already settled it.
 

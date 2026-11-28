@@ -41,14 +41,14 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 2. AT login, the system SHALL write the identity's login route with `add_flow` through the sealed `openflow` plugin (via zcall; admitted and receipted), using the identifier already held in the committed sled (session ID, UUID, container name or hostname).
 3. The login route SHALL carry only the incoming connection to the shared `:8080` entry. Traffic after the browser is connected SHALL NOT go through OpenFlow.
 4. HTTP bytes, TLS SNI, cookies, URL paths, query strings, browser headers, source ports, and browser-supplied identity values SHALL NOT name the identity.
-5. Nothing on the browser path SHALL perform a second login, a WireGuard peer check, a binding lookup, a search for a container, or a count of waiting containers.
-6. THE login route SHALL last for the `session_id`, the container's lifetime (owner, 2026-11-27). Ending an episode (logout) SHALL NOT delete it. The system SHALL delete it with `delete_flow` only when the `session_id` ends: container teardown, expiry or revocation of the identity. No login route: the connection goes nowhere. There SHALL be no fallback identity.
+5. Nothing on the browser path SHALL perform a second login, a WireGuard peer check, a binding lookup, a search for a container, or a count of containers present.
+6. THE login route SHALL last for the `session_id`, which is the identity's lifetime (owner, 2026-11-27). Nothing on this path SHALL delete it; logout ends only an episode. If the identity's container is not there to take the socket, the connection closes. There SHALL be no fallback identity.
 
 ## REQ-003: BPF carries the login's identity onto the socket
 
 1. A BPF program SHALL carry the identity named by the login route onto each accepted `:8080` socket, keyed by a kernel-derived socket key (socket cookie), before any application byte is read.
 2. The host ingress SHALL take that identity from the accepted socket and hand the socket to it. It SHALL NOT choose, match or re-derive the identity.
-3. BPF state SHALL follow the login route: written when login writes it, removed when the `session_id` ends (container teardown, expiry or revocation); not when an episode ends.
+3. BPF state SHALL follow the login route: written when login writes it, and kept for the `session_id`.
 4. Per-connection BPF entries SHALL be bounded and SHALL expire with the connection.
 5. BPF SHALL carry custody only. It SHALL NOT parse or serve application bytes.
 
@@ -57,7 +57,7 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 1. The host SHALL hand the accepted TCP socket itself to that identity's own lungs connection, as a D-Bus Unix fd.
 2. A lungs connection that has ended SHALL NOT receive a socket. This is a liveness fact about the connection, not a re-check of who the identity is.
 3. The host SHALL close its copy after successful transfer and SHALL NOT read, copy, splice, proxy, or relay browser bytes afterwards.
-4. If the identity has no live lungs connection or no ready waiter, the browser socket SHALL close immediately. It SHALL NOT be queued, retried, or delivered to another identity.
+4. If the identity's lungs connection is not there or the push fails, the browser socket SHALL close immediately. It SHALL NOT be queued, retried, or delivered to another identity.
 5. One accepted socket SHALL be delivered at most once.
 
 ## REQ-005: The container serves from localhost
@@ -102,7 +102,7 @@ The feature is complete only when all of the following evidence exists:
 2. Packet capture or equivalent byte comparison proves that the host does not consume or change the TLS ClientHello before the container's `127.0.0.1:8443` listener receives it.
 3. Each browser receives the certificate, UI build, plugin catalog, and live `GetSchema` result from its own container.
 4. Changing one container's mounted schema changes only that identity's response, without a host copy, cache, restart, or route update.
-5. No-login-route, ended-`session_id`, expired, revoked, missing-lungs, and dead-waiter cases close the affected connection and never reach another identity.
+5. No-login-route, missing-lungs, and failed-push cases close the affected connection and never reach another identity.
 6. Host diagnostics disclose aggregate counts only, and a review finds no identity, sled, route-handle, URI, or request data in ordinary logs.
 7. After cutover, each identity container still exposes only loopback, has no default route, and has no veth, tap, OVS port, NAT rule, or externally reachable listener.
 8. The old UI relay, per-identity `20000+` browser ports, `PortSelector`, and browser `BrowserSelector::select` path are absent after the new path has passed live proof.
@@ -112,7 +112,7 @@ The feature is complete only when all of the following evidence exists:
 ### Always
 
 - Take the identity from login and carry it forward unchanged; never re-derive, match or count it.
-- Use bounded maps, bounded waiter counts, owned file descriptors, cancellation-safe cleanup, and fail-closed errors.
+- Push, never poll or wait (owner, 2026-11-27). Use bounded maps, bounded in-flight pushes, owned file descriptors, cancellation-safe cleanup, and fail-closed errors.
 - Keep TLS, HTTP, UI assets, schema reads, calls, and admission inside the selected container.
 - Record commands and evidence without recording private identity material.
 
@@ -127,7 +127,8 @@ The feature is complete only when all of the following evidence exists:
 
 - Add a container NIC, veth, routable address, default route, OpenFlow route port, NAT path, or `route_localnet` dependency.
 - Select identity from browser-controlled bytes or accept a caller-supplied identity on the hand-off interface.
-- Pick the identity by which or how many containers are waiting, or by a WireGuard peer check, a binding lookup, or the Decoy.
+- Pick the identity by which or how many containers are present, or by a WireGuard peer check, a binding lookup, or the Decoy.
+- Poll, wait, keep waiters or pending calls, index, or cache anywhere on this path.
 - Terminate TLS or serve/cache UI or schema content on the host.
 - Fall back to another identity, a legacy relay, or a per-container port after an admission or delivery failure.
 - Bypass zcall for OpenFlow mutations or bypass the container's existing 3tchedFS admission for calls.
