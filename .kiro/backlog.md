@@ -9,8 +9,6 @@ Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and
 
 ## Open
 - [ ] Foundation: show a hire's on-chain state in the canvas with `ui/src/lib/web3/client.ts` (read-only: `getHire`, `anchorOf`, `checkReceipt`), for example a hire/receipt card that reads status and anchor time for a hire id. First check chat-canvas-ui design §2: the door is the browser's only path to the backend, so a browser-side RPC origin may need an owner decision; the RPC URL and contract addresses come from config, never a key (added 2026-11-28, kiroween)
-- [ ] Cleanup and tests: run `ui/src/lib/web3/client.ts` against a real local anvil, reusing `web3/script/e2e-local.sh` (deployed addresses, hire 1, fixed head), so the decoder is checked against the real ABI encoding and not only the mocked words (added 2026-11-28, kiroween)
-- [ ] Cleanup and tests: `web3/script/demo-setup.sh` is fixed to port 8545 and its preflight fails without the FUSE view, so it cannot run in a plain test; let it take the port from `RPC_URL` like the other scripts (added 2026-11-28, kiroween)
 
 ## Blocked
 - Owner item: kiroween container TLS UI listener (`OP_UI_LISTEN`) and provisioned browser port, then the live two-container check from docs/handoff/browser-door-dispatch/tasks.md task 9. Blocked: container provisioning and a live two-container check are owner actions outside the worker's scope. Unblock: owner configures the listener and port, then the check can run (2026-11-25)
@@ -35,6 +33,8 @@ Open is in priority order (owner, 2026-11-26): **Foundation** (the contracts and
 - demo-hire-and-receipt-check 7: recording the video needs a tagged known-good version and the live tasks 3, 4 and 6 first (2026-11-24)
 
 ## Done
+- Cleanup and tests: `web3/script/demo-setup.sh` takes its node from `RPC_URL` (anvil started on that port, 127.0.0.1 only), `DEMO_SKIP_PREFLIGHT=1` skips the FUSE preflight for plain tests (default unchanged), `DEMO_STATE_DIR` keeps test addresses out of `.kiro/state`; `e2e-local.sh` now deploys through it, 11/11 pass (2026-11-28, kiroween)
+- Cleanup and tests: `ui/src/lib/web3/client.ts` checked against a real local anvil: opt-in `client.anvil.test.ts` (skipped unless `WEB3_RPC_URL` is set) run by `web3/script/e2e-local.sh` after hire 1; real ABI decoding of `getHire`, `hireCount`, `anchor`, `anchorOf`, `checkReceipt` matches, no decoder bug found (2026-11-28, kiroween)
 - Cleanup: re-checked the nine remaining wiki pages against the live view (2026-11-26): `ui-surfaces.md` gained the new Shell surface (`/`, `json_render.canvas`); resolved VERIFY marks for the `Chat` custom transport and receipts; found `application_session_id` in no sealed schema and `.kiro/scripts/receipt.sh` still present (owner decision); `value.json` still EIO; unconfirmed VERIFY marks left in place
 - Cleanup: wiki re-check of `exchange-point-and-schema-feed.md` and `json-render.md` against the live view (generation 75, 74 plugins; no exchange operation in FUSE; `value.json` absent for `project`; json_render catalog read through FUSE); the other nine pages stay in Open (2026-11-26)
 - Cleanup: wiki update for the four pages the item named (2026-11-26): `fuse.get_catalog` still not sealed (golden 352, catalog gen 75), `chat_response` path unchanged, 147 threetched methods confirmed, `SetSelection` resolved as current, Keccak-256 note added to `two-chains.md`; README updated. The other pages are a new Open item
