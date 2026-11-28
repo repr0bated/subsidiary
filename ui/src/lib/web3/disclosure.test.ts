@@ -119,6 +119,10 @@ describe('verifyEntry', () => {
     expect(verifyEntry(entry, b)).toEqual(['bundle shows design as public, entry says withheld', 'bundle says 0 withheld, entry has 1']);
   });
 
+  it('reports an entry with no fields instead of throwing', () => {
+    expect(verifyEntry({ ...entry, fields: [] })).toEqual(['entry has no fields']);
+  });
+
   it('catches a bundle that drops a redacted field', () => {
     const b: PublicBundle = structuredClone(bundle);
     b.fields = b.fields.filter((f) => f.path !== 'client');

@@ -226,6 +226,7 @@ export function verifyBundle(bundle: PublicBundle): string[] {
 export function verifyEntry(entry: RecordEntry, bundle?: PublicBundle): string[] {
   const problems: string[] = [];
   if (entry?.version !== ENTRY_VERSION) return [`unknown entry version ${String(entry?.version)}`];
+  if (!Array.isArray(entry.fields) || entry.fields.length === 0) return ['entry has no fields'];
   const fields = [...entry.fields];
   const sorted = [...fields].sort((a, b) => byUtf8(a.path, b.path));
   if (fields.some((f, i) => f.path !== sorted[i].path)) problems.push('entry fields are not in path order');
