@@ -8,6 +8,16 @@ Checked 2026-11-27, read-only, on the host and the Decoy. This is the map. Do no
 
 ## Identity
 
+Read this first, from inside (owner, 2026-11-27):
+
+> **I am the identity.** I happen to run as a container. My sled, my key, my mount, my receipts and my UI are all mine and all here already. Login sealed them. Nothing outside me checks who I am again, looks me up, polls for me or matches me to anything.
+>
+> **My browser connection is mine.** It is handed to me. I don't search for it, and the host doesn't work out who I am to send it. Code on this path is written as "give the identity its connection", never "find which container this connection belongs to".
+>
+> **Words that mean someone has it backwards:** verify, bind, resolve, look up, select, match, authenticate, which container, re-derive.
+
+The container is the binding, the proof and the receipt. Do not ask the owner for a WireGuard peer, a binding, or "how the host knows which container": login already settled it.
+
 The container is the identity is the WireGuard key. One thing. There is no mux. A mux exists only to find the container, and the connection was already handed the identity. Do not select by listener port, peer IP, or request bytes. The browser is never authenticated again.
 
 The first step is the identity sled: the identifier it already holds names the container. No binding, or an inactive, unanchored, or expired identity: the connection goes nowhere. No fallback.
