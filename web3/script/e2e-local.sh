@@ -6,9 +6,10 @@
 #   e2e-local.sh            uses port 8546 (E2E_PORT to change); refuses a port already in use
 #
 # Uses only anvil's public default dev accounts; sends nothing to any other chain.
-# Reuses Deploy.s.sol (as demo-setup.sh does), AnchorHead.s.sol, DemoHire.s.sol and verify-hire.sh,
-# then runs ui/src/lib/web3/client.anvil.test.ts against the same node (skipped without ui/node_modules).
-# demo-setup.sh itself is not called: it is fixed to port 8545 and its preflight needs the FUSE view.
+# Deploys with demo-setup.sh (RPC_URL set to this anvil, DEMO_SKIP_PREFLIGHT=1, state in a temp dir,
+# so the demo's own .kiro/state/demo.env is not touched), then reuses AnchorHead.s.sol, DemoHire.s.sol
+# and verify-hire.sh, then runs ui/src/lib/web3/client.anvil.test.ts against the same node (skipped
+# without ui/node_modules).
 # shortcut: verify-receipt.sh is not run, it needs zcall and a live 3tched chain; add it when the
 # e2e runs inside the container.
 set -euo pipefail
@@ -44,9 +45,10 @@ pass() { printf 'PASS  %-9s %s\n' "$1" "$2"; }
 bad()  { printf 'FAIL  %-9s %s\n' "$1" "$2"; fail=1; }
 script() { ( cd "$here" && forge script "$@" --rpc-url "$rpc" --broadcast 2>&1 ); }
 
-out="$(DEPLOYER_KEY=$deployer script script/Deploy.s.sol)" || { echo "$out" >&2; exit 1; }
-anchor="$(echo "$out" | grep -oE 'EtchedAnchor 0x[0-9a-fA-F]{40}' | tail -1 | cut -d' ' -f2)"
-hire="$(echo "$out" | grep -oE 'HireContract 0x[0-9a-fA-F]{40}' | tail -1 | cut -d' ' -f2)"
+out="$(DEPLOYER_KEY=$deployer RPC_URL=$rpc DEMO_SKIP_PREFLIGHT=1 DEMO_STATE_DIR="$tmp/state" \
+  bash "$here/script/demo-setup.sh" 2>&1)" || { echo "$out" >&2; exit 1; }
+anchor="$(sed -n 's/^ANCHOR_ADDRESS=//p' "$tmp/state/demo.env")"
+hire="$(sed -n 's/^HIRE_ADDRESS=//p' "$tmp/state/demo.env")"
 [ -n "$anchor" ] && [ -n "$hire" ] && pass deploy "anchor $anchor hire $hire" || { bad deploy "no addresses"; exit 1; }
 
 # Fixed test inputs: a salted terms document and a fixed work head.
