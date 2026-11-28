@@ -17,6 +17,8 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 ## Terms
 
 - **Identity**: one thing represented by the container, its committed identity sled, and its sealed WireGuard public key.
+- **`session_id`**: the identity's id for the whole lifetime of its container (owner, 2026-11-27). It is not a per-login session.
+- **Episode**: one login of the identity; the traditional session. Episodes come and go within one `session_id`.
 - **UI URI**: the canonical browser URI obtained from the committed identity sled. It uses the shared entry on port `8080`.
 - **Ingress**: the host process that accepts raw browser TCP connections on the shared `:8080` entry. It does not serve HTTP or terminate TLS.
 - **Login route**: the OpenFlow flow that login writes for the identity, from the identifier already in its committed sled, so that the identity's incoming browser connection is settled to it. Written and deleted only through the sealed `openflow` plugin. It carries only the incoming connection setup; traffic after the browser is connected does not go through OpenFlow.
@@ -141,4 +143,4 @@ The feature is complete only when all of the following evidence exists:
 
 ## Open questions
 
-There are no open architecture decisions. Identity is settled at login (owner, 2026-11-27). The login route's identifier is the committed sled's `session_id` (owner, 2026-11-27): the flow's cookie and the mark it puts on the connection are derived from it, and BPF carries that `session_id` onto the accepted socket. The packet field the flow matches is the browser address login saw for this identity at login; never anything the browser sends inside the connection (REQ-002.4).
+There are no open architecture decisions. Identity is settled at login (owner, 2026-11-27). The login route's identifier is the committed sled's `session_id`, which lasts for the container's lifetime; episodes are the per-login sessions (owner, 2026-11-27). The flow's cookie and the mark it puts on the connection are derived from `session_id`, and BPF carries that `session_id` onto the accepted socket. The packet field the flow matches is the browser address login saw for this identity at login; never anything the browser sends inside the connection (REQ-002.4).
