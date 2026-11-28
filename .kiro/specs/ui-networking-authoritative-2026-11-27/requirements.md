@@ -38,7 +38,7 @@ The shared browser entry remains port `8080`. The server currently occupying tha
 ## REQ-002: Login settles the identity; nothing re-derives it
 
 1. The identity SHALL be the one login sealed. The browser path SHALL NOT check it again.
-2. THE identity's UI URI in its committed sled SHALL be `https://<label>.perspective.3tched.com:8080/` (owner, 2026-11-27; the domain is one configuration value). `<label>` SHALL be the identity's `session_id` encrypted under a host key (one AES-128 block, 32 lowercase hex characters). The raw `session_id` SHALL NOT appear on the wire.
+2. THE identity's UI URI SHALL be `https://<label>.perspective.3tched.com:8080/` (owner, 2026-11-27; the domain is one configuration value), derived from the committed sled's `session_id`: `<label>` SHALL be that `session_id` encrypted under a host key (one AES-128 block, 32 lowercase hex characters). The host gives it to the identity over its lungs connection (`LungsV1.BrowserUri`); the identity finds it at `/run/opdbus/browser/ui-uri`. It is not stored as a copy in the sled. The raw `session_id` SHALL NOT appear on the wire.
 3. ON `:8080`, the host SHALL read only the TLS ClientHello `server_name`, with `peek` (non-consuming), bounded in size and time, and SHALL decrypt its label to the `session_id`. SNI is allowed (owner, 2026-11-27). The label carries the `session_id`, so no lookup is needed.
 4. HTTP bytes, cookies, URL paths, query strings, browser headers, source addresses and ports SHALL NOT name the identity.
 5. Nothing on the browser path SHALL perform a second login, a WireGuard peer check, a binding lookup, a search for a container, or a count of containers present.

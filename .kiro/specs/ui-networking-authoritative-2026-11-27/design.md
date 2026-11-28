@@ -55,7 +55,7 @@ Final file placement is chosen after the implementation repository inventory and
 
 ## Trust boundaries and threat model
 
-The browser is untrusted. Only the ClientHello `server_name` label is read, and it names the identity only because it decrypts under the host key to a `session_id`; a forged label does not decrypt. Connection timing, source addresses and ports, HTTP and other TLS fields never name the identity. Userspace hands the socket to that identity without deciding anything else.
+The browser is untrusted. Only the ClientHello `server_name` label is read. It names an identity only because it decrypts under the host key to a `session_id`; a forged label decrypts to an unknown `session_id`, which has no browser receiver, so the connection closes. Connection timing, source addresses and ports, HTTP and other TLS fields never name the identity.
 
 The host holds socket custody but is blind to application plaintext. The container owns the TLS key and application data.
 
@@ -74,15 +74,17 @@ The sled's canonical UI URI names the WireGuard-reachable shared host entry and 
 
 The ingress is a raw TCP acceptor. It must not consume the TLS ClientHello, because the same bytes must reach the container's `127.0.0.1:8443` TLS listener. There is no HTTP redirect and no host login page on this listener.
 
-The certificate installed in each identity container covers `*.perspective.3tched.com`. Every identity uses the same `:8080` entry; the SNI label decides which container receives the connection.
+The certificate installed in each identity container covers `*.perspective.3tched.com` (Let's Encrypt, DNS-01 through the Cloudflare zone; renewed by the host runit service `perspective-cert-renew`). Every identity uses the same `:8080` entry; the SNI label decides which container receives the connection.
 
 ## D2. The SNI label carries the session_id
 
-The sled holds the identity's UI URI, `https://<label>.perspective.3tched.com:8080/`, where:
+The identity's UI URI is `https://<label>.perspective.3tched.com:8080/`, derived from its committed `session_id`:
 
 ```text
-label = hex(AES-128-ECB(host_key, session_id_bytes))   # one 16-byte block, 32 hex chars
+label = hex(AES-128(host_key, session_id_bytes))   # one 16-byte block, 32 hex chars
 ```
+
+The host computes it when the identity asks on its own lungs connection (`LungsV1.BrowserUri`); the identity's browser receiver writes it to `/run/opdbus/browser/ui-uri` in the container. Nothing stores a copy.
 
 On `:8080`, the ingress `peek`s the ClientHello (bounded size and deadline, no bytes consumed), extracts `server_name`, takes its first label and decrypts it to the `session_id`. A label that does not decrypt to a well-formed `session_id` closes the connection. No table is consulted; the label is the `session_id`, encrypted so it stays private on the wire. The host key lives in `/etc/op-dbus/secrets` and is never logged.
 
@@ -134,7 +136,7 @@ OpenFlow is not part of this path. The ingress reads the SNI label, and lungs tr
 
 ## D7. Lifecycle and failure behavior
 
-1. Login seals the identity. Its sled holds the UI URI with its encrypted label.
+1. Login seals the identity. Its UI URI is derived from its `session_id`.
 2. A browser connection on `:8080`: the ingress peeks the ClientHello and decrypts the label to the `session_id`, before any byte is consumed.
 3. The ingress pushes the fd once with `ReceiveBrowser(h)` on that identity's lungs connection and closes its copy.
 4. The container splices the fd to `127.0.0.1:8443`; TLS ends there.

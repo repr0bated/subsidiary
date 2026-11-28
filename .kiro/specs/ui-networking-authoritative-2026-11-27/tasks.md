@@ -84,7 +84,7 @@ Do not touch live `:8080` or attach BPF until all affected packages build togeth
   - **Requirements:** REQ-001.4, REQ-006, REQ-008.2, REQ-008.6.
 
 - [ ] **Task 8 — Complete focused coverage, then perform the owner-approved live proof**
-  - **Outcome:** First add package-scoped regression coverage for the full chain and negative cases. After a separate deployment approval, attach only the new browser-ingress BPF state, activate the prepared services, transfer `:8080` ownership, and prove two sealed WireGuard identities through the same public entry.
+  - **Outcome:** First add package-scoped regression coverage for the full chain and negative cases. Then deploy and prove the path live through the shared `:8080` entry. The two-identity proof is a production step, not a development one (owner, 2026-11-28): development proves one identity end to end and the negative cases; production adds the second identity.
   - **Likely files:** At most one focused test file in each of `op-network`, `op-grpc-bridge`, and `op-tunnel-mux`; live evidence goes under `docs/proof-of-work/ui-networking-authoritative-2026-11-27/`. Split tests and operations into separate commits.
   - **Dependencies:** Task 7, owner-approved package tests, clean security/review findings, and explicit deployment approval.
   - **Size:** L.
