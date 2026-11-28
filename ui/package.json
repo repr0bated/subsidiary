@@ -15,7 +15,8 @@
     "test": "vitest --run",
     "gen:door": "bash scripts/gen-door.sh",
     "prebuild": "bash scripts/gen-door.sh",
-    "pretest": "bash scripts/gen-door.sh"
+    "pretest": "bash scripts/gen-door.sh",
+    "record": "node --experimental-strip-types --no-warnings=ExperimentalWarning --import ./scripts/ts-resolve.mjs scripts/record.ts"
   },
   "dependencies": {
     "@ai-sdk/svelte": "^5.0.181",

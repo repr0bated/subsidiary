@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Local end-to-end check of the hire flow on a fresh anvil: deploy -> anchor a fixed work head
-# -> hire (create, accept, deliver, confirm x2) -> verify-hire.sh, plus two checks that must fail.
+# -> hire (create, accept, deliver, confirm x2) -> verify-hire.sh, plus two checks that must fail;
+# then a public record: build, publish-record.sh, verify-record.sh, and a changed bundle that must fail.
 # Exit 0 only if every step passes. Always stops the anvil it started.
 #
 #   e2e-local.sh            uses port 8546 (E2E_PORT to change); refuses a port already in use
@@ -80,6 +81,27 @@ if bash "$here/script/verify-hire.sh" --rpc "$rpc" --hire "$hire" --id "$id" --t
 jq '.task = "changed"' "$tmp/terms.json" > "$tmp/terms-changed.json"
 if bash "$here/script/verify-hire.sh" --rpc "$rpc" --hire "$hire" --id "$id" --terms "$tmp/terms-changed.json" >/dev/null; then
   bad neg-terms "changed terms passed"; else pass neg-terms "changed terms rejected"; fi
+
+# A record that starts on the public chain: build it (shown, redacted and withheld fields), publish
+# it, verify bundle, proofs and entry against the contract, then a changed bundle must fail.
+record="$(sed -n 's/^RECORD_ADDRESS=//p' "$tmp/state/demo.env")"
+ui="$here/../ui"
+rec() { ( cd "$ui" && node --experimental-strip-types --no-warnings=ExperimentalWarning --import ./scripts/ts-resolve.mjs scripts/record.ts "$@" ); }
+cat > "$tmp/record.json" <<'JSON'
+{"status":"delivered","hire":1,"client":"e2e client name","design":{"patent":"pending"}}
+JSON
+echo '{"status":"none","hire":"none","client":"private"}' > "$tmp/classes.json"
+if rec build --record "$tmp/record.json" --classes "$tmp/classes.json" --bundle "$tmp/bundle.json" --entry "$tmp/entry.json" >/dev/null 2>&1 \
+  && RECORD_ADDRESS=$record PUBLISH_KEY=$provider bash "$here/script/publish-record.sh" --rpc "$rpc" --bundle "$tmp/bundle.json" --out "$tmp/public.json" >/dev/null; then
+  pass record "record $(jq -r .recordId "$tmp/public.json") published, root $(jq -r .root "$tmp/public.json")"
+  if RECORD_ADDRESS=$record bash "$here/script/verify-record.sh" --rpc "$rpc" --record-id "$(jq -r .recordId "$tmp/public.json")" \
+    --bundle "$tmp/bundle.json" --entry "$tmp/entry.json"; then pass verify-rec "verify-record.sh exit 0"; else bad verify-rec "verify-record.sh failed"; fi
+  jq -c '(.fields[] | select(.path == "status") | .value) = "cancelled"' "$tmp/bundle.json" | jq -S -c . | tr -d '\n' > "$tmp/bundle-changed.json"
+  if RECORD_ADDRESS=$record bash "$here/script/verify-record.sh" --rpc "$rpc" --record-id "$(jq -r .recordId "$tmp/public.json")" \
+    --bundle "$tmp/bundle-changed.json" >/dev/null; then bad neg-rec "changed bundle passed"; else pass neg-rec "changed bundle rejected"; fi
+else
+  bad record "build or publish failed"
+fi
 
 # The UI's read-only chain client (ui/src/lib/web3/client.ts) against this same node, so its
 # decoder meets real ABI encoding. The test is opt-in: offline `npm --prefix ui test` skips it.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Demo setup in one step (demo-hire-and-receipt-check requirement 1).
-# Starts anvil if needed, runs preflight, deploys EtchedAnchor and HireContract, and writes the
-# two addresses (never keys) to .kiro/state/demo.env. DEPLOYER_KEY comes from the environment.
+# Starts anvil if needed, runs preflight, deploys EtchedAnchor, HireContract and EtchedRecord, and
+# writes the three addresses (never keys) to .kiro/state/demo.env. DEPLOYER_KEY comes from the environment.
 #
 #   RPC_URL                node to deploy to, default http://127.0.0.1:8545 (like the other scripts);
 #                          if nothing answers there, anvil is started on its port, on 127.0.0.1 only
@@ -33,6 +33,7 @@ fi
 out="$(cd "$here" && forge script script/Deploy.s.sol --rpc-url "$rpc" --broadcast 2>&1)" || { echo "$out" >&2; exit 1; }
 anchor="$(echo "$out" | grep -oE 'EtchedAnchor 0x[0-9a-fA-F]{40}' | tail -1 | cut -d' ' -f2)"
 hire="$(echo "$out" | grep -oE 'HireContract 0x[0-9a-fA-F]{40}' | tail -1 | cut -d' ' -f2)"
-[ -n "$anchor" ] && [ -n "$hire" ] || { echo "deploy output had no addresses" >&2; exit 1; }
-printf 'ANCHOR_ADDRESS=%s\nHIRE_ADDRESS=%s\n' "$anchor" "$hire" > "$state/demo.env"
-echo "EtchedAnchor $anchor"; echo "HireContract $hire"; echo "addresses saved to $state/demo.env"
+record="$(echo "$out" | grep -oE 'EtchedRecord 0x[0-9a-fA-F]{40}' | tail -1 | cut -d' ' -f2)"
+[ -n "$anchor" ] && [ -n "$hire" ] && [ -n "$record" ] || { echo "deploy output had no addresses" >&2; exit 1; }
+printf 'ANCHOR_ADDRESS=%s\nHIRE_ADDRESS=%s\nRECORD_ADDRESS=%s\n' "$anchor" "$hire" "$record" > "$state/demo.env"
+echo "EtchedAnchor $anchor"; echo "HireContract $hire"; echo "EtchedRecord $record"; echo "addresses saved to $state/demo.env"
